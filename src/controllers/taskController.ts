@@ -1,10 +1,30 @@
-import { Request, Response, RequestHandler } from 'express';
+import { Request, Response } from 'express';
 import { randomUUID } from 'crypto';
 import { taskStore } from '../data/taskStore.ts';
 import { TaskEntity } from '../types/task.ts';
 
 export function getTasks(req: Request, res: Response): void {
+  const { isCompleted } = req.query;
+
+  if (isCompleted !== undefined) {
+    return getTasksByStatus(req, res);
+  }
+
   res.status(200).json(taskStore);
+}
+
+export function getTasksByStatus(req: Request, res: Response): void {
+  const { isCompleted } = req.query;
+
+  if (isCompleted !== 'true' && isCompleted !== 'false') {
+    res.status(400).json({ error: 'isCompleted must be "true" or "false"' });
+    return;
+  }
+
+  const completed = isCompleted === 'true';
+  const filteredTasks = taskStore.filter((task) => task.isCompleted === completed);
+
+  res.status(200).json(filteredTasks);
 }
 
 export function getTaskById(req: Request, res: Response): void {
@@ -97,16 +117,3 @@ export function deleteTask(req: Request, res: Response): void {
   res.status(204).json({ message: 'Task deleted successfully' });
 }
 
-export function getTasksByStatus(req: Request, res: Response): void {
-  const { status } = req.query;
-
-  if (status !== 'true' && status !== 'false') {
-    res.status(400).json({ error: 'Status must be strictly "true" or "false"' });
-    return;
-  }
-
-  const completed = status === 'true';
-  const filteredTasks = taskStore.filter((task) => task.isCompleted === completed);
-
-  res.status(200).json(filteredTasks);
-}
