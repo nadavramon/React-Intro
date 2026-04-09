@@ -1,15 +1,15 @@
 import express from 'express';
 import taskRoutes from './routes/taskRoutes.ts';
-import { logger } from './middlewares/logger.ts';
+import { logger } from './middlewares/httpLogger.ts';
 
-const app = express(); // Initialize the Express application
-const port = process.env.PORT; // Get the port from the environment variables
+const app = express();
+const port = process.env.PORT;
 
-app.use(logger); // Apply the logger middleware to all requests
+app.use(logger);
+app.use(express.json());
 
-app.use(express.json()); // Read raw text -> parse into JSON -> attach to req.body
-app.use('/tasks', taskRoutes); // Forward the entire request over to the taskRoutes router if the URL starts with /tasks
+app.use('/tasks', taskRoutes);
 
-app.listen(port, () => { // Start the server and listen for incoming requests
+app.listen(port, () => {
     console.log(`Server running at http://localhost:${port}`);
 });
