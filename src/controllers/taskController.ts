@@ -1,18 +1,27 @@
 import { Request, Response, NextFunction } from 'express';
 import * as taskService from '../services/taskService.ts';
+import {
+  CreateTaskBodySchema,
+  UpdateTaskBodySchema,
+  GetTasksQuerySchema,
+} from '../dtos/task.dto.ts';
+import { ValidationError } from '../errors/ValidationError.ts';
 
 export function getTasks(req: Request, res: Response, next: NextFunction): void {
   try {
-    const { isCompleted } = req.query;
+    const result = GetTasksQuerySchema.safeParse(req.query);
+    if (!result.success) {
+      throw new ValidationError(result.error.issues[0]!.message);
+    }
+
+    const { isCompleted } = result.data;
 
     if (isCompleted !== undefined) {
-      const tasks = taskService.getTasksByStatus(isCompleted as string);
-      res.status(200).json(tasks);
+      res.status(200).json(taskService.getTasksByStatus(isCompleted));
       return;
     }
 
-    const tasks = taskService.getAllTasks();
-    res.status(200).json(tasks);
+    res.status(200).json(taskService.getAllTasks());
   } catch (err) {
     next(err);
   }
@@ -29,7 +38,12 @@ export function getTaskById(req: Request, res: Response, next: NextFunction): vo
 
 export function createTask(req: Request, res: Response, next: NextFunction): void {
   try {
-    const newTask = taskService.createTask(req.body.title);
+    const result = CreateTaskBodySchema.safeParse(req.body);
+    if (!result.success) {
+      throw new ValidationError(result.error.issues[0]!.message);
+    }
+
+    const newTask = taskService.createTask(result.data);
     res.status(201).json(newTask);
   } catch (err) {
     next(err);
@@ -38,8 +52,12 @@ export function createTask(req: Request, res: Response, next: NextFunction): voi
 
 export function updateTask(req: Request, res: Response, next: NextFunction): void {
   try {
-    const { title, isCompleted } = req.body;
-    const updatedTask = taskService.updateTask(req.params.id as string, { title, isCompleted });
+    const result = UpdateTaskBodySchema.safeParse(req.body);
+    if (!result.success) {
+      throw new ValidationError(result.error.issues[0]!.message);
+    }
+
+    const updatedTask = taskService.updateTask(req.params.id as string, result.data);
     res.status(200).json(updatedTask);
   } catch (err) {
     next(err);
