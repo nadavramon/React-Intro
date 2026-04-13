@@ -3,6 +3,7 @@ import { TaskEntity } from '../types/task.ts';
 import * as taskModel from '../models/taskModel.ts';
 import { NotFoundError } from '../errors/NotFoundError.ts';
 import { CreateTaskBodyDto, UpdateTaskBodyDto } from '../dtos/task.dto.ts';
+import { logger } from '../utils/logger.ts';
 
 export function getAllTasks(): TaskEntity[] {
   return taskModel.findAll();
@@ -29,7 +30,9 @@ export function createTask(dto: CreateTaskBodyDto): TaskEntity {
     isCompleted: dto.isCompleted ?? false,
   };
 
-  return taskModel.create(newTask);
+  const created = taskModel.create(newTask);
+  logger.info(`Task created: id=${created.id}, title="${created.title}"`);
+  return created;
 }
 
 export function updateTask(id: string, dto: UpdateTaskBodyDto): TaskEntity {
@@ -38,7 +41,9 @@ export function updateTask(id: string, dto: UpdateTaskBodyDto): TaskEntity {
     throw new NotFoundError('Task not found');
   }
 
-  return taskModel.update(id, dto as Partial<Omit<TaskEntity, 'id'>>)!;
+  const updated = taskModel.update(id, dto as Partial<Omit<TaskEntity, 'id'>>)!;
+  logger.info(`Task updated: id=${updated.id}`);
+  return updated;
 }
 
 export function deleteTask(id: string): void {
@@ -47,4 +52,6 @@ export function deleteTask(id: string): void {
   if (!removed) {
     throw new NotFoundError('Task not found');
   }
+
+  logger.info(`Task deleted: id=${id}`);
 }
