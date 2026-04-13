@@ -1,12 +1,8 @@
 import { randomUUID } from 'crypto';
 import { TaskEntity } from '../types/task.ts';
 import * as taskModel from '../models/taskModel.ts';
-
-function throwError(message: string, statusCode: number): never {
-  const error: any = new Error(message);
-  error.statusCode = statusCode;
-  throw error;
-}
+import { NotFoundError } from '../errors/NotFoundError.ts';
+import { ValidationError } from '../errors/ValidationError.ts';
 
 export function getAllTasks(): TaskEntity[] {
   return taskModel.findAll();
@@ -14,7 +10,7 @@ export function getAllTasks(): TaskEntity[] {
 
 export function getTasksByStatus(isCompleted: string): TaskEntity[] {
   if (isCompleted !== 'true' && isCompleted !== 'false') {
-    throwError('isCompleted must be "true" or "false"', 400);
+    throw new ValidationError('isCompleted must be "true" or "false"');
   }
 
   const completed = isCompleted === 'true';
@@ -25,7 +21,7 @@ export function getTaskById(id: string): TaskEntity {
   const task = taskModel.findById(id);
 
   if (!task) {
-    throwError('Task not found', 404);
+    throw new NotFoundError('Task not found');
   }
 
   return task;
@@ -33,11 +29,11 @@ export function getTaskById(id: string): TaskEntity {
 
 export function createTask(title: unknown): TaskEntity {
   if (!title || typeof title !== 'string' || title.trim() === '') {
-    throwError('Title is required and must be a non-empty string', 400);
+    throw new ValidationError('Title is required and must be a non-empty string');
   }
 
   if (title.length > 255) {
-    throwError('Title is too long (maximum 255 characters)', 400);
+    throw new ValidationError('Title is too long (maximum 255 characters)');
   }
 
   const newTask: TaskEntity = {
@@ -51,23 +47,23 @@ export function createTask(title: unknown): TaskEntity {
 
 export function updateTask(id: string, data: { title?: unknown; isCompleted?: unknown }): TaskEntity {
   if (data.title === undefined && data.isCompleted === undefined) {
-    throwError('Please provide either a title or isCompleted status to update', 400);
+    throw new ValidationError('Please provide either a title or isCompleted status to update');
   }
 
   const existingTask = taskModel.findById(id);
   if (!existingTask) {
-    throwError('Task not found', 404);
+    throw new NotFoundError('Task not found');
   }
 
   const updateData: Partial<Omit<TaskEntity, 'id'>> = {};
 
   if (data.title !== undefined) {
     if (typeof data.title !== 'string' || data.title.trim() === '') {
-      throwError('Title must be a non-empty string', 400);
+      throw new ValidationError('Title must be a non-empty string');
     }
 
     if (data.title.length > 255) {
-      throwError('Title is too long (maximum 255 characters)', 400);
+      throw new ValidationError('Title is too long (maximum 255 characters)');
     }
 
     updateData.title = data.title.trim();
@@ -75,7 +71,7 @@ export function updateTask(id: string, data: { title?: unknown; isCompleted?: un
 
   if (data.isCompleted !== undefined) {
     if (typeof data.isCompleted !== 'boolean') {
-      throwError('Completed must be a boolean', 400);
+      throw new ValidationError('Completed must be a boolean');
     }
 
     updateData.isCompleted = data.isCompleted;
@@ -89,6 +85,6 @@ export function deleteTask(id: string): void {
   const removed = taskModel.remove(id);
 
   if (!removed) {
-    throwError('Task not found', 404);
+    throw new NotFoundError('Task not found');
   }
 }

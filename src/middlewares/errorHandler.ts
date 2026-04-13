@@ -1,17 +1,18 @@
 import { Request, Response, NextFunction } from 'express';
+import { AppError } from '../errors/AppError.ts';
 
-export function errorHandler(err: any, req: Request, res: Response, next: NextFunction) {
-    if (res.headersSent) {
-        return next(err);
+export function errorHandler(err: Error, req: Request, res: Response, next: NextFunction): void {
+    const statusCode = err instanceof AppError ? err.statusCode : 500;
+    const message = err instanceof AppError ? err.message : 'An unexpected error occurred';
+
+    if (statusCode === 500) {
+        console.error(`[Error] ${req.method} ${req.path} >> StatusCode:: ${statusCode}\n`, err);
+    } else {
+        console.error(`[Error] ${req.method} ${req.path} >> StatusCode:: ${statusCode} - ${message}`);
     }
 
-    const statusCode = err.status || err.statusCode || 500;
-
-    console.error(`[Error] ${req.method} ${req.path} >> StatusCode:: ${statusCode}\n`, err);
-
-    const payload: Record<string, any> = {
-        error: statusCode === 500 ? 'Internal Server Error' : 'Error',
-        message: err.message || 'An unexpected error occurred',
+    const payload: Record<string, unknown> = {
+        error: message,
     };
 
     if (process.env.NODE_ENV === 'development') {
