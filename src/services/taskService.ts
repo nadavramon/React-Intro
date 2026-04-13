@@ -2,19 +2,14 @@ import { randomUUID } from 'crypto';
 import { TaskEntity } from '../types/task.ts';
 import * as taskModel from '../models/taskModel.ts';
 import { NotFoundError } from '../errors/NotFoundError.ts';
-import { ValidationError } from '../errors/ValidationError.ts';
+import { CreateTaskBodyDto, UpdateTaskBodyDto } from '../dtos/task.dto.ts';
 
 export function getAllTasks(): TaskEntity[] {
   return taskModel.findAll();
 }
 
-export function getTasksByStatus(isCompleted: string): TaskEntity[] {
-  if (isCompleted !== 'true' && isCompleted !== 'false') {
-    throw new ValidationError('isCompleted must be "true" or "false"');
-  }
-
-  const completed = isCompleted === 'true';
-  return taskModel.findByStatus(completed);
+export function getTasksByStatus(isCompleted: boolean): TaskEntity[] {
+  return taskModel.findByStatus(isCompleted);
 }
 
 export function getTaskById(id: string): TaskEntity {
@@ -27,58 +22,23 @@ export function getTaskById(id: string): TaskEntity {
   return task;
 }
 
-export function createTask(title: unknown): TaskEntity {
-  if (!title || typeof title !== 'string' || title.trim() === '') {
-    throw new ValidationError('Title is required and must be a non-empty string');
-  }
-
-  if (title.length > 255) {
-    throw new ValidationError('Title is too long (maximum 255 characters)');
-  }
-
+export function createTask(dto: CreateTaskBodyDto): TaskEntity {
   const newTask: TaskEntity = {
     id: randomUUID(),
-    title: title.trim(),
-    isCompleted: false,
+    title: dto.title,
+    isCompleted: dto.isCompleted ?? false,
   };
 
   return taskModel.create(newTask);
 }
 
-export function updateTask(id: string, data: { title?: unknown; isCompleted?: unknown }): TaskEntity {
-  if (data.title === undefined && data.isCompleted === undefined) {
-    throw new ValidationError('Please provide either a title or isCompleted status to update');
-  }
-
+export function updateTask(id: string, dto: UpdateTaskBodyDto): TaskEntity {
   const existingTask = taskModel.findById(id);
   if (!existingTask) {
     throw new NotFoundError('Task not found');
   }
 
-  const updateData: Partial<Omit<TaskEntity, 'id'>> = {};
-
-  if (data.title !== undefined) {
-    if (typeof data.title !== 'string' || data.title.trim() === '') {
-      throw new ValidationError('Title must be a non-empty string');
-    }
-
-    if (data.title.length > 255) {
-      throw new ValidationError('Title is too long (maximum 255 characters)');
-    }
-
-    updateData.title = data.title.trim();
-  }
-
-  if (data.isCompleted !== undefined) {
-    if (typeof data.isCompleted !== 'boolean') {
-      throw new ValidationError('Completed must be a boolean');
-    }
-
-    updateData.isCompleted = data.isCompleted;
-  }
-
-  const updatedTask = taskModel.update(id, updateData);
-  return updatedTask!;
+  return taskModel.update(id, dto as Partial<Omit<TaskEntity, 'id'>>)!;
 }
 
 export function deleteTask(id: string): void {
