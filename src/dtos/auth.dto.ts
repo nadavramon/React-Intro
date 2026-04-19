@@ -11,3 +11,8 @@ export const LoginBodySchema = z.object({
   password: z.string({ error: 'Password must be a string' }).min(1, 'Password is required'),
 });
 export type LoginBodyDto = z.infer<typeof LoginBodySchema>;
+
+export const RefreshBodySchema = z.object({
+  refreshToken: z.string({ error: 'Refresh token is required' }).min(1, 'Refresh token is required'),
+});
+export type RefreshBodyDto = z.infer<typeof RefreshBodySchema>;
