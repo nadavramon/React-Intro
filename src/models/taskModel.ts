@@ -2,12 +2,12 @@ import { TaskEntity } from '../types/task.ts';
 
 const taskStore: TaskEntity[] = [];
 
-export function findAll(): TaskEntity[] {
-  return taskStore;
+export function findAll(userId: string): TaskEntity[] {
+  return taskStore.filter((task) => task.userId === userId);
 }
 
-export function findByStatus(isCompleted: boolean): TaskEntity[] {
-  return taskStore.filter((task) => task.isCompleted === isCompleted);
+export function findByStatus(userId: string, isCompleted: boolean): TaskEntity[] {
+  return taskStore.filter((task) => task.userId === userId && task.isCompleted === isCompleted);
 }
 
 export function findById(id: string): TaskEntity | undefined {
@@ -19,7 +19,7 @@ export function create(task: TaskEntity): TaskEntity {
   return task;
 }
 
-export function update(id: string, data: Partial<Omit<TaskEntity, 'id'>>): TaskEntity | undefined {
+export function update(id: string, data: Partial<Omit<TaskEntity, 'id' | 'userId'>>): TaskEntity | undefined {
   const task = taskStore.find((t) => t.id === id);
 
   if (!task) {
