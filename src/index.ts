@@ -8,7 +8,12 @@ import { swaggerUi, swaggerSpec } from './utils/swagger.ts';
 
 if (!process.env.JWT_SECRET) {
     logger.error("JWT_SECRET is not defined");
-    process.exit(1)
+    process.exit(1);
+}
+
+if (!process.env.REFRESH_TOKEN_SECRET) {
+    logger.error("REFRESH_TOKEN_SECRET is not defined");
+    process.exit(1);
 }
 
 const app = express();

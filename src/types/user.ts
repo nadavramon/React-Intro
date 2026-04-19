@@ -18,3 +18,8 @@ export interface JwtPayload {
 export interface AuthenticatedRequest extends Request {
   user: JwtPayload;
 }
+
+export interface AuthTokens {
+  accessToken: string;
+  refreshToken: string;
+}
