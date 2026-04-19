@@ -1,31 +1,32 @@
 import { randomUUID } from 'crypto';
 import { TaskEntity } from '../types/task.ts';
 import * as taskModel from '../models/taskModel.ts';
-import { NotFoundError } from '../errors/NotFoundError.ts';
+import { NotFoundError } from '../errors/AppError.ts';
 import { CreateTaskBodyDto, UpdateTaskBodyDto } from '../dtos/task.dto.ts';
 import { logger } from '../utils/logger.ts';
 
-export function getAllTasks(): TaskEntity[] {
-  return taskModel.findAll();
+export function getAllTasks(userId: string): TaskEntity[] {
+  return taskModel.findAll(userId);
 }
 
-export function getTasksByStatus(isCompleted: boolean): TaskEntity[] {
-  return taskModel.findByStatus(isCompleted);
+export function getTasksByStatus(userId: string, isCompleted: boolean): TaskEntity[] {
+  return taskModel.findByStatus(userId, isCompleted);
 }
 
-export function getTaskById(id: string): TaskEntity {
+export function getTaskById(userId: string, id: string): TaskEntity {
   const task = taskModel.findById(id);
 
-  if (!task) {
+  if (!task || task.userId !== userId) {
     throw new NotFoundError('Task not found');
   }
 
   return task;
 }
 
-export function createTask(dto: CreateTaskBodyDto): TaskEntity {
+export function createTask(userId: string, dto: CreateTaskBodyDto): TaskEntity {
   const newTask: TaskEntity = {
     id: randomUUID(),
+    userId,
     title: dto.title,
     isCompleted: dto.isCompleted ?? false,
   };
@@ -35,23 +36,25 @@ export function createTask(dto: CreateTaskBodyDto): TaskEntity {
   return created;
 }
 
-export function updateTask(id: string, dto: UpdateTaskBodyDto): TaskEntity {
-  const existingTask = taskModel.findById(id);
-  if (!existingTask) {
+export function updateTask(userId: string, id: string, dto: UpdateTaskBodyDto): TaskEntity {
+  const task = taskModel.findById(id);
+
+  if (!task || task.userId !== userId) {
     throw new NotFoundError('Task not found');
   }
 
-  const updated = taskModel.update(id, dto as Partial<Omit<TaskEntity, 'id'>>)!;
+  const updated = taskModel.update(id, dto as Partial<Omit<TaskEntity, 'id' | 'userId'>>)!;
   logger.info(`Task updated: id=${updated.id}`);
   return updated;
 }
 
-export function deleteTask(id: string): void {
-  const removed = taskModel.remove(id);
+export function deleteTask(userId: string, id: string): void {
+  const task = taskModel.findById(id);
 
-  if (!removed) {
+  if (!task || task.userId !== userId) {
     throw new NotFoundError('Task not found');
   }
 
+  taskModel.remove(id);
   logger.info(`Task deleted: id=${id}`);
 }
