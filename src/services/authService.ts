@@ -56,13 +56,11 @@ export async function refresh(dto: RefreshBodyDto): Promise<{ accessToken: strin
 
   const token = refreshTokenModel.findByToken(dto.refreshToken);
 
-  if (!token)
-    throw new UnauthorizedError('Invalid refresh token');
+  if (!token) throw new UnauthorizedError('Invalid refresh token');
 
   const user = userModel.findById(refreshPayload.userId);
 
-  if (!user)
-    throw new UnauthorizedError('User not found');
+  if (!user) throw new UnauthorizedError('User not found');
 
   const payload: JwtPayload = {
     userId: user.id,

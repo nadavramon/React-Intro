@@ -19,7 +19,10 @@ export function create(task: TaskEntity): TaskEntity {
   return task;
 }
 
-export function update(id: string, data: Partial<Omit<TaskEntity, 'id' | 'userId'>>): TaskEntity | undefined {
+export function update(
+  id: string,
+  data: Partial<Omit<TaskEntity, 'id' | 'userId'>>,
+): TaskEntity | undefined {
   const task = taskStore.find((t) => t.id === id);
 
   if (!task) {

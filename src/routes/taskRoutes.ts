@@ -12,11 +12,13 @@ const router = Router();
 
 router.use(authenticate);
 
-router.route('/')
+router
+  .route('/')
   .get(getTasks as RequestHandler)
   .post(createTask as RequestHandler);
 
-router.route('/:id')
+router
+  .route('/:id')
   .get(getTaskById as RequestHandler)
   .put(updateTask as RequestHandler)
   .delete(deleteTask as RequestHandler);

@@ -34,8 +34,7 @@ export async function login(req: Request, res: Response, next: NextFunction): Pr
 export async function refresh(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
     const result = RefreshBodySchema.safeParse(req.body);
-    if (!result.success)
-      throw new ValidationError(result.error.issues[0]!.message);
+    if (!result.success) throw new ValidationError(result.error.issues[0]!.message);
 
     const { accessToken } = await authService.refresh(result.data);
     res.status(200).json({ accessToken });
@@ -47,8 +46,7 @@ export async function refresh(req: Request, res: Response, next: NextFunction): 
 export async function logout(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
     const result = RefreshBodySchema.safeParse(req.body);
-    if (!result.success)
-      throw new ValidationError(result.error.issues[0]!.message);
+    if (!result.success) throw new ValidationError(result.error.issues[0]!.message);
 
     await authService.logout(result.data);
     res.status(204).send();

@@ -10,10 +10,6 @@ const logFormat = printf(formatLog);
 
 export const logger = winston.createLogger({
   level: 'info',
-  format: combine(
-    timestamp({ format: 'DD/MM/YYYY HH:mm:ss' }),
-    colorize(),
-    logFormat
-  ),
+  format: combine(timestamp({ format: 'DD/MM/YYYY HH:mm:ss' }), colorize(), logFormat),
   transports: [new winston.transports.Console()],
 });

@@ -72,9 +72,7 @@ const swaggerSpec = {
     '/tasks/{id}': {
       get: {
         summary: 'Get a task by ID',
-        parameters: [
-          { name: 'id', in: 'path', required: true, schema: { type: 'string' } },
-        ],
+        parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
         responses: {
           200: {
             description: 'Task found',
@@ -85,9 +83,7 @@ const swaggerSpec = {
       },
       put: {
         summary: 'Update a task',
-        parameters: [
-          { name: 'id', in: 'path', required: true, schema: { type: 'string' } },
-        ],
+        parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
         requestBody: {
           required: true,
           content: {
@@ -113,9 +109,7 @@ const swaggerSpec = {
       },
       delete: {
         summary: 'Delete a task',
-        parameters: [
-          { name: 'id', in: 'path', required: true, schema: { type: 'string' } },
-        ],
+        parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
         responses: {
           204: { description: 'Task deleted' },
           404: { description: 'Task not found' },

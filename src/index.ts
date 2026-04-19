@@ -7,13 +7,13 @@ import { logger } from './utils/logger.ts';
 import { swaggerUi, swaggerSpec } from './utils/swagger.ts';
 
 if (!process.env.JWT_SECRET) {
-    logger.error("JWT_SECRET is not defined");
-    process.exit(1);
+  logger.error('JWT_SECRET is not defined');
+  process.exit(1);
 }
 
 if (!process.env.REFRESH_TOKEN_SECRET) {
-    logger.error("REFRESH_TOKEN_SECRET is not defined");
-    process.exit(1);
+  logger.error('REFRESH_TOKEN_SECRET is not defined');
+  process.exit(1);
 }
 
 const app = express();
@@ -29,5 +29,5 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 app.use(errorHandler);
 
 app.listen(port, () => {
-    logger.info(`Server running at http://localhost:${port}`);
+  logger.info(`Server running at http://localhost:${port}`);
 });
