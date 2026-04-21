@@ -1,4 +1,4 @@
-import { Router, RequestHandler } from 'express';
+import { Router } from 'express';
 import {
   getTasks,
   getTaskById,
@@ -12,15 +12,8 @@ const router = Router();
 
 router.use(authenticate);
 
-router
-  .route('/')
-  .get(getTasks as RequestHandler)
-  .post(createTask as RequestHandler);
+router.route('/').get(getTasks).post(createTask);
 
-router
-  .route('/:id')
-  .get(getTaskById as RequestHandler)
-  .put(updateTask as RequestHandler)
-  .delete(deleteTask as RequestHandler);
+router.route('/:id').get(getTaskById).put(updateTask).delete(deleteTask);
 
 export default router;

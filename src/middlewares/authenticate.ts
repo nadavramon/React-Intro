@@ -1,9 +1,8 @@
-import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
-import { JwtPayload, AuthenticatedRequest } from '../types/user.ts';
+import { env } from '../config/env.ts';
+import { Request, Response, NextFunction } from 'express';
+import { JwtPayload } from '../types/user.ts';
 import { UnauthorizedError } from '../errors/AppError.ts';
-
-const JWT_SECRET = process.env.JWT_SECRET!;
 
 export function authenticate(req: Request, _res: Response, next: NextFunction): void {
   try {
@@ -14,9 +13,9 @@ export function authenticate(req: Request, _res: Response, next: NextFunction): 
     }
 
     const token = authHeader.split(' ')[1]!;
-    const payload = jwt.verify(token, JWT_SECRET) as JwtPayload;
+    const payload = jwt.verify(token, env.JWT_SECRET) as JwtPayload;
 
-    (req as AuthenticatedRequest).user = payload;
+    req.user = payload;
     next();
   } catch (err) {
     if (err instanceof UnauthorizedError) {

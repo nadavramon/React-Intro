@@ -1,6 +1,7 @@
-import { Request } from 'express';
-
-export type UserRole = 'admin' | 'user';
+export enum UserRole {
+  ADMIN = 'admin',
+  USER = 'user',
+}
 
 export interface UserEntity {
   id: string;
@@ -13,10 +14,6 @@ export interface JwtPayload {
   userId: string;
   email: string;
   role: UserRole;
-}
-
-export interface AuthenticatedRequest extends Request {
-  user: JwtPayload;
 }
 
 export interface AuthTokens {
