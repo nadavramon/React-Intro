@@ -1,9 +1,9 @@
 import { randomUUID } from 'crypto';
-import { TaskEntity } from '../types/task.ts';
-import * as taskModel from '../models/taskModel.ts';
-import { NotFoundError } from '../errors/AppError.ts';
-import { CreateTaskBodyDto, UpdateTaskBodyDto } from '../dtos/task.dto.ts';
-import { logger } from '../utils/logger.ts';
+import { TaskEntity } from './task.ts';
+import * as taskModel from './taskModel.ts';
+import { NotFoundError } from '../../shared/errors/AppError.ts';
+import { CreateTaskBodyDto, UpdateTaskBodyDto } from './task.dto.ts';
+import { logger } from '../../shared/utils/logger.ts';
 
 export function getAllTasks(userId: string): TaskEntity[] {
   return taskModel.findAll(userId);

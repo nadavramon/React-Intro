@@ -1,8 +1,8 @@
 import bcrypt from 'bcrypt';
 import { randomUUID } from 'node:crypto';
-import * as userModel from '../models/userModel.ts';
-import { UserEntity, UserRole } from '../types/user.ts';
-import { ValidationError, UnauthorizedError } from '../errors/AppError.ts';
+import * as userModel from './userModel.ts';
+import { UserEntity, UserRole } from './user.ts';
+import { ValidationError, UnauthorizedError } from '../../shared/errors/AppError.ts';
 
 const SALT_ROUNDS = 10;
 

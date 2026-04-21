@@ -1,4 +1,4 @@
-import { TaskEntity } from '../types/task.ts';
+import { TaskEntity } from './task.ts';
 
 const taskStore: TaskEntity[] = [];
 

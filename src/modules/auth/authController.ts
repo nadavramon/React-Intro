@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
-import * as authService from '../services/authService.ts';
-import { RegisterBodySchema, LoginBodySchema, RefreshBodySchema } from '../dtos/auth.dto.ts';
-import { ValidationError } from '../errors/AppError.ts';
+import * as authService from './authService.ts';
+import { RegisterBodySchema, LoginBodySchema, RefreshBodySchema } from './auth.dto.ts';
+import { ValidationError } from '../../shared/errors/AppError.ts';
 
 export async function register(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
