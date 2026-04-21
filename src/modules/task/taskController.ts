@@ -1,10 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import * as taskService from './taskService.ts';
-import {
-  CreateTaskBodySchema,
-  UpdateTaskBodySchema,
-  GetTasksQuerySchema,
-} from './task.dto.ts';
+import { CreateTaskBodySchema, UpdateTaskBodySchema, GetTasksQuerySchema } from './task.dto.ts';
 import { ValidationError } from '../../shared/errors/AppError.ts';
 
 export function getTasks(req: Request, res: Response, next: NextFunction): void {
