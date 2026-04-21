@@ -1,4 +1,4 @@
-import { UserEntity } from '../types/user.ts';
+import { UserEntity } from './user.ts';
 
 const userStore: UserEntity[] = [];
 

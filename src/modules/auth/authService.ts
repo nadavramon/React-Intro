@@ -1,10 +1,10 @@
 import jwt from 'jsonwebtoken';
-import { env } from '../config/env.ts';
-import { RegisterBodyDto, LoginBodyDto, RefreshBodyDto } from '../dtos/auth.dto.ts';
-import { AuthTokens, JwtPayload, UserEntity } from '../types/user.ts';
-import { UnauthorizedError } from '../errors/AppError.ts';
-import * as userService from './userService.ts';
-import * as refreshTokenModel from '../models/refreshTokenModel.ts';
+import { env } from '../../shared/config/env.ts';
+import { RegisterBodyDto, LoginBodyDto, RefreshBodyDto } from './auth.dto.ts';
+import { AuthTokens, JwtPayload, UserEntity } from '../user/user.ts';
+import { UnauthorizedError } from '../../shared/errors/AppError.ts';
+import * as userService from '../user/userService.ts';
+import * as refreshTokenModel from './refreshTokenModel.ts';
 
 export async function register(dto: RegisterBodyDto): Promise<AuthTokens> {
   const user = await userService.createUser(dto.email, dto.password);
