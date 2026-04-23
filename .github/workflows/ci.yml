@@ -43,6 +43,18 @@ jobs:
           path: dist/
           retention-days: 7
 
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'npm'
+      - run: npm ci
+      - run: npm test
+
   docker:
     name: Docker
     runs-on: ubuntu-latest
