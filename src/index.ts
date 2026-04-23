@@ -10,6 +10,10 @@ import { limiter } from './shared/middlewares/rateLimiter.ts';
 
 const app = express();
 
+app.get('/health', (_req, res) => {
+  res.status(200).json({ status: 'ok' });
+});
+
 app.use(httpLogger);
 app.use(express.json());
 
