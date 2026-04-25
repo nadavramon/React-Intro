@@ -10,8 +10,8 @@ export async function register(req: Request, res: Response, next: NextFunction):
       throw new ValidationError(result.error.issues[0]!.message);
     }
 
-    await authService.register(result.data);
-    res.status(201).json({ message: 'User registered successfully' });
+    const { accessToken, refreshToken } = await authService.register(result.data);
+    res.status(201).json({ message: 'User registered successfully', accessToken, refreshToken });
   } catch (err) {
     next(err);
   }

@@ -21,7 +21,7 @@ RUN npm ci --omit=dev
 
 COPY --from=builder /app/dist ./dist
 
-ENV NODE_ENV=production
+ENV NODE_ENV=dev
 ENV PORT=3000
 
 USER node

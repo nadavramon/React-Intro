@@ -1,0 +1,57 @@
+name: Deploy
+
+on:
+  workflow_run:
+    workflows: [Release]
+    types: [completed]
+    branches: [main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  deploy:
+    name: Restart server on EC2
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::825765398865:role/github-deploy
+          aws-region: eu-central-1
+
+      - name: Trigger restart via SSM
+        id: send
+        run: |
+          CMD_ID=$(aws ssm send-command \
+            --instance-ids i-050b3d01b5fbd58fa \
+            --document-name AWS-RunShellScript \
+            --comment "deploy ${{ github.event.workflow_run.head_sha }}" \
+            --parameters 'commands=["systemctl restart server"]' \
+            --query 'Command.CommandId' \
+            --output text)
+          echo "command_id=$CMD_ID" >> "$GITHUB_OUTPUT"
+          echo "Sent SSM command $CMD_ID"
+
+      - name: Wait for command to finish
+        run: |
+          aws ssm wait command-executed \
+            --command-id "${{ steps.send.outputs.command_id }}" \
+            --instance-id i-050b3d01b5fbd58fa
+          STATUS=$(aws ssm get-command-invocation \
+            --command-id "${{ steps.send.outputs.command_id }}" \
+            --instance-id i-050b3d01b5fbd58fa \
+            --query 'Status' --output text)
+          echo "Final status: $STATUS"
+          if [ "$STATUS" != "Success" ]; then
+            aws ssm get-command-invocation \
+              --command-id "${{ steps.send.outputs.command_id }}" \
+              --instance-id i-050b3d01b5fbd58fa
+            exit 1
+          fi
