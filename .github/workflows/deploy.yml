@@ -1,10 +1,7 @@
 name: Deploy
 
 on:
-  workflow_run:
-    workflows: [Release]
-    types: [completed]
-    branches: [main]
+  workflow_dispatch:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -17,7 +14,6 @@ permissions:
 jobs:
   deploy:
     name: Restart server on EC2
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     steps:
       - name: Configure AWS credentials
@@ -32,7 +28,7 @@ jobs:
           CMD_ID=$(aws ssm send-command \
             --instance-ids i-050b3d01b5fbd58fa \
             --document-name AWS-RunShellScript \
-            --comment "deploy ${{ github.event.workflow_run.head_sha }}" \
+            --comment "deploy ${{ github.sha }}" \
             --parameters 'commands=["systemctl restart server"]' \
             --query 'Command.CommandId' \
             --output text)
