@@ -1,52 +1,44 @@
 import { TaskEntity } from './task.ts';
+import { TaskModel, TaskDoc } from './taskSchema.ts';
 
-const taskStore: TaskEntity[] = [];
-
-export function findAll(userId: string): TaskEntity[] {
-  return taskStore.filter((task) => task.userId === userId);
+function toTask(doc: TaskDoc): TaskEntity {
+  return {
+    id: doc._id.toString(),
+    userId: doc.userId.toString(),
+    title: doc.title,
+    isCompleted: doc.isCompleted,
+  };
 }
 
-export function findByStatus(userId: string, isCompleted: boolean): TaskEntity[] {
-  return taskStore.filter((task) => task.userId === userId && task.isCompleted === isCompleted);
+export async function findAll(userId: string): Promise<TaskEntity[]> {
+  const docs = await TaskModel.find({ userId }).lean();
+  return docs.map(toTask);
 }
 
-export function findById(id: string): TaskEntity | undefined {
-  return taskStore.find((task) => task.id === id);
+export async function findByStatus(userId: string, isCompleted: boolean): Promise<TaskEntity[]> {
+  const docs = await TaskModel.find({ userId, isCompleted }).lean();
+  return docs.map(toTask);
 }
 
-export function create(task: TaskEntity): TaskEntity {
-  taskStore.push(task);
-  return task;
+export async function findById(id: string): Promise<TaskEntity | null> {
+  const doc = await TaskModel.findById(id).lean();
+  return doc ? toTask(doc) : null;
 }
 
-export function update(
+export async function create(input: Omit<TaskEntity, 'id'>): Promise<TaskEntity> {
+  const doc = await TaskModel.create(input);
+  return toTask(doc.toObject());
+}
+
+export async function update(
   id: string,
   data: Partial<Omit<TaskEntity, 'id' | 'userId'>>,
-): TaskEntity | undefined {
-  const task = taskStore.find((t) => t.id === id);
-
-  if (!task) {
-    return undefined;
-  }
-
-  if (data.title !== undefined) {
-    task.title = data.title;
-  }
-
-  if (data.isCompleted !== undefined) {
-    task.isCompleted = data.isCompleted;
-  }
-
-  return task;
+): Promise<TaskEntity | null> {
+  const doc = await TaskModel.findByIdAndUpdate(id, data, { new: true }).lean();
+  return doc ? toTask(doc) : null;
 }
 
-export function remove(id: string): boolean {
-  const index = taskStore.findIndex((task) => task.id === id);
-
-  if (index === -1) {
-    return false;
-  }
-
-  taskStore.splice(index, 1);
-  return true;
+export async function remove(id: string): Promise<boolean> {
+  const doc = await TaskModel.findByIdAndDelete(id).lean();
+  return doc !== null;
 }
