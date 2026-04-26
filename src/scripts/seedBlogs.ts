@@ -1,10 +1,13 @@
-import { connectDB, getDB, disconnectDB } from '../shared/config/db.ts';
+import { MongoClient } from 'mongodb';
+import { env } from '../shared/config/env.ts';
 import { logger } from '../shared/utils/logger.ts';
 
 async function seed() {
+  const client = new MongoClient(env.MONGODB_URI);
   try {
-    await connectDB();
-    const db = getDB('blogs');
+    await client.connect();
+    logger.info('Connected to MongoDB');
+    const db = client.db('blogs');
 
     const collections = await db.listCollections().toArray();
     for (const col of collections) {
@@ -138,7 +141,8 @@ async function seed() {
     logger.error(`Seed failed: ${error}`);
     process.exit(1);
   } finally {
-    await disconnectDB();
+    await client.close();
+    logger.info('Disconnected from MongoDB');
   }
 }
 
