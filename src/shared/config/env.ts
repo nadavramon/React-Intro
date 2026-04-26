@@ -12,5 +12,6 @@ function requireEnv(name: string): string {
 export const env = {
   JWT_SECRET: requireEnv('JWT_SECRET'),
   REFRESH_TOKEN_SECRET: requireEnv('REFRESH_TOKEN_SECRET'),
+  MONGODB_URI: requireEnv('MONGODB_URI'),
   PORT: process.env.PORT,
 };
