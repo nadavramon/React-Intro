@@ -1,16 +1,26 @@
-import { UserEntity } from './user.ts';
+import { UserEntity, UserRole } from './user.ts';
+import { UserModel, UserDoc } from './userSchema.ts';
 
-const userStore: UserEntity[] = [];
-
-export function findByEmail(email: string): UserEntity | undefined {
-  return userStore.find((user) => user.email === email);
+function toUser(doc: UserDoc): UserEntity {
+  return {
+    id: doc._id.toString(),
+    email: doc.email,
+    password: doc.password,
+    role: doc.role as UserRole,
+  };
 }
 
-export function findById(id: string): UserEntity | undefined {
-  return userStore.find((user) => user.id === id);
+export async function findByEmail(email: string): Promise<UserEntity | null> {
+  const doc = await UserModel.findOne({ email }).lean();
+  return doc ? toUser(doc) : null;
 }
 
-export function create(user: UserEntity): UserEntity {
-  userStore.push(user);
-  return user;
+export async function findById(id: string): Promise<UserEntity | null> {
+  const doc = await UserModel.findById(id).lean();
+  return doc ? toUser(doc) : null;
+}
+
+export async function create(input: Omit<UserEntity, 'id'>): Promise<UserEntity> {
+  const doc = await UserModel.create(input);
+  return toUser(doc.toObject());
 }

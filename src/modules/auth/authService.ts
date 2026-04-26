@@ -28,7 +28,7 @@ export async function refresh(dto: RefreshBodyDto): Promise<{ accessToken: strin
   if (!ownerId || ownerId !== refreshPayload.userId)
     throw new UnauthorizedError('Invalid refresh token');
 
-  const user = userService.getById(refreshPayload.userId);
+  const user = await userService.getById(refreshPayload.userId);
 
   const payload: JwtPayload = {
     userId: user.id,
