@@ -1,7 +1,7 @@
 import jwt from 'jsonwebtoken';
 import { env } from '../config/env.ts';
 import { Request, Response, NextFunction } from 'express';
-import { JwtPayload } from '../../modules/user/user.ts';
+import { JwtPayload } from '../../modules/auth/auth.ts';
 import { UnauthorizedError } from '../errors/AppError.ts';
 
 export function authenticate(req: Request, _res: Response, next: NextFunction): void {

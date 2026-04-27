@@ -9,14 +9,3 @@ export interface UserEntity {
   password: string;
   role: UserRole;
 }
-
-export interface JwtPayload {
-  userId: string;
-  email: string;
-  role: UserRole;
-}
-
-export interface AuthTokens {
-  accessToken: string;
-  refreshToken: string;
-}

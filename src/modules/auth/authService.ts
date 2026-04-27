@@ -1,7 +1,8 @@
 import jwt from 'jsonwebtoken';
 import { env } from '../../shared/config/env.ts';
 import { RegisterBodyDto, LoginBodyDto, RefreshBodyDto } from './auth.dto.ts';
-import { AuthTokens, JwtPayload, UserEntity } from '../user/user.ts';
+import { UserEntity } from '../user/user.ts';
+import { AuthTokens, JwtPayload } from './auth.ts';
 import { UnauthorizedError } from '../../shared/errors/AppError.ts';
 import * as userService from '../user/userService.ts';
 import * as refreshTokenModel from './refreshTokenModel.ts';
