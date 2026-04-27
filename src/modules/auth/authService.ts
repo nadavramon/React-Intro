@@ -6,6 +6,8 @@ import { UnauthorizedError } from '../../shared/errors/AppError.ts';
 import * as userService from '../user/userService.ts';
 import * as refreshTokenModel from './refreshTokenModel.ts';
 
+const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000;
+
 export async function register(dto: RegisterBodyDto): Promise<AuthTokens> {
   const user = await userService.createUser(dto.email, dto.password);
   return generateTokens(user);
@@ -23,9 +25,9 @@ export async function refresh(dto: RefreshBodyDto): Promise<{ accessToken: strin
   } catch {
     throw new UnauthorizedError('Invalid refresh token');
   }
-  const ownerId = refreshTokenModel.findByToken(dto.refreshToken);
+  const stored = await refreshTokenModel.findByToken(dto.refreshToken);
 
-  if (!ownerId || ownerId !== refreshPayload.userId)
+  if (!stored || stored.userId !== refreshPayload.userId)
     throw new UnauthorizedError('Invalid refresh token');
 
   const user = await userService.getById(refreshPayload.userId);
@@ -40,10 +42,10 @@ export async function refresh(dto: RefreshBodyDto): Promise<{ accessToken: strin
 }
 
 export async function logout(dto: RefreshBodyDto): Promise<void> {
-  refreshTokenModel.remove(dto.refreshToken);
+  await refreshTokenModel.remove(dto.refreshToken);
 }
 
-function generateTokens(user: UserEntity): AuthTokens {
+async function generateTokens(user: UserEntity): Promise<AuthTokens> {
   const payload: JwtPayload = {
     userId: user.id,
     email: user.email,
@@ -52,7 +54,9 @@ function generateTokens(user: UserEntity): AuthTokens {
 
   const accessToken = jwt.sign(payload, env.JWT_SECRET, { expiresIn: '15m' });
   const refreshToken = jwt.sign({ userId: user.id }, env.REFRESH_TOKEN_SECRET, { expiresIn: '7d' });
-  refreshTokenModel.save(refreshToken, user.id);
+
+  const expiresAt = new Date(Date.now() + SEVEN_DAYS_MS);
+  await refreshTokenModel.save(refreshToken, user.id, expiresAt);
 
   return { accessToken, refreshToken };
 }

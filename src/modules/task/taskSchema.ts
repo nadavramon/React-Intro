@@ -9,8 +9,6 @@ const taskSchema = new Schema(
   { timestamps: true },
 );
 
-taskSchema.index({ userId: 1, isCompleted: 1 });
-
 export type TaskDoc = InferSchemaType<typeof taskSchema> & {
   _id: Types.ObjectId;
   userId: Types.ObjectId;

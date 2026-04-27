@@ -1,13 +1,23 @@
-const refreshTokenStore: Map<string, string> = new Map();
+import { RefreshTokenModel, RefreshTokenDoc } from './refreshTokenSchema.ts';
+import { RefreshTokenEntity } from './refreshToken.ts';
 
-export function save(token: string, userId: string): void {
-  refreshTokenStore.set(token, userId);
+function toRefreshToken(doc: RefreshTokenDoc): RefreshTokenEntity {
+  return {
+    token: doc.token,
+    userId: doc.userId.toString(),
+    expiresAt: doc.expiresAt,
+  };
 }
 
-export function findByToken(token: string): string | undefined {
-  return refreshTokenStore.get(token);
+export async function save(token: string, userId: string, expiresAt: Date): Promise<void> {
+  await RefreshTokenModel.create({ token, userId, expiresAt });
 }
 
-export function remove(token: string): void {
-  refreshTokenStore.delete(token);
+export async function findByToken(token: string): Promise<RefreshTokenEntity | null> {
+  const doc = await RefreshTokenModel.findOne({ token }).lean();
+  return doc ? toRefreshToken(doc) : null;
+}
+
+export async function remove(token: string): Promise<void> {
+  await RefreshTokenModel.deleteOne({ token });
 }
