@@ -1,5 +1,6 @@
 import { PostEntity } from './post.ts';
 import * as postModel from './postModel.ts';
+import * as commentModel from '../comment/commentModel.ts';
 import type { UpdatePostInput } from './postModel.ts';
 import { CreatePostBodyDto, UpdatePostBodyDto } from './post.dto.ts';
 import { NotFoundError, ForbiddenError } from '../../shared/errors/AppError.ts';
@@ -39,6 +40,7 @@ export async function updatePost(
 export async function deletePost(authorId: string, id: string): Promise<void> {
   await findOwnedPost(authorId, id, 'delete');
   await postModel.softRemove(id);
+  await commentModel.softRemoveByPostId(id);
 
   logger.info(`Post deleted: id=${id}`);
 }
