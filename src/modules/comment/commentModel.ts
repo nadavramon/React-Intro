@@ -45,3 +45,12 @@ export async function softRemoveByPostId(postId: string): Promise<void> {
     { isDeleted: true, deletedAt: new Date() },
   );
 }
+
+export type UpdateCommentInput = Pick<CommentEntity, 'content'>;
+
+export async function update(id: string, data: UpdateCommentInput): Promise<CommentEntity | null> {
+  const doc = await CommentModel.findOneAndUpdate({ _id: id, isDeleted: false }, data, {
+    new: true,
+  }).lean();
+  return doc ? toComment(doc) : null;
+}

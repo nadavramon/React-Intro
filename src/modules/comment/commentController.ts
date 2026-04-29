@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import * as commentService from './commentService.ts';
-import { CreateCommentBodySchema } from './comment.dto.ts';
+import { CreateCommentBodySchema, UpdateCommentBodySchema } from './comment.dto.ts';
 import { validate } from '../../shared/utils/validate.ts';
 
 export async function getComments(req: Request, res: Response, next: NextFunction): Promise<void> {
@@ -25,6 +25,25 @@ export async function createComment(
       body,
     );
     res.status(201).json(newComment);
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function updateComment(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<void> {
+  try {
+    const body = validate(UpdateCommentBodySchema, req.body);
+    const updated = await commentService.updateComment(
+      req.user!.userId,
+      req.params.postId as string,
+      req.params.id as string,
+      body,
+    );
+    res.status(200).json(updated);
   } catch (err) {
     next(err);
   }
