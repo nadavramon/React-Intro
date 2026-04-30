@@ -1,0 +1,232 @@
+// =============================================================================
+// db/queries.mongodb
+// Reusable Studio 3T IntelliShell snippets for the blog system.
+// Run blocks INDIVIDUALLY — highlight a block and Cmd+Enter.
+// =============================================================================
+
+
+// ─── 1. Quick state ─────────────────────────────────────────────────────────
+
+// Live + deleted counts per collection
+db.users.countDocuments();
+db.posts.countDocuments({ isDeleted: false });
+db.posts.countDocuments({ isDeleted: true });
+db.comments.countDocuments({ isDeleted: false });
+db.comments.countDocuments({ isDeleted: true });
+
+// Verify indexes are in place (post compound, comment compound, refreshToken TTL)
+db.posts.getIndexes();
+db.comments.getIndexes();
+db.refreshtokens.getIndexes();
+
+
+// ─── 2. Lookups by id ───────────────────────────────────────────────────────
+
+db.posts.findOne({ _id: ObjectId('<paste-id>') });
+db.comments.findOne({ _id: ObjectId('<paste-id>') });
+db.users.findOne({ _id: ObjectId('<paste-id>') }, { password: 0 });
+
+
+// ─── 3. Lookups by field ────────────────────────────────────────────────────
+
+// User by email (excluding password)
+db.users.findOne({ email: 'pr4_alice@example.com' }, { password: 0 });
+
+// Posts by an author (live only, newest first)
+db.posts
+  .find({ userId: ObjectId('<paste-userId>'), isDeleted: false })
+  .sort({ createdAt: -1 });
+
+// Comments by an author (live only)
+db.comments
+  .find({ userId: ObjectId('<paste-userId>'), isDeleted: false })
+  .sort({ createdAt: -1 });
+
+// Comments on a post — uses the { postId, createdAt } compound index
+db.comments
+  .find({ postId: ObjectId('<paste-postId>'), isDeleted: false })
+  .sort({ createdAt: -1 });
+
+
+// ─── 4. Joins via $lookup ───────────────────────────────────────────────────
+
+// Live posts enriched with author email + name
+db.posts.aggregate([
+  { $match: { isDeleted: false } },
+  { $lookup: { from: 'users', localField: 'userId', foreignField: '_id', as: 'author' } },
+  { $unwind: '$author' },
+  {
+    $project: {
+      title: 1,
+      content: 1,
+      likesCount: 1,
+      createdAt: 1,
+      'author.email': 1,
+      'author.name': 1,
+    },
+  },
+  { $sort: { createdAt: -1 } },
+]);
+
+// Posts with their LIVE comment count
+db.posts.aggregate([
+  { $match: { isDeleted: false } },
+  {
+    $lookup: {
+      from: 'comments',
+      let: { postId: '$_id' },
+      pipeline: [
+        {
+          $match: {
+            $expr: {
+              $and: [{ $eq: ['$postId', '$$postId'] }, { $eq: ['$isDeleted', false] }],
+            },
+          },
+        },
+        { $count: 'count' },
+      ],
+      as: 'comments',
+    },
+  },
+  { $addFields: { commentCount: { $ifNull: [{ $arrayElemAt: ['$comments.count', 0] }, 0] } } },
+  { $project: { title: 1, likesCount: 1, commentCount: 1, createdAt: 1 } },
+  { $sort: { createdAt: -1 } },
+]);
+
+// Single post with author + all live comments (handy for debugging a specific thread)
+db.posts.aggregate([
+  { $match: { _id: ObjectId('<paste-postId>') } },
+  { $lookup: { from: 'users', localField: 'userId', foreignField: '_id', as: 'author' } },
+  { $unwind: '$author' },
+  {
+    $lookup: {
+      from: 'comments',
+      let: { postId: '$_id' },
+      pipeline: [
+        {
+          $match: {
+            $expr: {
+              $and: [{ $eq: ['$postId', '$$postId'] }, { $eq: ['$isDeleted', false] }],
+            },
+          },
+        },
+        { $sort: { createdAt: -1 } },
+      ],
+      as: 'comments',
+    },
+  },
+]);
+
+
+// ─── 5. Soft-delete admin ───────────────────────────────────────────────────
+
+// All soft-deleted posts (most recently deleted first)
+db.posts.find({ isDeleted: true }).sort({ deletedAt: -1 });
+
+// All soft-deleted comments
+db.comments.find({ isDeleted: true }).sort({ deletedAt: -1 });
+
+// Comments cascaded by a specific post deletion (same postId, isDeleted=true)
+db.comments.find({ postId: ObjectId('<paste-postId>'), isDeleted: true });
+
+// Restore a post — flips flag and unsets the timestamp
+db.posts.updateOne(
+  { _id: ObjectId('<paste-id>'), isDeleted: true },
+  { $set: { isDeleted: false }, $unset: { deletedAt: '' } },
+);
+
+// Restore the comments that were cascaded with that post
+db.comments.updateMany(
+  { postId: ObjectId('<paste-postId>'), isDeleted: true },
+  { $set: { isDeleted: false }, $unset: { deletedAt: '' } },
+);
+
+
+// ─── 6. Rankings ────────────────────────────────────────────────────────────
+
+// Top 5 most-liked live posts
+db.posts.find({ isDeleted: false }).sort({ likesCount: -1 }).limit(5);
+
+// Posts with the most live comments
+db.posts.aggregate([
+  { $match: { isDeleted: false } },
+  {
+    $lookup: {
+      from: 'comments',
+      let: { postId: '$_id' },
+      pipeline: [
+        {
+          $match: {
+            $expr: {
+              $and: [{ $eq: ['$postId', '$$postId'] }, { $eq: ['$isDeleted', false] }],
+            },
+          },
+        },
+        { $count: 'count' },
+      ],
+      as: 'comments',
+    },
+  },
+  { $addFields: { commentCount: { $ifNull: [{ $arrayElemAt: ['$comments.count', 0] }, 0] } } },
+  { $sort: { commentCount: -1 } },
+  { $project: { title: 1, commentCount: 1 } },
+  { $limit: 5 },
+]);
+
+
+// ─── 7. Time-based ──────────────────────────────────────────────────────────
+
+// Posts created in the last 7 days
+db.posts
+  .find({
+    isDeleted: false,
+    createdAt: { $gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) },
+  })
+  .sort({ createdAt: -1 });
+
+// Edited comments (where updatedAt differs from createdAt)
+db.comments
+  .find({ isDeleted: false, $expr: { $ne: ['$createdAt', '$updatedAt'] } })
+  .sort({ updatedAt: -1 });
+
+
+// ─── 8. Integrity checks ────────────────────────────────────────────────────
+
+// Comments whose post no longer exists at all (real orphans — shouldn't happen)
+db.comments.aggregate([
+  { $lookup: { from: 'posts', localField: 'postId', foreignField: '_id', as: 'post' } },
+  { $match: { post: { $size: 0 } } },
+  { $project: { content: 1, postId: 1, createdAt: 1 } },
+]);
+
+// Live comments under soft-deleted posts (cascade should make this empty)
+db.comments.aggregate([
+  { $match: { isDeleted: false } },
+  { $lookup: { from: 'posts', localField: 'postId', foreignField: '_id', as: 'post' } },
+  { $unwind: '$post' },
+  { $match: { 'post.isDeleted': true } },
+  { $project: { content: 1, postId: 1 } },
+]);
+
+
+// ─── 9. Cleanup — DANGEROUS, READ BEFORE RUNNING ───────────────────────────
+
+// Hard-delete soft-deleted posts older than 30 days
+// db.posts.deleteMany({
+//   isDeleted: true,
+//   deletedAt: { $lt: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) },
+// });
+
+// Hard-delete soft-deleted comments older than 30 days
+// db.comments.deleteMany({
+//   isDeleted: true,
+//   deletedAt: { $lt: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) },
+// });
+
+// Drop a test user and everything they own (run as a script, not query-by-query)
+// const u = db.users.findOne({ email: 'pr4_alice@example.com' });
+// if (u) {
+//   db.posts.deleteMany({ userId: u._id });
+//   db.comments.deleteMany({ userId: u._id });
+//   db.users.deleteOne({ _id: u._id });
+// }
