@@ -43,16 +43,17 @@ See [.env.example](./.env.example). All four are required.
 
 ## Scripts
 
-| Command                | What it does                      |
-| ---------------------- | --------------------------------- |
-| `npm run dev`          | Start with hot-reload (tsx watch) |
-| `npm run build`        | Compile to `dist/`                |
-| `npm start`            | Run compiled output               |
-| `npm run typecheck`    | `tsc --noEmit`                    |
-| `npm test`             | Vitest run                        |
-| `npm run test:watch`   | Vitest watch mode                 |
-| `npm run format`       | Prettier write                    |
-| `npm run format:check` | Prettier check (CI)               |
+| Command                | What it does                       |
+| ---------------------- | ---------------------------------- |
+| `npm run dev`          | Start with hot-reload (tsx watch)  |
+| `npm run build`        | Compile to `dist/`                 |
+| `npm start`            | Run compiled output                |
+| `npm run start:prod`   | Run compiled output with .env.prod |
+| `npm run typecheck`    | `tsc --noEmit`                     |
+| `npm test`             | Vitest run                         |
+| `npm run test:watch`   | Vitest watch mode                  |
+| `npm run format`       | Prettier write                     |
+| `npm run format:check` | Prettier check (CI)                |
 
 ## Project structure
 
