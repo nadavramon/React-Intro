@@ -77,3 +77,89 @@ db/
 ```
 
 Each `modules/<name>/` folder follows the same layout: `<name>.ts` (domain types), `<name>Schema.ts` (Mongoose schema), `<name>Model.ts` (async data access + mapper), `<name>Service.ts` (business logic), `<name>Controller.ts` (HTTP handlers), `<name>Routes.ts` (route wiring), `<name>.dto.ts` (Zod request shapes).
+
+## Data model
+
+```mermaid
+erDiagram
+    User ||--o{ Task : owns
+    User ||--o{ Post : authors
+    User ||--o{ Comment : authors
+    User ||--o{ RefreshToken : has
+    Post ||--o{ Comment : "has many"
+
+    User {
+        ObjectId _id PK
+        string email "unique"
+        string password "bcrypt"
+        string name
+        UserRole role
+        Date createdAt
+        Date updatedAt
+    }
+    Task {
+        ObjectId _id PK
+        ObjectId userId FK
+        string title
+        boolean isCompleted
+        Date createdAt
+        Date updatedAt
+    }
+    Post {
+        ObjectId _id PK
+        ObjectId userId FK
+        string title
+        string content
+        number likesCount
+        boolean isDeleted
+        Date deletedAt "nullable"
+        Date createdAt
+        Date updatedAt
+    }
+    Comment {
+        ObjectId _id PK
+        ObjectId postId FK
+        ObjectId userId FK
+        string content
+        boolean isDeleted
+        Date deletedAt "nullable"
+        Date createdAt
+        Date updatedAt
+    }
+    RefreshToken {
+        ObjectId _id PK
+        string token "unique"
+        ObjectId userId FK
+        Date expiresAt "TTL"
+        Date createdAt
+    }
+```
+
+### Relationships
+
+| Direction             | FK field | Cardinality         | Notes                                               |
+| --------------------- | -------- | ------------------- | --------------------------------------------------- |
+| `Task → User`         | `userId` | 1 user : N tasks    | Tasks are private — only the owner sees them        |
+| `Post → User`         | `userId` | 1 user : N posts    | Author                                              |
+| `Comment → User`      | `userId` | 1 user : N comments | Author                                              |
+| `Comment → Post`      | `postId` | 1 post : N comments | Comments cascade-soft-delete with their parent post |
+| `RefreshToken → User` | `userId` | 1 user : N tokens   | Multiple active sessions per user                   |
+
+### Indexes
+
+| Collection     | Index                                             | Purpose                                                |
+| -------------- | ------------------------------------------------- | ------------------------------------------------------ |
+| `Comment`      | `{ postId: 1, createdAt: -1 }` (compound)         | Serves "newest comments per post" via index scan       |
+| `RefreshToken` | `{ token: 1 }` (unique)                           | Prevents duplicate tokens, fast lookup by token        |
+| `RefreshToken` | `{ expiresAt: 1 }` (TTL, `expireAfterSeconds: 0`) | Mongo's background sweeper auto-deletes expired tokens |
+
+### Soft-delete model
+
+`Post` and `Comment` use a two-field soft-delete pattern:
+
+- `isDeleted: boolean` (default `false`) — the source of truth for visibility. All reads filter `{ isDeleted: false }` explicitly.
+- `deletedAt: Date | null` (default `null`) — audit timestamp, set when the document is soft-deleted.
+
+When a `Post` is soft-deleted, `postService.deletePost` also runs `commentModel.softRemoveByPostId` — `updateMany` on all live comments under that post, in one batched operation. Both layers hide together, no orphans.
+
+`User`, `Task`, and `RefreshToken` use **hard-delete** (no soft-delete fields).
