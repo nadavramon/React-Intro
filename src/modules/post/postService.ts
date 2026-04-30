@@ -45,6 +45,14 @@ export async function deletePost(authorId: string, id: string): Promise<void> {
   logger.info(`Post deleted: id=${id}`);
 }
 
+export async function likePost(id: string): Promise<PostEntity> {
+  const post = await postModel.incrementLikes(id);
+
+  if (!post) throw new NotFoundError('Post not found');
+
+  return post;
+}
+
 async function findExistingPost(id: string): Promise<PostEntity> {
   const post = await postModel.findById(id);
 

@@ -53,3 +53,12 @@ export async function softRemove(id: string): Promise<PostEntity | null> {
   ).lean();
   return doc ? toPost(doc) : null;
 }
+
+export async function incrementLikes(id: string): Promise<PostEntity | null> {
+  const doc = await PostModel.findOneAndUpdate(
+    { _id: id, isDeleted: false },
+    { $inc: { likesCount: 1 } },
+    { new: true },
+  ).lean();
+  return doc ? toPost(doc) : null;
+}

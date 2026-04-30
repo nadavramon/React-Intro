@@ -50,3 +50,12 @@ export async function deletePost(req: Request, res: Response, next: NextFunction
     next(err);
   }
 }
+
+export async function likePost(req: Request, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const liked = await postService.likePost(req.params.id as string);
+    res.status(200).json(liked);
+  } catch (err) {
+    next(err);
+  }
+}
