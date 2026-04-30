@@ -1,16 +1,12 @@
 import { Request, Response, NextFunction } from 'express';
 import * as taskService from './taskService.ts';
 import { CreateTaskBodySchema, UpdateTaskBodySchema, GetTasksQuerySchema } from './task.dto.ts';
-import { ValidationError } from '../../shared/errors/AppError.ts';
+import { validate } from '../../shared/utils/validate.ts';
 
 export async function getTasks(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const result = GetTasksQuerySchema.safeParse(req.query);
-    if (!result.success) {
-      throw new ValidationError(result.error.issues[0]!.message);
-    }
-
-    const { isCompleted } = result.data;
+    const query = validate(GetTasksQuerySchema, req.query);
+    const { isCompleted } = query;
 
     if (isCompleted !== undefined) {
       const tasks = await taskService.getTasksByStatus(req.user!.userId, isCompleted);
@@ -36,12 +32,8 @@ export async function getTaskById(req: Request, res: Response, next: NextFunctio
 
 export async function createTask(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const result = CreateTaskBodySchema.safeParse(req.body);
-    if (!result.success) {
-      throw new ValidationError(result.error.issues[0]!.message);
-    }
-
-    const newTask = await taskService.createTask(req.user!.userId, result.data);
+    const body = validate(CreateTaskBodySchema, req.body);
+    const newTask = await taskService.createTask(req.user!.userId, body);
     res.status(201).json(newTask);
   } catch (err) {
     next(err);
@@ -52,12 +44,8 @@ export async function updateTask(req: Request, res: Response, next: NextFunction
   try {
     const { id } = req.params;
     const { userId } = req.user!;
-    const result = UpdateTaskBodySchema.safeParse(req.body);
-    if (!result.success) {
-      throw new ValidationError(result.error.issues[0]!.message);
-    }
-
-    const updatedTask = await taskService.updateTask(userId, id as string, result.data);
+    const body = validate(UpdateTaskBodySchema, req.body);
+    const updatedTask = await taskService.updateTask(userId, id as string, body);
     res.status(200).json(updatedTask);
   } catch (err) {
     next(err);
@@ -67,7 +55,7 @@ export async function updateTask(req: Request, res: Response, next: NextFunction
 export async function deleteTask(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
     await taskService.deleteTask(req.user!.userId, req.params.id as string);
-    res.status(204).json({ message: 'Task deleted successfully' });
+    res.status(204).send();
   } catch (err) {
     next(err);
   }
