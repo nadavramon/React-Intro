@@ -1,14 +1,26 @@
 import { CommentEntity } from './comment.ts';
-import * as commentModel from './commentModel.ts';
-import type { UpdateCommentInput } from './commentModel.ts';
-import * as postModel from '../post/postModel.ts';
+import { CommentModel, CommentDoc } from './commentSchema.ts';
+import { PostModel } from '../post/postSchema.ts';
 import { CreateCommentBodyDto, UpdateCommentBodyDto } from './comment.dto.ts';
 import { NotFoundError, ForbiddenError } from '../../shared/errors/AppError.ts';
 import { logger } from '../../shared/utils/logger.ts';
 
+function toComment(doc: CommentDoc): CommentEntity {
+  return {
+    id: doc._id.toString(),
+    postId: doc.postId.toString(),
+    userId: doc.userId.toString(),
+    content: doc.content,
+    createdAt: doc.createdAt,
+    updatedAt: doc.updatedAt,
+  };
+}
+
 export async function getCommentsByPost(postId: string): Promise<CommentEntity[]> {
   await assertPostExists(postId);
-  return commentModel.findByPostId(postId);
+
+  const docs = await CommentModel.find({ postId, isDeleted: false }).sort({ createdAt: -1 }).lean();
+  return docs.map(toComment);
 }
 
 export async function createComment(
@@ -18,13 +30,14 @@ export async function createComment(
 ): Promise<CommentEntity> {
   await assertPostExists(postId);
 
-  const created = await commentModel.create({
+  const doc = await CommentModel.create({
     postId,
     userId: authorId,
     content: dto.content,
   });
-  logger.info(`Comment created: id=${created.id}, postId=${created.postId}`);
-  return created;
+  const comment = toComment(doc.toObject());
+  logger.info(`Comment created: id=${comment.id}, postId=${comment.postId}`);
+  return comment;
 }
 
 export async function updateComment(
@@ -35,21 +48,26 @@ export async function updateComment(
 ): Promise<CommentEntity> {
   await findOwnedComment(authorId, postId, id, 'edit');
 
-  const updated = (await commentModel.update(id, dto as UpdateCommentInput))!;
-  logger.info(`Comment updated: id=${updated.id}`);
-  return updated;
+  const doc = (await CommentModel.findOneAndUpdate({ _id: id, isDeleted: false }, dto, {
+    new: true,
+  }).lean())!;
+  logger.info(`Comment updated: id=${id}`);
+  return toComment(doc);
 }
 
 export async function deleteComment(authorId: string, postId: string, id: string): Promise<void> {
   await findOwnedComment(authorId, postId, id, 'delete');
 
-  await commentModel.softRemove(id);
+  await CommentModel.findOneAndUpdate(
+    { _id: id, isDeleted: false },
+    { isDeleted: true, deletedAt: new Date() },
+  );
   logger.info(`Comment deleted: id=${id}`);
 }
 
 async function assertPostExists(postId: string): Promise<void> {
-  const post = await postModel.findById(postId);
-  if (!post) throw new NotFoundError('Post not found');
+  const exists = await PostModel.exists({ _id: postId, isDeleted: false });
+  if (!exists) throw new NotFoundError('Post not found');
 }
 
 async function findOwnedComment(
@@ -58,12 +76,12 @@ async function findOwnedComment(
   id: string,
   action: string,
 ): Promise<CommentEntity> {
-  const comment = await commentModel.findById(id);
+  const doc = await CommentModel.findOne({ _id: id, isDeleted: false }).lean();
 
-  if (!comment || comment.postId !== postId) throw new NotFoundError('Comment not found');
+  if (!doc || doc.postId.toString() !== postId) throw new NotFoundError('Comment not found');
 
-  if (comment.userId !== authorId)
+  if (doc.userId.toString() !== authorId)
     throw new ForbiddenError(`You can only ${action} your own comments`);
 
-  return comment;
+  return toComment(doc);
 }
