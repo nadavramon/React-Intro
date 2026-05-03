@@ -1,4 +1,4 @@
-import { UserRole } from '../user/user.ts';
+import { UserRole } from '../user/user.entity.ts';
 
 export interface JwtPayload {
   userId: string;

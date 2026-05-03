@@ -1,6 +1,6 @@
 import bcrypt from 'bcrypt';
-import { UserEntity, UserRole } from './user.ts';
-import { UserModel, UserDoc } from './userSchema.ts';
+import { UserEntity, UserRole } from './user.entity.ts';
+import { UserModel, UserDoc } from './user.schema.ts';
 import { ValidationError, UnauthorizedError } from '../../shared/errors/AppError.ts';
 
 const SALT_ROUNDS = 10;

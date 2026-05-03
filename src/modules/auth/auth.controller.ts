@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import * as authService from './authService.ts';
+import * as authService from './auth.service.ts';
 import { RegisterBodySchema, LoginBodySchema, RefreshBodySchema } from './auth.dto.ts';
 import { ValidationError } from '../../shared/errors/AppError.ts';
 

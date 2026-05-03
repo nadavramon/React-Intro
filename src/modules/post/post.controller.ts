@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import * as postService from './postService.ts';
+import * as postService from './post.service.ts';
 import { CreatePostBodySchema, UpdatePostBodySchema, GetPostsQuerySchema } from './post.dto.ts';
 import { validate } from '../../shared/utils/validate.ts';
 

@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import * as commentService from './commentService.ts';
+import * as commentService from './comment.service.ts';
 import { CreateCommentBodySchema, UpdateCommentBodySchema } from './comment.dto.ts';
 import { validate } from '../../shared/utils/validate.ts';
 

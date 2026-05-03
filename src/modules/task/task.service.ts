@@ -1,5 +1,5 @@
-import { TaskEntity } from './task.ts';
-import { TaskModel, TaskDoc } from './taskSchema.ts';
+import { TaskEntity } from './task.entity.ts';
+import { TaskModel, TaskDoc } from './task.schema.ts';
 import { NotFoundError } from '../../shared/errors/AppError.ts';
 import { CreateTaskBodyDto, UpdateTaskBodyDto } from './task.dto.ts';
 import { logger } from '../../shared/utils/logger.ts';

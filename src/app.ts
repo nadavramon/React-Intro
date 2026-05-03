@@ -1,7 +1,7 @@
 import express from 'express';
-import taskRoutes from './modules/task/taskRoutes.ts';
-import authRoutes from './modules/auth/authRoutes.ts';
-import postRoutes from './modules/post/postRoutes.ts';
+import taskRoutes from './modules/task/task.routes.ts';
+import authRoutes from './modules/auth/auth.routes.ts';
+import postRoutes from './modules/post/post.routes.ts';
 import { httpLogger } from './shared/middlewares/httpLogger.ts';
 import { errorHandler } from './shared/middlewares/errorHandler.ts';
 import { swaggerUi, swaggerSpec } from './shared/utils/swagger.ts';

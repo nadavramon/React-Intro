@@ -1,5 +1,5 @@
 import { Schema, model, InferSchemaType, Types } from 'mongoose';
-import { UserRole } from './user.ts';
+import { UserRole } from './user.entity.ts';
 
 const userSchema = new Schema(
   {

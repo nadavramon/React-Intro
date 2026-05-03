@@ -1,11 +1,11 @@
 import jwt from 'jsonwebtoken';
 import { env } from '../../shared/config/env.ts';
 import { RegisterBodyDto, LoginBodyDto, RefreshBodyDto } from './auth.dto.ts';
-import { UserEntity } from '../user/user.ts';
-import { AuthTokens, JwtPayload } from './auth.ts';
+import { UserEntity } from '../user/user.entity.ts';
+import { AuthTokens, JwtPayload } from './auth.types.ts';
 import { UnauthorizedError } from '../../shared/errors/AppError.ts';
-import * as userService from '../user/userService.ts';
-import { RefreshTokenModel } from './refreshTokenSchema.ts';
+import * as userService from '../user/user.service.ts';
+import { RefreshTokenModel } from './refresh-token.schema.ts';
 
 const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000;
 

@@ -1,6 +1,6 @@
-import { CommentEntity } from './comment.ts';
-import { CommentModel, CommentDoc } from './commentSchema.ts';
-import { PostModel } from '../post/postSchema.ts';
+import { CommentEntity } from './comment.entity.ts';
+import { CommentModel, CommentDoc } from './comment.schema.ts';
+import { PostModel } from '../post/post.schema.ts';
 import { CreateCommentBodyDto, UpdateCommentBodyDto } from './comment.dto.ts';
 import { NotFoundError, ForbiddenError } from '../../shared/errors/AppError.ts';
 import { logger } from '../../shared/utils/logger.ts';

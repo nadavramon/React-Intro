@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import * as taskService from './taskService.ts';
+import * as taskService from './task.service.ts';
 import { CreateTaskBodySchema, UpdateTaskBodySchema, GetTasksQuerySchema } from './task.dto.ts';
 import { validate } from '../../shared/utils/validate.ts';
 

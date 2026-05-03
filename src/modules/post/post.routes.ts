@@ -6,9 +6,9 @@ import {
   updatePost,
   deletePost,
   likePost,
-} from './postController.ts';
+} from './post.controller.ts';
 import { authenticate } from '../../shared/middlewares/authenticate.ts';
-import commentRoutes from '../comment/commentRoutes.ts';
+import commentRoutes from '../comment/comment.routes.ts';
 
 const router = Router();
 
