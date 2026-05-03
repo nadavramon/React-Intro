@@ -5,7 +5,7 @@ import { UserEntity } from '../user/user.ts';
 import { AuthTokens, JwtPayload } from './auth.ts';
 import { UnauthorizedError } from '../../shared/errors/AppError.ts';
 import * as userService from '../user/userService.ts';
-import * as refreshTokenModel from './refreshTokenModel.ts';
+import { RefreshTokenModel } from './refreshTokenSchema.ts';
 
 const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000;
 
@@ -26,9 +26,9 @@ export async function refresh(dto: RefreshBodyDto): Promise<{ accessToken: strin
   } catch {
     throw new UnauthorizedError('Invalid refresh token');
   }
-  const stored = await refreshTokenModel.findByToken(dto.refreshToken);
+  const stored = await RefreshTokenModel.findOne({ token: dto.refreshToken }).lean();
 
-  if (!stored || stored.userId !== refreshPayload.userId)
+  if (!stored || stored.userId.toString() !== refreshPayload.userId)
     throw new UnauthorizedError('Invalid refresh token');
 
   const user = await userService.getById(refreshPayload.userId);
@@ -43,7 +43,7 @@ export async function refresh(dto: RefreshBodyDto): Promise<{ accessToken: strin
 }
 
 export async function logout(dto: RefreshBodyDto): Promise<void> {
-  await refreshTokenModel.remove(dto.refreshToken);
+  await RefreshTokenModel.deleteOne({ token: dto.refreshToken });
 }
 
 async function generateTokens(user: UserEntity): Promise<AuthTokens> {
@@ -57,7 +57,7 @@ async function generateTokens(user: UserEntity): Promise<AuthTokens> {
   const refreshToken = jwt.sign({ userId: user.id }, env.REFRESH_TOKEN_SECRET, { expiresIn: '7d' });
 
   const expiresAt = new Date(Date.now() + SEVEN_DAYS_MS);
-  await refreshTokenModel.save(refreshToken, user.id, expiresAt);
+  await RefreshTokenModel.create({ token: refreshToken, userId: user.id, expiresAt });
 
   return { accessToken, refreshToken };
 }
