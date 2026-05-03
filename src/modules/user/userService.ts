@@ -1,41 +1,46 @@
 import bcrypt from 'bcrypt';
-import * as userModel from './userModel.ts';
 import { UserEntity, UserRole } from './user.ts';
+import { UserModel, UserDoc } from './userSchema.ts';
 import { ValidationError, UnauthorizedError } from '../../shared/errors/AppError.ts';
 
 const SALT_ROUNDS = 10;
+
+function toUser(doc: UserDoc): UserEntity {
+  return {
+    id: doc._id.toString(),
+    email: doc.email,
+    password: doc.password,
+    role: doc.role as UserRole,
+  };
+}
 
 export async function createUser(
   email: string,
   password: string,
   role: UserRole = UserRole.USER,
 ): Promise<UserEntity> {
-  const existing = await userModel.findByEmail(email);
-
+  const existing = await UserModel.findOne({ email }).lean();
   if (existing) throw new ValidationError('Email already in use');
 
   const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS);
 
-  return userModel.create({
-    email,
-    password: hashedPassword,
-    role,
-  });
+  const doc = await UserModel.create({ email, password: hashedPassword, role });
+  return toUser(doc.toObject());
 }
 
 export async function verifyCredentials(email: string, password: string): Promise<UserEntity> {
-  const user = await userModel.findByEmail(email);
-  if (!user) throw new UnauthorizedError('Invalid email');
+  const doc = await UserModel.findOne({ email }).lean();
+  if (!doc) throw new UnauthorizedError('Invalid email');
 
-  const passwordMatch = await bcrypt.compare(password, user.password);
+  const passwordMatch = await bcrypt.compare(password, doc.password);
   if (!passwordMatch) throw new UnauthorizedError('Invalid password');
 
-  return user;
+  return toUser(doc);
 }
 
 export async function getById(id: string): Promise<UserEntity> {
-  const user = await userModel.findById(id);
-  if (!user) throw new UnauthorizedError('User not found');
+  const doc = await UserModel.findById(id).lean();
+  if (!doc) throw new UnauthorizedError('User not found');
 
-  return user;
+  return toUser(doc);
 }
