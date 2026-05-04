@@ -6,6 +6,7 @@ import {
   updatePost,
   deletePost,
   likePost,
+  unlikePost,
 } from './post.controller.ts';
 import { authenticate } from '../../shared/middlewares/authenticate.ts';
 import commentRoutes from '../comment/comment.routes.ts';
@@ -18,7 +19,7 @@ router.route('/').get(getPosts).post(createPost);
 
 router.route('/:id').get(getPostById).put(updatePost).delete(deletePost);
 
-router.post('/:id/like', likePost);
+router.route('/:id/like').post(likePost).delete(unlikePost);
 
 router.use('/:postId/comments', commentRoutes);
 

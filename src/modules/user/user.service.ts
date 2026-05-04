@@ -19,11 +19,7 @@ export async function createUser(
   password: string,
   role: UserRole = UserRole.USER,
 ): Promise<UserEntity> {
-  const existing = await UserModel.findOne({ email }).lean();
-  if (existing) throw new ValidationError('Email already in use');
-
   const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS);
-
   const doc = await UserModel.create({ email, password: hashedPassword, role });
   return toUser(doc.toObject());
 }

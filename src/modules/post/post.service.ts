@@ -2,8 +2,9 @@ import { PostEntity } from './post.entity.ts';
 import { PostModel, PostDoc } from './post.schema.ts';
 import { CommentModel } from '../comment/comment.schema.ts';
 import { CreatePostBodyDto, UpdatePostBodyDto } from './post.dto.ts';
-import { NotFoundError, ForbiddenError } from '../../shared/errors/AppError.ts';
+import { NotFoundError } from '../../shared/errors/AppError.ts';
 import { logger } from '../../shared/utils/logger.ts';
+import { LikeModel } from '../like/like.schema.ts';
 
 function toPost(doc: PostDoc): PostEntity {
   return {
@@ -26,7 +27,10 @@ export async function getAllPosts(filter: { userId?: string } = {}): Promise<Pos
 }
 
 export async function getPostById(id: string): Promise<PostEntity> {
-  return findExistingPost(id);
+  const doc = await PostModel.findOne({ _id: id, isDeleted: false }).lean();
+  if (!doc) throw new NotFoundError('Post not found');
+
+  return toPost(doc);
 }
 
 export async function createPost(authorId: string, dto: CreatePostBodyDto): Promise<PostEntity> {
@@ -45,54 +49,36 @@ export async function updatePost(
   id: string,
   dto: UpdatePostBodyDto,
 ): Promise<PostEntity> {
-  await findOwnedPost(authorId, id, 'update');
+  const doc = await PostModel.findOneAndUpdate(
+    { _id: id, isDeleted: false, userId: authorId },
+    dto,
+    { returnDocument: 'after' },
+  ).lean();
+  if (!doc) throw new NotFoundError('Post not found');
 
-  const doc = (await PostModel.findOneAndUpdate({ _id: id, isDeleted: false }, dto, {
-    new: true,
-  }).lean())!;
   logger.info(`Post updated: id=${id}`);
   return toPost(doc);
 }
 
 export async function deletePost(authorId: string, id: string): Promise<void> {
-  await findOwnedPost(authorId, id, 'delete');
+  const doc = await PostModel.findOneAndUpdate(
+    { _id: id, isDeleted: false, userId: authorId },
+    { isDeleted: true, deletedAt: new Date() },
+  ).lean();
+  if (!doc) throw new NotFoundError('Post not found');
 
-  await PostModel.findOneAndUpdate(
-    { _id: id, isDeleted: false },
-    { isDeleted: true, deletedAt: new Date() },
-  );
-  await CommentModel.updateMany(
-    { postId: id, isDeleted: false },
-    { isDeleted: true, deletedAt: new Date() },
-  );
+  await Promise.all([
+    CommentModel.updateMany(
+      { postId: id, isDeleted: false },
+      { isDeleted: true, deletedAt: new Date() },
+    ),
+    LikeModel.deleteMany({ postId: id }),
+  ]);
 
   logger.info(`Post deleted: id=${id}`);
 }
 
-export async function likePost(id: string): Promise<PostEntity> {
-  const doc = await PostModel.findOneAndUpdate(
-    { _id: id, isDeleted: false },
-    { $inc: { likesCount: 1 } },
-    { new: true },
-  ).lean();
-
-  if (!doc) throw new NotFoundError('Post not found');
-
-  return toPost(doc);
-}
-
-async function findExistingPost(id: string): Promise<PostEntity> {
-  const doc = await PostModel.findOne({ _id: id, isDeleted: false }).lean();
-
-  if (!doc) throw new NotFoundError('Post not found');
-
-  return toPost(doc);
-}
-
-async function findOwnedPost(authorId: string, id: string, action: string): Promise<PostEntity> {
-  const post = await findExistingPost(id);
-
-  if (post.userId !== authorId) throw new ForbiddenError(`You can only ${action} your own posts`);
-
-  return post;
+export async function assertPostExists(postId: string): Promise<void> {
+  const exists = await PostModel.exists({ _id: postId, isDeleted: false });
+  if (!exists) throw new NotFoundError('Post not found');
 }

@@ -1,8 +1,14 @@
 import { Request, Response, NextFunction } from 'express';
-import { AppError } from '../errors/AppError.ts';
+import { AppError, ValidationError } from '../errors/AppError.ts';
 import { logger } from '../utils/logger.ts';
+import mongoose from 'mongoose';
 
 export function errorHandler(err: Error, req: Request, res: Response, _next: NextFunction): void {
+  if (err instanceof mongoose.mongo.MongoServerError && err.code === 11000) {
+    const field = Object.keys(err.keyValue ?? {})[0] ?? 'field';
+    err = new ValidationError(`${field} already in use`);
+  }
+
   const statusCode = err instanceof AppError ? err.statusCode : 500;
   const message = err instanceof AppError ? err.message : 'An unexpected error occurred';
 

@@ -230,3 +230,29 @@ db.comments.aggregate([
 //   db.comments.deleteMany({ userId: u._id });
 //   db.users.deleteOne({ _id: u._id });
 // }
+
+
+// ─── 10. Likes Module ───────────────────────────────────────────────────────
+
+// MIGRATION: Reset all spam likesCount to 0. 
+// Run this ONCE after merging the new likes module to production.
+// db.posts.updateMany({}, { $set: { likesCount: 0 } });
+
+// Find all posts liked by a specific user (newest likes first)
+db.likes.find({ userId: ObjectId('<paste-userId>') }).sort({ createdAt: -1 });
+
+// Get a list of users who liked a specific post
+db.likes.aggregate([
+  { $match: { postId: ObjectId('<paste-postId>') } },
+  { $lookup: { from: 'users', localField: 'userId', foreignField: '_id', as: 'user' } },
+  { $unwind: '$user' },
+  { 
+    $project: { 
+      'user._id': 1, 
+      'user.name': 1, 
+      'user.email': 1, 
+      createdAt: 1 
+    } 
+  },
+  { $sort: { createdAt: -1 } }
+]);

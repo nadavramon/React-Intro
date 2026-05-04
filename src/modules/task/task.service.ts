@@ -27,9 +27,8 @@ export async function getTasksByStatus(
 }
 
 export async function getTaskById(userId: string, id: string): Promise<TaskEntity> {
-  const doc = await TaskModel.findById(id).lean();
-
-  if (!doc || doc.userId.toString() !== userId) throw new NotFoundError('Task not found');
+  const doc = await TaskModel.findOne({ _id: id, userId }).lean();
+  if (!doc) throw new NotFoundError('Task not found');
 
   return toTask(doc);
 }
@@ -50,20 +49,18 @@ export async function updateTask(
   id: string,
   dto: UpdateTaskBodyDto,
 ): Promise<TaskEntity> {
-  const existing = await TaskModel.findById(id).lean();
+  const doc = await TaskModel.findOneAndUpdate({ _id: id, userId }, dto, {
+    returnDocument: 'after',
+  }).lean();
+  if (!doc) throw new NotFoundError('Task not found');
 
-  if (!existing || existing.userId.toString() !== userId) throw new NotFoundError('Task not found');
-
-  const doc = (await TaskModel.findByIdAndUpdate(id, dto, { new: true }).lean())!;
   logger.info(`Task updated: id=${id}`);
   return toTask(doc);
 }
 
 export async function deleteTask(userId: string, id: string): Promise<void> {
-  const existing = await TaskModel.findById(id).lean();
+  const doc = await TaskModel.findOneAndDelete({ _id: id, userId }).lean();
+  if (!doc) throw new NotFoundError('Task not found');
 
-  if (!existing || existing.userId.toString() !== userId) throw new NotFoundError('Task not found');
-
-  await TaskModel.findByIdAndDelete(id);
   logger.info(`Task deleted: id=${id}`);
 }

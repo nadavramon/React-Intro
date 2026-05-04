@@ -1,56 +1,32 @@
-import { Request, Response, NextFunction } from 'express';
+import { Request, Response } from 'express';
 import * as authService from './auth.service.ts';
 import { RegisterBodySchema, LoginBodySchema, RefreshBodySchema } from './auth.dto.ts';
-import { ValidationError } from '../../shared/errors/AppError.ts';
+import { validate } from '../../shared/utils/validate.ts';
 
-export async function register(req: Request, res: Response, next: NextFunction): Promise<void> {
-  try {
-    const result = RegisterBodySchema.safeParse(req.body);
-    if (!result.success) {
-      throw new ValidationError(result.error.issues[0]!.message);
-    }
+export async function register(req: Request, res: Response): Promise<void> {
+  const body = validate(RegisterBodySchema, req.body);
 
-    const { accessToken, refreshToken } = await authService.register(result.data);
-    res.status(201).json({ message: 'User registered successfully', accessToken, refreshToken });
-  } catch (err) {
-    next(err);
-  }
+  const { accessToken, refreshToken } = await authService.register(body);
+  res.status(201).json({ message: 'User registered successfully', accessToken, refreshToken });
 }
 
-export async function login(req: Request, res: Response, next: NextFunction): Promise<void> {
-  try {
-    const result = LoginBodySchema.safeParse(req.body);
-    if (!result.success) {
-      throw new ValidationError(result.error.issues[0]!.message);
-    }
+export async function login(req: Request, res: Response): Promise<void> {
+  const body = validate(LoginBodySchema, req.body);
 
-    const { accessToken, refreshToken } = await authService.login(result.data);
-    res.status(200).json({ accessToken, refreshToken });
-  } catch (err) {
-    next(err);
-  }
+  const { accessToken, refreshToken } = await authService.login(body);
+  res.status(200).json({ accessToken, refreshToken });
 }
 
-export async function refresh(req: Request, res: Response, next: NextFunction): Promise<void> {
-  try {
-    const result = RefreshBodySchema.safeParse(req.body);
-    if (!result.success) throw new ValidationError(result.error.issues[0]!.message);
+export async function refresh(req: Request, res: Response): Promise<void> {
+  const body = validate(RefreshBodySchema, req.body);
 
-    const { accessToken } = await authService.refresh(result.data);
-    res.status(200).json({ accessToken });
-  } catch (err) {
-    next(err);
-  }
+  const { accessToken } = await authService.refresh(body);
+  res.status(200).json({ accessToken });
 }
 
-export async function logout(req: Request, res: Response, next: NextFunction): Promise<void> {
-  try {
-    const result = RefreshBodySchema.safeParse(req.body);
-    if (!result.success) throw new ValidationError(result.error.issues[0]!.message);
+export async function logout(req: Request, res: Response): Promise<void> {
+  const body = validate(RefreshBodySchema, req.body);
 
-    await authService.logout(result.data);
-    res.status(204).send();
-  } catch (err) {
-    next(err);
-  }
+  await authService.logout(body);
+  res.status(204).send();
 }
