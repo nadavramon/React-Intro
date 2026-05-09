@@ -102,3 +102,8 @@ body {
   border-color: var(--accent-border);
   box-shadow: 0 0 12px -4px var(--accent-glow);
 }
+
+.reset:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
