@@ -1,6 +1,6 @@
 import { useState } from 'react'
-import CounterApp from './CounterApp'
-import TicTacToe from './TicTacToe'
+import CounterApp from './counter/CounterApp'
+import TicTacToe from './tic-tac-toe/TicTacToe'
 
 enum View {
   Counter = 'counter',
