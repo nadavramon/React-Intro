@@ -1,0 +1,223 @@
+.tic-tac-toe {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 32px 16px;
+  color: var(--text-h);
+}
+
+.ttt-header {
+  margin-bottom: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.ttt-subtitle {
+  margin: 0;
+  font-size: 14px;
+  color: var(--text);
+  opacity: 0.85;
+}
+
+.ttt-title {
+  font-size: 32px;
+  margin: 0;
+}
+
+.ttt-statusbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 12px 18px;
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+}
+
+.ttt-status {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--text-h);
+}
+
+.ttt-status-icon {
+  flex-shrink: 0;
+  color: var(--accent);
+}
+
+.ttt-status-player {
+  font-weight: 700;
+}
+
+.ttt-status-player-x {
+  color: var(--accent);
+}
+
+.ttt-status-player-o {
+  color: var(--accent-2);
+}
+
+.ttt-layout {
+  display: grid;
+  grid-template-columns: 1fr 280px;
+  gap: 24px;
+  align-items: start;
+}
+
+.ttt-game {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.ttt-board {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  padding: 12px;
+}
+
+.square {
+  aspect-ratio: 1 / 1;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  font-size: 56px;
+  font-weight: 700;
+  color: var(--text-h);
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.square > * {
+  display: inline-block;
+  animation: square-pop 180ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes square-pop {
+  from { transform: scale(0); }
+  to   { transform: scale(1); }
+}
+
+.square:hover:not(:disabled) {
+  border-color: var(--accent-border);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.square:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.square:disabled {
+  cursor: default;
+}
+
+.square-x {
+  color: var(--accent);
+}
+
+.square-o {
+  color: var(--accent-2);
+}
+
+.square-winning {
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  border-color: var(--accent-border);
+  box-shadow: 0 0 20px -4px var(--accent-glow);
+  color: var(--text-h);
+}
+
+.square-winning {
+  animation: winning-pulse 1.6s ease-in-out infinite;
+}
+
+@keyframes winning-pulse {
+  0%, 100% { box-shadow: 0 0 20px -4px var(--accent-glow); }
+  50%      { box-shadow: 0 0 30px 0 var(--accent-glow); }
+}
+
+.ttt-restart {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  color: var(--text-h);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
+}
+
+.ttt-restart:hover {
+  border-color: var(--accent-border);
+  background: var(--card-bg);
+  box-shadow: 0 0 12px -4px var(--accent-glow);
+}
+
+.ttt-restart:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.ttt-restart-icon {
+  flex-shrink: 0;
+}
+
+.ttt-history {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  padding: 20px;
+}
+
+.ttt-history-title {
+  margin: 0 0 12px 0;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.ttt-history-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.history-item {
+  padding: 8px 12px;
+  background: var(--bg);
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+.history-item-start {
+  background: transparent;
+  font-style: italic;
+  opacity: 0.6;
+}
+
+.history-item-latest {
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  color: var(--text-h);
+  border: 1px solid var(--accent-border);
+  box-shadow: 0 0 12px -4px var(--accent-glow);
+}
+
+.ttt-history-empty {
+  margin: 0;
+  font-size: 14px;
+  opacity: 0.6;
+}
