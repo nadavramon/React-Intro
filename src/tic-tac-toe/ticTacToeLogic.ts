@@ -32,8 +32,7 @@ export function findWinner(board: Cell[]): WinResult | null {
     for (const line of WINNING_LINES) {
         const [a, b, c] = line
         const cellA = board[a]
-        if (cellA === null) continue
-        if (cellA === board[b] && cellA === board[c])
+        if (cellA !== null && cellA === board[b] && cellA === board[c])
             return { winner: cellA, line }
     }
     return null
