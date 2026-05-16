@@ -38,5 +38,4 @@ export function findWinner(board: Cell[]): WinResult | null {
     return null
 }
 
-export const isBoardFull = (board: Cell[]): boolean =>
-    board.every(cell => cell !== null)
+export const isBoardFull = (board: Cell[]): boolean => board.every((cell) => cell !== null)

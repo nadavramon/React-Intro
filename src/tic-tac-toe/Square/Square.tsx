@@ -1,4 +1,6 @@
-import { Player, type Cell } from "./ticTacToeLogic"
+import { Player, type Cell } from '../ticTacToeLogic'
+import clsx from 'clsx'
+import styles from './Square.module.css'
 
 type SquareProps = {
     value: Cell
@@ -7,18 +9,15 @@ type SquareProps = {
     onClick: () => void
 }
 
-function getClassName(value: Cell, isWinning: boolean) {
-    let className = 'square'
-    if (value === Player.X) className += ' square-x'
-    if (value === Player.O) className += ' square-o'
-    if (isWinning) className += ' square-winning'
-    return className
-}
-
 export default function Square({ value, isWinning, isGameOver, onClick }: SquareProps) {
     return (
         <button
-            className={getClassName(value, isWinning)}
+            className={clsx(
+                styles.square,
+                value === Player.X && styles.squareX,
+                value === Player.O && styles.squareO,
+                isWinning && styles.squareWinning,
+            )}
             type="button"
             onClick={onClick}
             disabled={value !== null || isGameOver}

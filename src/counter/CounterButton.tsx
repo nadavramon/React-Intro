@@ -9,11 +9,7 @@ type Props = {
 
 function CounterButton({ index, value, isMax, onClick }: Props) {
     return (
-        <button
-            type="button"
-            className={`counter-card${isMax ? ' is-max' : ''}`}
-            onClick={onClick}
-        >
+        <button type="button" className={`counter-card${isMax ? ' is-max' : ''}`} onClick={onClick}>
             <span className="counter-label">#{index + 1}</span>
             <span className="counter-value">{value}</span>
         </button>

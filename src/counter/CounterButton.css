@@ -1,64 +1,67 @@
 .counter-card {
-  position: relative;
-  aspect-ratio: 1 / 1;
-  background: var(--card-bg);
-  border: 1px solid var(--border);
-  border-radius: 18px;
-  color: var(--text-h);
-  cursor: pointer;
-  font: inherit;
-  padding: 14px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: transform 0.08s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+    position: relative;
+    aspect-ratio: 1 / 1;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    color: var(--text-h);
+    cursor: pointer;
+    font: inherit;
+    padding: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition:
+        transform 0.08s ease,
+        border-color 0.2s ease,
+        box-shadow 0.2s ease;
 }
 
 .counter-card:hover {
-  transform: translateY(-1px);
-  border-color: var(--accent-border);
+    transform: translateY(-1px);
+    border-color: var(--accent-border);
 }
 
 .counter-card:active {
-  transform: translateY(0) scale(0.97);
-  transition-duration: 0.05s;
+    transform: translateY(0) scale(0.97);
+    transition-duration: 0.05s;
 }
 
 .counter-card:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 3px;
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
 }
 
 .counter-label {
-  position: absolute;
-  top: 12px;
-  left: 14px;
-  font-size: 12px;
-  color: var(--text);
-  letter-spacing: 0.5px;
+    position: absolute;
+    top: 12px;
+    left: 14px;
+    font-size: 12px;
+    color: var(--text);
+    letter-spacing: 0.5px;
 }
 
 .counter-value {
-  font-size: 64px;
-  font-weight: 700;
-  letter-spacing: -1.5px;
-  font-variant-numeric: tabular-nums;
+    font-size: 64px;
+    font-weight: 700;
+    letter-spacing: -1.5px;
+    font-variant-numeric: tabular-nums;
 }
 
 .counter-card.is-max {
-  background: linear-gradient(135deg, var(--accent), var(--accent-2));
-  border-color: transparent;
-  box-shadow:
-    0 0 0 1px var(--accent-border),
-    0 12px 28px -8px var(--accent-glow);
-  color: #fff;
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    border-color: transparent;
+    box-shadow:
+        0 0 0 1px var(--accent-border),
+        0 12px 28px -8px var(--accent-glow);
+    color: #fff;
 }
 
 .counter-card.is-max:hover {
-  border-color: transparent;
-  transform: translateY(-2px);
+    border-color: transparent;
+    transform: translateY(-2px);
 }
 
 .counter-card.is-max .counter-label {
-  color: rgba(255, 255, 255, 0.85);
+    color: rgba(255, 255, 255, 0.85);
 }

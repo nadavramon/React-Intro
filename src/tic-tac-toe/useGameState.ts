@@ -1,5 +1,5 @@
-import { useState, useEffect, useMemo } from 'react'
-import { Player, BOARD_SIZE, type Cell, type Move } from './ticTacToeLogic'
+import { useState, useEffect } from 'react'
+import { Player, BOARD_SIZE, findWinner, isBoardFull, type Cell, type Move } from './ticTacToeLogic'
 
 const STORAGE_KEY = 'tic-tac-toe-state'
 
@@ -7,49 +7,64 @@ const INITIAL_BOARD: Cell[] = Array(BOARD_SIZE).fill(null)
 const FIRST_PLAYER: Player = Player.X
 const INITIAL_HISTORY: Move[] = []
 
-type PersistedState = {
+type GameState = {
     board: Cell[]
     currentPlayer: Player
     history: Move[]
 }
 
-function readPersistedState(): PersistedState | null {
+const INITIAL_STATE: GameState = {
+    board: INITIAL_BOARD,
+    currentPlayer: FIRST_PLAYER,
+    history: INITIAL_HISTORY,
+}
+
+function readGameState(): GameState | null {
     try {
         const raw = localStorage.getItem(STORAGE_KEY)
-        if (raw === null)
-            return null
+        if (raw === null) return null
         return JSON.parse(raw)
     } catch {
         return null
     }
 }
 
-export function usePersistedGameState() {
-    const persisted = useMemo(() => readPersistedState(), [])
+export function useGameState() {
+    const [gameState, setGameState] = useState<GameState>(() => readGameState() ?? INITIAL_STATE)
+    const { board, currentPlayer, history } = gameState
 
-    const [board, setBoard] = useState<Cell[]>(persisted?.board ?? INITIAL_BOARD)
-    const [currentPlayer, setCurrentPlayer] = useState<Player>(persisted?.currentPlayer ?? FIRST_PLAYER)
-    const [history, setHistory] = useState<Move[]>(persisted?.history ?? INITIAL_HISTORY)
+    const result = findWinner(board)
+    const winner = result?.winner ?? null
+    const winningLine = result?.line ?? null
+    const isDraw = winner === null && isBoardFull(board)
+    const isGameOver = winner !== null || isDraw
 
     useEffect(() => {
-        const stateToPersist: PersistedState = { board, currentPlayer, history }
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(stateToPersist))
-    }, [board, currentPlayer, history])
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(gameState))
+    }, [gameState])
 
     function applyMove(index: number) {
-        const nextBoard = board.map((cell, i) => i === index ? currentPlayer : cell)
-        const nextPlayer = currentPlayer === Player.X ? Player.O : Player.X
-        const newMove: Move = { player: currentPlayer, cellIndex: index }
-        setBoard(nextBoard)
-        setCurrentPlayer(nextPlayer)
-        setHistory([...history, newMove])
+        if (isGameOver || board[index] !== null) return
+        setGameState((prev) => ({
+            board: prev.board.map((cell, i) => (i === index ? prev.currentPlayer : cell)),
+            currentPlayer: prev.currentPlayer === Player.X ? Player.O : Player.X,
+            history: [...prev.history, { player: prev.currentPlayer, cellIndex: index }],
+        }))
     }
 
     function resetGame() {
-        setBoard(INITIAL_BOARD)
-        setCurrentPlayer(FIRST_PLAYER)
-        setHistory(INITIAL_HISTORY)
+        setGameState(INITIAL_STATE)
     }
 
-    return { board, currentPlayer, history, applyMove, resetGame }
+    return {
+        board,
+        currentPlayer,
+        history,
+        winner,
+        winningLine,
+        isDraw,
+        isGameOver,
+        applyMove,
+        resetGame,
+    }
 }

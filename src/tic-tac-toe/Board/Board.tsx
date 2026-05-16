@@ -1,5 +1,6 @@
-import { type Cell } from './ticTacToeLogic'
-import Square from './Square'
+import { type Cell } from '../ticTacToeLogic'
+import Square from '../Square'
+import styles from './Board.module.css'
 
 type BoardProps = {
     board: Cell[]
@@ -10,7 +11,7 @@ type BoardProps = {
 
 export default function Board({ board, winningLine, isGameOver, onSquareClick }: BoardProps) {
     return (
-        <div className="ttt-board">
+        <div className={styles.board}>
             {board.map((value, i) => (
                 <Square
                     key={i}
