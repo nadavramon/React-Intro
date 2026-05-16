@@ -1,0 +1,38 @@
+.ticTacToe {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 32px 16px;
+    color: var(--text-h);
+}
+
+.header {
+    margin-bottom: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.title {
+    font-size: 32px;
+    margin: 0;
+}
+
+.subtitle {
+    margin: 0;
+    font-size: 14px;
+    color: var(--text);
+    opacity: 0.85;
+}
+
+.layout {
+    display: grid;
+    grid-template-columns: 1fr 280px;
+    gap: 24px;
+    align-items: start;
+}
+
+.game {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}

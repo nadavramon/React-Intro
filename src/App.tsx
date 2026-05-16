@@ -3,28 +3,34 @@ import CounterApp from './counter/CounterApp'
 import TicTacToe from './tic-tac-toe/TicTacToe'
 
 enum View {
-  Counter = 'counter',
-  TicTacToe = 'tictactoe',
+    Counter = 'counter',
+    TicTacToe = 'tictactoe',
 }
 
 export default function App() {
-  const [view, setView] = useState<View>(View.TicTacToe)
+    const [view, setView] = useState<View>(View.TicTacToe)
 
-  const navButtonClass = (buttonView: View) =>
-    `nav-button${view === buttonView ? ' is-active' : ''}`
+    const navButtonClass = (buttonView: View) =>
+        `nav-button${view === buttonView ? ' is-active' : ''}`
 
-  return (
-    <>
-      <nav className="nav">
-        <button className={navButtonClass(View.Counter)} onClick={() => setView(View.Counter)}>
-          Counter
-        </button>
-        <button className={navButtonClass(View.TicTacToe)} onClick={() => setView(View.TicTacToe)}>
-          Tic-Tac-Toe
-        </button>
-      </nav>
+    return (
+        <>
+            <nav className="nav">
+                <button
+                    className={navButtonClass(View.Counter)}
+                    onClick={() => setView(View.Counter)}
+                >
+                    Counter
+                </button>
+                <button
+                    className={navButtonClass(View.TicTacToe)}
+                    onClick={() => setView(View.TicTacToe)}
+                >
+                    Tic-Tac-Toe
+                </button>
+            </nav>
 
-      {view === View.Counter ? <CounterApp /> : <TicTacToe />}
-    </>
-  )
+            {view === View.Counter ? <CounterApp /> : <TicTacToe />}
+        </>
+    )
 }

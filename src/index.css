@@ -1,143 +1,146 @@
 :root {
-  --bg: #15131f;
-  --card-bg: #25203a;
-  --border: #3b3458;
-  --text: #9ca3af;
-  --text-h: #f3f4f6;
-  --accent: #c084fc;
-  --accent-2: #f472b6;
-  --accent-border: rgba(192, 132, 252, 0.5);
-  --accent-glow: rgba(192, 132, 252, 0.6);
+    --bg: #15131f;
+    --card-bg: #25203a;
+    --border: #3b3458;
+    --text: #9ca3af;
+    --text-h: #f3f4f6;
+    --accent: #c084fc;
+    --accent-2: #f472b6;
+    --accent-border: rgba(192, 132, 252, 0.5);
+    --accent-glow: rgba(192, 132, 252, 0.6);
 
-  font: 18px/145% system-ui, sans-serif;
-  color-scheme: dark;
-  color: var(--text);
-  background: var(--bg);
+    font:
+        18px/145% system-ui,
+        sans-serif;
+    color-scheme: dark;
+    color: var(--text);
+    background: var(--bg);
 }
 
 body {
-  margin: 0;
-  min-height: 100svh;
-  background:
-    radial-gradient(ellipse 80% 60% at 50% 0%, #2a2348 0%, transparent 60%),
-    var(--bg);
+    margin: 0;
+    min-height: 100svh;
+    background: radial-gradient(ellipse 80% 60% at 50% 0%, #2a2348 0%, transparent 60%), var(--bg);
 }
 
 .app {
-  max-width: 960px;
-  margin: 0 auto;
-  padding: 56px 24px 48px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 32px;
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 56px 24px 48px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 32px;
 }
 
 .header {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 18px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 18px;
 }
 
 .title {
-  margin: 0;
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 3px;
-  text-transform: uppercase;
-  color: var(--accent);
+    margin: 0;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--accent);
 }
 
 .total-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 18px;
-  background: var(--card-bg);
-  border: 1px solid var(--border);
-  border-radius: 18px;
-  padding: 14px 28px;
+    display: inline-flex;
+    align-items: center;
+    gap: 18px;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 14px 28px;
 }
 
 .total-label {
-  font-size: 15px;
-  color: var(--text);
+    font-size: 15px;
+    color: var(--text);
 }
 
 .total-value {
-  font-size: 44px;
-  font-weight: 700;
-  letter-spacing: -1px;
-  line-height: 1.2;
-  padding: 0.1em 0;
-  font-variant-numeric: tabular-nums;
-  min-width: 3ch;
-  text-align: right;
-  background: linear-gradient(135deg, var(--accent), var(--accent-2));
-  background-clip: text;
-  -webkit-background-clip: text;
-  color: transparent;
+    font-size: 44px;
+    font-weight: 700;
+    letter-spacing: -1px;
+    line-height: 1.2;
+    padding: 0.1em 0;
+    font-variant-numeric: tabular-nums;
+    min-width: 3ch;
+    text-align: right;
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent;
 }
 
 .grid {
-  width: 100%;
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 16px;
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
 }
 
 .reset {
-  background: var(--card-bg);
-  border: 1px solid var(--border);
-  border-radius: 999px;
-  color: var(--text-h);
-  font: inherit;
-  font-size: 14px;
-  padding: 8px 24px;
-  cursor: pointer;
-  transition: border-color 0.2s ease;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    color: var(--text-h);
+    font: inherit;
+    font-size: 14px;
+    padding: 8px 24px;
+    cursor: pointer;
+    transition: border-color 0.2s ease;
 }
 
 .reset:hover {
-  border-color: var(--accent-border);
-  box-shadow: 0 0 12px -4px var(--accent-glow);
+    border-color: var(--accent-border);
+    box-shadow: 0 0 12px -4px var(--accent-glow);
 }
 
 .reset:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 3px;
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
 }
 
 .nav {
-  display: flex;
-  justify-content: center;
-  gap: 8px;
-  padding: 16px;
-  border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    padding: 16px;
+    border-bottom: 1px solid var(--border);
 }
 
 .nav-button {
-  padding: 8px 20px;
-  background: transparent;
-  border: 1px solid var(--border);
-  border-radius: 999px;
-  color: var(--text-h);
-  font-size: 14px;
-  cursor: pointer;
-  transition: border-color 0.15s, background 0.15s, box-shadow 0.15s;
+    padding: 8px 20px;
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    color: var(--text-h);
+    font-size: 14px;
+    cursor: pointer;
+    transition:
+        border-color 0.15s,
+        background 0.15s,
+        box-shadow 0.15s;
 }
 
 .nav-button:hover {
-  border-color: var(--accent-border);
+    border-color: var(--accent-border);
 }
 
 .nav-button.is-active {
-  background: var(--card-bg);
-  border-color: var(--accent-border);
-  box-shadow: 0 0 12px -4px var(--accent-glow);
+    background: var(--card-bg);
+    border-color: var(--accent-border);
+    box-shadow: 0 0 12px -4px var(--accent-glow);
 }
 
 .nav-button:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
 }
