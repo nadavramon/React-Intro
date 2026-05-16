@@ -1,0 +1,47 @@
+.sidebar {
+    background: var(--card-bg);
+    border-right: 1px solid var(--border);
+    padding: 24px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.brand {
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--accent);
+    padding: 0 8px;
+}
+
+.nav {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.link {
+    display: block;
+    padding: 10px 14px;
+    border-radius: 10px;
+    color: var(--text);
+    text-decoration: none;
+    transition:
+        background 120ms,
+        color 120ms;
+}
+
+.link:hover {
+    background: rgba(192, 132, 252, 0.08);
+    color: var(--text-h);
+}
+
+.linkActive {
+    background: rgba(192, 132, 252, 0.18);
+    color: var(--text-h);
+}
