@@ -1,0 +1,12 @@
+.search {
+    padding: 12px 14px;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--text-h);
+    font: inherit;
+}
+
+.search:focus {
+    outline: 2px solid var(--accent-border);
+}
