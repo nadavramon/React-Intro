@@ -2,16 +2,16 @@ import { useState } from 'react'
 import styles from './AddTaskForm.module.css'
 
 type AddTaskFormProps = {
-    onAdd: (text: string) => void
+    onAdd: (title: string) => void
 }
 
 export default function AddTaskForm({ onAdd }: AddTaskFormProps) {
-    const [text, setText] = useState('')
+    const [title, setTitle] = useState('')
 
     function handleSubmit(event: React.SubmitEvent<HTMLFormElement>) {
         event.preventDefault()
-        onAdd(text)
-        setText('')
+        onAdd(title)
+        setTitle('')
     }
 
     return (
@@ -19,12 +19,12 @@ export default function AddTaskForm({ onAdd }: AddTaskFormProps) {
             <input
                 className={styles.input}
                 type="text"
-                value={text}
-                onChange={(event) => setText(event.target.value)}
+                value={title}
+                onChange={(event) => setTitle(event.target.value)}
                 aria-label="New task"
                 placeholder="New task..."
             />
-            <button className={styles.button} type="submit" disabled={text.trim() === ''}>
+            <button className={styles.button} type="submit" disabled={title.trim() === ''}>
                 Add
             </button>
         </form>

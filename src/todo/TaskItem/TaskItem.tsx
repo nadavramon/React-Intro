@@ -9,15 +9,15 @@ type TaskItemProps = {
 
 export default function TaskItem({ task, onToggle }: TaskItemProps) {
     return (
-        <li className={clsx(styles.item, task.done && styles.itemDone)}>
+        <li className={clsx(styles.item, task.isCompleted && styles.itemDone)}>
             <label className={styles.label}>
                 <input
                     type="checkbox"
                     className={styles.checkbox}
-                    checked={task.done}
+                    checked={task.isCompleted}
                     onChange={() => onToggle(task.id)}
                 />
-                <span className={styles.text}>{task.text}</span>
+                <span className={styles.text}>{task.title}</span>
             </label>
         </li>
     )
