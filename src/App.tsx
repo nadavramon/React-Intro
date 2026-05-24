@@ -1,9 +1,9 @@
 import { Routes, Route, Navigate, BrowserRouter } from 'react-router-dom'
-import Layout from './layout/Layout'
-import CounterApp from './counter/CounterApp'
-import TicTacToe from './tic-tac-toe/TicTacToe'
-import TodoPage from './todo/TodoPage'
-import NotFoundPage from './pages/NotFoundPage'
+import Layout from './layout/Layout/Layout'
+import CounterApp from './features/counter'
+import TicTacToe from './features/tic-tac-toe'
+import TodoPage from './features/todo'
+import NotFoundPage from './pages/NotFoundPage/NotFoundPage'
 
 export default function App() {
     return (
