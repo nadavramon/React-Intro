@@ -11,7 +11,7 @@ export default function TodoPage() {
     const [searchQuery, setSearchQuery] = useState('')
 
     const filteredTasks = tasks.filter((task) =>
-        task.text.toLowerCase().includes(searchQuery.toLowerCase()),
+        task.title.toLowerCase().includes(searchQuery.toLowerCase()),
     )
 
     return (
