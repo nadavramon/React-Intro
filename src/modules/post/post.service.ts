@@ -36,8 +36,7 @@ export async function getPostById(id: string): Promise<PostEntity> {
 export async function createPost(authorId: string, dto: CreatePostBodyDto): Promise<PostEntity> {
   const doc = await PostModel.create({
     userId: authorId,
-    title: dto.title,
-    content: dto.content,
+    ...dto,
   });
   const post = toPost(doc.toObject());
   logger.info(`Post created: id=${post.id}, title="${post.title}"`);

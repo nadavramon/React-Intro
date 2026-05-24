@@ -6,6 +6,7 @@ import { httpLogger } from './shared/middlewares/httpLogger.ts';
 import { errorHandler } from './shared/middlewares/errorHandler.ts';
 import { swaggerUi, swaggerSpec } from './shared/utils/swagger.ts';
 import { limiter } from './shared/middlewares/rateLimiter.ts';
+import cors from 'cors';
 
 export const app = express();
 
@@ -14,6 +15,7 @@ app.get('/health', (_req, res) => {
 });
 
 app.use(httpLogger);
+app.use(cors({ origin: 'http://localhost:5173', credentials: true }));
 app.use(express.json());
 
 app.use(limiter);
