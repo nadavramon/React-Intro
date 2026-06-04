@@ -14,7 +14,7 @@ test('clicking a counter updates that counter and the total', async ({ page }) =
     await page.goto('/counters')
 
     // The total pill starts at 0.
-    const total = page.locator('.total-value')
+    const total = page.getByTestId('total-value')
     await expect(total).toHaveText('0')
 
     // Counter "#1": match its label exactly so it doesn't also hit #10/#11/#12.
