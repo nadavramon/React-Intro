@@ -1,6 +1,5 @@
 import { type Move } from '../ticTacToeLogic'
-import clsx from 'clsx'
-import styles from './MoveHistory.module.css'
+import { cn } from '@/lib/utils'
 
 type MoveHistoryProps = {
     history: Move[]
@@ -15,7 +14,10 @@ export default function MoveHistory({ history }: MoveHistoryProps) {
         return (
             <li
                 key={index}
-                className={clsx(styles.historyItem, isLatest && styles.historyItemLatest)}
+                className={cn(
+                    'bg-card rounded-md border px-3 py-2 text-sm',
+                    isLatest && 'border-primary',
+                )}
             >
                 Move #{moveNumber} - {move.player} -&gt; pos {position}
             </li>
@@ -23,13 +25,13 @@ export default function MoveHistory({ history }: MoveHistoryProps) {
     }
 
     return (
-        <aside className={styles.history}>
-            <h2 className={styles.historyTitle}>Move history</h2>
+        <aside className="flex flex-col gap-3">
+            <h2 className="text-foreground text-lg font-semibold">Move history</h2>
             {history.length === 0 ? (
-                <p className={styles.historyEmpty}>No moves yet.</p>
+                <p className="text-muted-foreground text-sm">No moves yet.</p>
             ) : (
-                <ol className={styles.historyList}>
-                    <li className={clsx(styles.historyItem, styles.historyItemStart)}>
+                <ol className="flex list-none flex-col gap-1 p-0">
+                    <li className="bg-muted text-muted-foreground rounded-md border px-3 py-2 text-sm">
                         Game start
                     </li>
                     {history.map(renderHistoryItem)}

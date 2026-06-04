@@ -1,0 +1,76 @@
+# React_Intro
+
+A learning sandbox for React + TypeScript. Several small, self-contained apps (counter, tic-tac-toe, todo) live side by side under `src/features/`. Code quality matters here, but the primary goal is learning — favor clarity and explanation over cleverness.
+
+## Commands
+
+| Task | Command |
+| --- | --- |
+| Dev server | `npm run dev` |
+| Build (typecheck + bundle) | `npm run build` (`tsc -b && vite build`) |
+| Lint | `npm run lint` |
+| Format (write) | `npm run format` |
+| Format (check) | `npm run format:check` |
+| Unit/component tests (watch) | `npm test` |
+| Unit/component tests (once) | `npm run test:run` |
+| E2E tests (real browser) | `npm run test:e2e` |
+
+## Stack
+
+- **React 19** + **TypeScript** (strict), built with **Vite**.
+- Routing: **react-router-dom v7** (`BrowserRouter` lives in `App.tsx`).
+- Styling: **Tailwind CSS v4** (via `@tailwindcss/vite`) + **shadcn/radix-ui** primitives. Some older features still use CSS Modules — both coexist during the Tailwind migration.
+- Utilities: `clsx` + `tailwind-merge` (see `cn()` in `src/lib/utils.ts`), `lucide-react` icons.
+- HTTP: **axios** (`src/lib/api.ts`).
+- Tests: **Vitest** + **React Testing Library** (jsdom) for unit/component; **Playwright** for e2e.
+
+## Architecture
+
+- **`src/features/<name>/`** — each feature is self-contained (components, hooks, logic, types) and exposes a public surface via `index.ts`. Import features through their `index.ts`, not deep paths.
+- **`src/layout/`** — app shell (`Header`, `Sidebar`, `Layout`).
+- **`src/pages/`** — route-level pages (e.g. `NotFoundPage`).
+- **`src/lib/`** — shared, framework-agnostic helpers (`api.ts`, `utils.ts`).
+- **`src/routes.ts`** + **`src/AppRoutes.tsx`** — route table and router wiring.
+
+## Conventions
+
+- **Path alias:** `@/` → `src/` (configured in both `tsconfig.app.json` and `vite.config.ts`). Use `@/features/...` over relative climbs.
+- **Formatting is Prettier's job.** Format-on-save is enabled; do not hand-tune whitespace, quotes, or semicolons. Braceless single-statement `if`/`else` is allowed.
+- **ESLint** is configured (`eslint.config.js`) with the react-hooks and react-refresh plugins; `eslint-config-prettier` disables stylistic rules so the two don't fight.
+- Prefer named exports; co-locate a feature's types in its own `types.ts`.
+
+## Testing
+
+Two layers, kept separate (Vitest excludes `e2e/**`):
+
+- **Unit / component** — Vitest + RTL. Specs live next to the source as `*.test.ts(x)` under `src/`. Setup: `src/test/setup.ts` (jest-dom matchers + auto-cleanup). Run with `npm run test:run`.
+- **E2E** — Playwright. Specs live in `e2e/*.spec.ts`; config in `playwright.config.ts` auto-starts the dev server. Run with `npm run test:e2e`. Note: the Todo/`/tasks` page needs the Express server running; counters and tic-tac-toe are backend-free.
+
+**Browser verification — prefer the CLI, not the MCP.** To *verify* known behavior (DOM, styles, console errors, flows), write/run a Playwright spec — its output is compact text. Reserve the Playwright **MCP** (snapshots/screenshots, which cost many tokens) for open-ended *exploration* ("why does this look wrong?"). Don't reach for the MCP when an assertion would do.
+
+## Project tooling (Claude Code)
+
+- **`/check`** runs lint + typecheck + unit tests; **`/check --e2e`** adds the browser tests.
+- **`/scaffold-feature <name>`** generates a new `src/features/<name>/` folder matching the conventions above.
+- A `PostToolUse` hook runs `tsc` after any `.ts/.tsx` edit, so type errors surface immediately.
+
+## Backend API contract
+
+The todo feature talks to a separate Express + Mongoose + JWT server (`../server`). Client lives in `src/features/todo/api/tasksApi.ts`, axios instance in `src/lib/api.ts`.
+
+- Base URL from `VITE_API_BASE_URL`; dev auth auto-logs-in via `VITE_DEV_EMAIL` / `VITE_DEV_PASSWORD` and stores `accessToken` in `localStorage`. A response interceptor retries once on `401` by re-logging in.
+- **Task shape:** `{ id: string; title: string; isCompleted: boolean }`. The server contract uses `title` (not `text`) and `isCompleted` (not `done`) — keep this naming.
+- Endpoints: `GET /tasks`, `POST /tasks` (`{ title }`), `PUT /tasks/:id` (`{ title?, isCompleted? }`), `DELETE /tasks/:id`, `POST /auth/login`.
+
+## Working style
+
+This is a learning project. When implementing features, prefer explaining the *why* and, where useful, writing out steps the way a tutorial would rather than silently applying large edits. Introduce concepts in their verbose form first; compaction comes later once understood.
+
+## Design context
+
+Design work uses the `impeccable` skill. Full strategic context is in `PRODUCT.md` (and visual system in `DESIGN.md` when present).
+
+- **Register:** product (a tool, but one with a deliberate point of view).
+- **Direction:** bold & distinctive, **retro-arcade**; playful, not childish; commit to the aesthetic rather than piling on decoration.
+- **Avoid:** generic SaaS dashboards, untouched shadcn/Tailwind defaults, corporate-stiff, overdesigned/cluttered.
+- **Accessibility:** WCAG AA, full keyboard nav, honor `prefers-reduced-motion`; never rely on color alone to convey state.

@@ -1,6 +1,5 @@
-import type { Task } from '../../types'
+import type { Task } from '@/features/todo/types'
 import TaskItem from './TaskItem/TaskItem'
-import styles from './TaskList.module.css'
 
 type TaskListProps = {
     tasks: Task[]
@@ -9,7 +8,7 @@ type TaskListProps = {
 
 export default function TaskList({ tasks, onToggle }: TaskListProps) {
     return (
-        <ul className={styles.list}>
+        <ul className="flex flex-col gap-2">
             {tasks.map((task) => (
                 <TaskItem key={task.id} task={task} onToggle={onToggle} />
             ))}

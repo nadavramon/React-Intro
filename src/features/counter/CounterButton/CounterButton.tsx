@@ -1,5 +1,4 @@
-import clsx from 'clsx'
-import styles from './CounterButton.module.css'
+import { cn } from '@/lib/utils'
 
 type Props = {
     index: number
@@ -12,11 +11,31 @@ function CounterButton({ index, value, isMax, onClick }: Props) {
     return (
         <button
             type="button"
-            className={clsx(styles.counterCard, isMax && styles.isMax)}
             onClick={onClick}
+            className={cn(
+                'relative flex aspect-square cursor-pointer items-center justify-center rounded-xl border p-3.5 font-sans transition duration-200',
+                'border-border bg-(--card-bg) text-(--text-h)',
+                'hover:-translate-y-px hover:border-(--accent-border)',
+                'active:translate-y-0 active:scale-[0.97] active:duration-50',
+                'focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-[3px]',
+                isMax &&
+                'border-transparent bg-linear-to-br from-accent to-(--accent-2) text-white shadow-counter-glow hover:-translate-y-0.5 hover:border-transparent',
+            )}
         >
-            <span className={styles.counterLabel}>#{index + 1}</span>
-            <span className={styles.counterValue}>{value}</span>
+            <span
+                className={cn(
+                    'absolute top-3 left-3.5 text-xs tracking-wide text-(--text)',
+                    isMax && 'text-white/85',
+                )}
+            >
+                #{index + 1}
+            </span>
+            <span
+                key={value}
+                className="animate-pop text-[64px] font-bold tracking-tighter tabular-nums"
+            >
+                {value}
+            </span>
         </button>
     )
 }

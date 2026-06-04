@@ -3,7 +3,6 @@ import { useGameState } from './useGameState'
 import MoveHistory from './MoveHistory/MoveHistory'
 import Board from './Board/Board'
 import StatusBar from './StatusBar/StatusBar'
-import styles from './TicTacToe.module.css'
 
 export default function TicTacToe() {
     const {
@@ -30,13 +29,13 @@ export default function TicTacToe() {
     }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
     return (
-        <main className={styles.ticTacToe}>
-            <header className={styles.header}>
-                <h1 className={styles.title}>Tic-Tac-Toe</h1>
-                <p className={styles.subtitle}>Classic two-player strategy game</p>
+        <main className="mx-auto flex min-h-full max-w-4xl flex-col items-center gap-8 px-6 py-14">
+            <header className="flex flex-col items-center gap-2">
+                <h1 className="text-3xl font-bold text-foreground">Tic-Tac-Toe</h1>
+                <p className="text-muted-foreground text-sm">Classic two-player strategy game</p>
             </header>
-            <div className={styles.layout}>
-                <section className={styles.game}>
+            <div className="flex flex-col items-center gap-6 xl:grid xl:grid-cols-[auto_280px] xl:items-start">
+                <section className="flex flex-col gap-4">
                     <StatusBar
                         winner={winner}
                         isDraw={isDraw}

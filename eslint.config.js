@@ -21,4 +21,12 @@ export default defineConfig([
             globals: globals.browser,
         },
     },
+    {
+        // shadcn-generated UI components conventionally export non-component
+        // helpers (cva variants, etc.) alongside the component itself.
+        files: ['src/components/ui/**'],
+        rules: {
+            'react-refresh/only-export-components': 'off',
+        },
+    },
 ])

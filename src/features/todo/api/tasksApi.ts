@@ -1,5 +1,5 @@
-import { api } from '../../../lib/api'
-import type { Task } from '../types'
+import { api } from '@/lib/api'
+import type { Task } from '@/features/todo/types'
 
 export async function fetchTasks(): Promise<Task[]> {
     const response = await api.get<Task[]>('/tasks')

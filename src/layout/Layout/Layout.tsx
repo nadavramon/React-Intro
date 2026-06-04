@@ -1,15 +1,22 @@
+import { useState } from 'react'
 import { Outlet } from 'react-router-dom'
 import Sidebar from '../Sidebar/Sidebar'
 import Header from '../Header/Header'
-import styles from './Layout.module.css'
 
 export default function Layout() {
+    const [sidebarOpen, setSidebarOpen] = useState(
+        () => typeof window !== 'undefined' && window.innerWidth >= 768,
+    )
+
     return (
-        <div className={styles.layout}>
-            <Sidebar />
-            <div className={styles.main}>
-                <Header />
-                <div className={styles.content}>
+        <div className="flex min-h-screen">
+            <Sidebar isOpen={sidebarOpen} />
+            <div className="flex min-w-0 flex-1 flex-col">
+                <Header
+                    sidebarOpen={sidebarOpen}
+                    onToggleSidebar={() => setSidebarOpen((o) => !o)}
+                />
+                <div className="min-w-0 flex-1 overflow-auto">
                     <Outlet />
                 </div>
             </div>
