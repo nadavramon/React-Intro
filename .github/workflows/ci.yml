@@ -5,9 +5,20 @@ on:
     branches: [main]
   pull_request:
 
+# Least privilege: the workflow only reads the repo; it never needs write scope.
+permissions:
+  contents: read
+
+# Cancel a PR's older in-progress run when a new commit is pushed to the same ref.
+# main pushes group by SHA so they don't cancel each other.
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.head_ref || github.sha }}
+  cancel-in-progress: true
+
 jobs:
   verify:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
 
@@ -27,6 +38,18 @@ jobs:
 
       - name: Unit / component tests
         run: npm run test:run
+
+      # Cache the downloaded browser binaries between runs (keyed on the
+      # installed Playwright version). System deps still install each run.
+      - name: Resolve Playwright version
+        id: playwright
+        run: echo "version=$(npm ls @playwright/test --json | node -p 'JSON.parse(require("fs").readFileSync(0)).dependencies["@playwright/test"].version')" >> "$GITHUB_OUTPUT"
+
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ steps.playwright.outputs.version }}
 
       - name: Install Playwright browser
         run: npx playwright install --with-deps chromium
