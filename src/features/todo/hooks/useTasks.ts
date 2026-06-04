@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
-import type { Task } from '../types'
-import { createTask, deleteTask, fetchTasks, updateTask } from '../api/tasksApi'
+import type { Task } from '@/features/todo/types'
+import { createTask, deleteTask, fetchTasks, updateTask } from '@/features/todo/api/tasksApi'
+import { toast } from 'sonner'
 
 export function useTasks() {
     const [tasks, setTasks] = useState<Task[]>([])
@@ -22,18 +23,16 @@ export function useTasks() {
             })
     }, [])
 
-    const total = tasks.length
-    const completed = tasks.filter((task) => task.isCompleted).length
-    const active = total - completed
-
     async function addTask(title: string) {
         const trimmed = title.trim()
         if (trimmed === '') return
         try {
             const created = await createTask(trimmed)
             setTasks((prev) => [...prev, created])
+            toast.success('Task added')
         } catch (err) {
             console.error('Failed to add task', err)
+            toast.error('Failed to add task')
         }
     }
 
@@ -43,8 +42,10 @@ export function useTasks() {
         try {
             const updated = await updateTask(id, { isCompleted: !task.isCompleted })
             setTasks((prev) => prev.map((task) => (task.id === id ? updated : task)))
+            toast.success(updated.isCompleted ? 'Task completed' : 'Task marked active')
         } catch (err) {
             console.error('Failed to toggle task', err)
+            toast.error('Failed to update task')
         }
     }
 
@@ -53,10 +54,13 @@ export function useTasks() {
         try {
             await Promise.all(completedTasks.map((task) => deleteTask(task.id)))
             setTasks((prev) => prev.filter((task) => !task.isCompleted))
+            const n = completedTasks.length
+            toast.success(`Deleted ${n} task${n === 1 ? '' : 's'}`)
         } catch (err) {
             console.error('Failed to delete task', err)
+            toast.error('Failed to delete tasks')
         }
     }
 
-    return { tasks, total, active, completed, loading, error, addTask, toggleTask, deleteCompleted }
+    return { tasks, loading, error, addTask, toggleTask, deleteCompleted }
 }

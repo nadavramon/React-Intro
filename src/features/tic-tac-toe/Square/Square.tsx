@@ -1,6 +1,6 @@
 import { Player, type Cell } from '../ticTacToeLogic'
-import clsx from 'clsx'
-import styles from './Square.module.css'
+import { Button } from '@/components/ui/button'
+import { cn } from '@/lib/utils'
 
 type SquareProps = {
     value: Cell
@@ -11,18 +11,19 @@ type SquareProps = {
 
 export default function Square({ value, isWinning, isGameOver, onClick }: SquareProps) {
     return (
-        <button
-            className={clsx(
-                styles.square,
-                value === Player.X && styles.squareX,
-                value === Player.O && styles.squareO,
-                isWinning && styles.squareWinning,
-            )}
-            type="button"
+        <Button
+            variant="outline"
             onClick={onClick}
             disabled={value !== null || isGameOver}
+            className={cn(
+                'aspect-square h-auto w-full text-5xl font-bold disabled:opacity-100',
+                value !== null && !isWinning && 'animate-scale-in',
+                value === Player.X && 'text-primary',
+                value === Player.O && 'text-secondary',
+                isWinning && 'border-2 border-primary animate-pulse-once dark:border-primary',
+            )}
         >
-            {value != null && <span>{value}</span>}
-        </button>
+            {value}
+        </Button>
     )
 }

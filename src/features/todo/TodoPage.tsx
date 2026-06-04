@@ -1,64 +1,59 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useTasks } from './hooks/useTasks'
 import AddTaskForm from './components/AddTaskForm/AddTaskForm'
 import SearchBar from './components/SearchBar/SearchBar'
 import TaskStats from './components/TaskStats/TaskStats'
 import TaskList from './components/TaskList/TaskList'
-import styles from './TodoPage.module.css'
+import { Button } from '@/components/ui/button'
+import { Loader2 } from 'lucide-react'
 
 export default function TodoPage() {
-    const {
-        tasks,
-        total,
-        active,
-        completed,
-        loading,
-        error,
-        addTask,
-        toggleTask,
-        deleteCompleted,
-    } = useTasks()
+    const { tasks, loading, error, addTask, toggleTask, deleteCompleted } = useTasks()
     const [searchQuery, setSearchQuery] = useState('')
 
-    const filteredTasks = tasks.filter((task) =>
-        task.title.toLowerCase().includes(searchQuery.toLowerCase()),
+    const filteredTasks = useMemo(
+        () => tasks.filter((task) => task.title.toLowerCase().includes(searchQuery.toLowerCase())),
+        [tasks, searchQuery],
     )
 
     if (loading) {
         return (
-            <main className={styles.todo}>
-                <p className={styles.empty}>Loading tasks...</p>
+            <main className="mx-auto flex min-h-full max-w-2xl items-center justify-center px-6 py-14">
+                <div className="text-muted-foreground flex items-center gap-2">
+                    <Loader2 className="size-5 animate-spin" />
+                    <span>Loading tasks…</span>
+                </div>
             </main>
         )
     }
 
     if (error) {
         return (
-            <main className={styles.todo}>
-                <p className={styles.empty}>{error}</p>
+            <main className="mx-auto flex min-h-full max-w-2xl items-center justify-center px-6 py-14">
+                <p className="text-destructive">{error}</p>
             </main>
         )
     }
 
     return (
-        <main className={styles.todo}>
-            <header className={styles.todoHeader}>
-                <h1 className={styles.todoTitle}>Todo</h1>
-                <p className={styles.todoSubtitle}>Track your tasks</p>
+        <main className="mx-auto flex max-w-2xl flex-col gap-6 px-6 py-14">
+            <header className="flex flex-col gap-1">
+                <h1 className="text-foreground text-3xl font-bold tracking-tight">Todo</h1>
+                <p className="text-muted-foreground text-sm">Track your tasks</p>
             </header>
             <AddTaskForm onAdd={addTask} />
             <SearchBar query={searchQuery} onQueryChange={setSearchQuery} />
-            <TaskStats total={total} active={active} completed={completed} />
-            <button
-                className={styles.deleteCompleted}
-                type="button"
+            <TaskStats tasks={tasks} />
+            <Button
+                className="self-start"
+                variant="destructive"
                 onClick={deleteCompleted}
-                disabled={completed === 0}
+                disabled={!tasks.some((t) => t.isCompleted)}
             >
                 Delete completed
-            </button>
+            </Button>
             {filteredTasks.length === 0 ? (
-                <p className={styles.empty}>
+                <p className="text-muted-foreground text-sm">
                     {tasks.length === 0
                         ? 'No tasks yet. Add one above.'
                         : `No tasks match "${searchQuery}".`}

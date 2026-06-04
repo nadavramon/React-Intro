@@ -1,25 +1,29 @@
-import styles from './TaskStats.module.css'
+import type { Task } from '@/features/todo/types'
 
 type TaskStatsProps = {
-    total: number
-    active: number
-    completed: number
+    tasks: Task[]
 }
 
-export default function TaskStats({ total, active, completed }: TaskStatsProps) {
+const STAT_CARD = 'bg-card flex flex-1 flex-col items-center gap-1 rounded-md border p-4'
+
+export default function TaskStats({ tasks }: TaskStatsProps) {
+    const total = tasks.length
+    const completed = tasks.filter((task) => task.isCompleted).length
+    const active = total - completed
+
     return (
-        <div className={styles.stats}>
-            <div className={styles.card}>
-                <span className={styles.label}>Total</span>
-                <span className={styles.value}>{total}</span>
+        <div className="flex gap-3">
+            <div className={STAT_CARD}>
+                <span className="text-muted-foreground text-xs tracking-wide uppercase">Total</span>
+                <span className="text-foreground text-2xl font-bold tabular-nums">{total}</span>
             </div>
-            <div className={styles.card}>
-                <span className={styles.label}>Active</span>
-                <span className={styles.value}>{active}</span>
+            <div className={STAT_CARD}>
+                <span className="text-muted-foreground text-xs tracking-wide uppercase">Active</span>
+                <span className="text-foreground text-2xl font-bold tabular-nums">{active}</span>
             </div>
-            <div className={styles.card}>
-                <span className={styles.label}>Completed</span>
-                <span className={styles.value}>{completed}</span>
+            <div className={STAT_CARD}>
+                <span className="text-muted-foreground text-xs tracking-wide uppercase">Completed</span>
+                <span className="text-primary text-2xl font-bold tabular-nums">{completed}</span>
             </div>
         </div>
     )
