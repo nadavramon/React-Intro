@@ -21,11 +21,7 @@ export default function TaskList({ tasks }: TaskListProps) {
     return (
         <ul className="flex flex-col gap-2">
             {tasks.map((task) => (
-                <TaskItem
-                    key={task.id}
-                    task={task}
-                    onToggle={() => handleToggle(task.id)}
-                />
+                <TaskItem key={task.id} task={task} onToggle={() => handleToggle(task.id)} />
             ))}
         </ul>
     )
