@@ -1,5 +1,7 @@
 import { useMemo, useState } from 'react'
-import { useTasks } from './hooks/useTasks'
+import { toast } from 'sonner'
+import { useTodoActions, useTodoStore } from './store/useTodoStore'
+import { TodoStatus } from './store/todoStore'
 import AddTaskForm from './components/AddTaskForm/AddTaskForm'
 import SearchBar from './components/SearchBar/SearchBar'
 import TaskStats from './components/TaskStats/TaskStats'
@@ -8,7 +10,11 @@ import { Button } from '@/components/ui/button'
 import { Loader2 } from 'lucide-react'
 
 export default function TodoPage() {
-    const { tasks, loading, error, addTask, toggleTask, deleteCompleted } = useTasks()
+    const status = useTodoStore((s) => s.status)
+    const errorMessage = useTodoStore((s) => s.errorMessage)
+    const tasks = useTodoStore((s) => s.tasks)
+    const { deleteCompleted } = useTodoActions()
+
     const [searchQuery, setSearchQuery] = useState('')
 
     const filteredTasks = useMemo(
@@ -16,7 +22,7 @@ export default function TodoPage() {
         [tasks, searchQuery],
     )
 
-    if (loading) {
+    if (status === TodoStatus.Idle || status === TodoStatus.Loading) {
         return (
             <main className="mx-auto flex min-h-full max-w-2xl items-center justify-center px-6 py-14">
                 <div className="text-muted-foreground flex items-center gap-2">
@@ -27,12 +33,22 @@ export default function TodoPage() {
         )
     }
 
-    if (error) {
+    if (status === TodoStatus.Error) {
         return (
             <main className="mx-auto flex min-h-full max-w-2xl items-center justify-center px-6 py-14">
-                <p className="text-destructive">{error}</p>
+                <p className="text-destructive">{errorMessage}</p>
             </main>
         )
+    }
+
+    async function handleDeleteCompleted() {
+        try {
+            const count = tasks.filter((t) => t.isCompleted).length
+            await deleteCompleted()
+            toast.success(`Deleted ${count} task${count === 1 ? '' : 's'}`)
+        } catch {
+            toast.error('Failed to delete tasks')
+        }
     }
 
     return (
@@ -41,13 +57,13 @@ export default function TodoPage() {
                 <h1 className="text-foreground text-3xl font-bold tracking-tight">Todo</h1>
                 <p className="text-muted-foreground text-sm">Track your tasks</p>
             </header>
-            <AddTaskForm onAdd={addTask} />
+            <AddTaskForm />
             <SearchBar query={searchQuery} onQueryChange={setSearchQuery} />
-            <TaskStats tasks={tasks} />
+            <TaskStats />
             <Button
                 className="self-start"
                 variant="destructive"
-                onClick={deleteCompleted}
+                onClick={handleDeleteCompleted}
                 disabled={!tasks.some((t) => t.isCompleted)}
             >
                 Delete completed
@@ -59,7 +75,7 @@ export default function TodoPage() {
                         : `No tasks match "${searchQuery}".`}
                 </p>
             ) : (
-                <TaskList tasks={filteredTasks} onToggle={toggleTask} />
+                <TaskList tasks={filteredTasks} />
             )}
         </main>
     )

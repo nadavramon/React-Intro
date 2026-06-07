@@ -3,7 +3,7 @@ import { cn } from '@/lib/utils'
 
 type TaskItemProps = {
     task: Task
-    onToggle: (id: string) => void
+    onToggle: () => void
 }
 
 export default function TaskItem({ task, onToggle }: TaskItemProps) {
@@ -18,7 +18,7 @@ export default function TaskItem({ task, onToggle }: TaskItemProps) {
                 type="checkbox"
                 className="accent-primary size-4 cursor-pointer"
                 checked={task.isCompleted}
-                onChange={() => onToggle(task.id)}
+                onChange={onToggle}
                 aria-label={task.isCompleted ? 'Mark as not done' : 'Mark as done'}
             />
             <span
