@@ -10,10 +10,9 @@ type TaskListProps = {
 export default function TaskList({ tasks }: TaskListProps) {
     const { toggleTask } = useTodoActions()
 
-    async function handleToggle(id: string, willBeCompleted: boolean) {
+    async function handleToggle(id: string) {
         try {
             await toggleTask(id)
-            toast.success(willBeCompleted ? 'Task completed' : 'Task marked active')
         } catch {
             toast.error('Failed to update task')
         }
@@ -25,7 +24,7 @@ export default function TaskList({ tasks }: TaskListProps) {
                 <TaskItem
                     key={task.id}
                     task={task}
-                    onToggle={() => handleToggle(task.id, !task.isCompleted)}
+                    onToggle={() => handleToggle(task.id)}
                 />
             ))}
         </ul>
