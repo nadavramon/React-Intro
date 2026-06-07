@@ -1,17 +1,21 @@
 import { useState } from 'react'
+import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
+import { useTodoActions } from '@/features/todo/store/useTodoStore'
 
-type AddTaskFormProps = {
-    onAdd: (title: string) => void
-}
-
-export default function AddTaskForm({ onAdd }: AddTaskFormProps) {
+export default function AddTaskForm() {
+    const { addTask } = useTodoActions()
     const [title, setTitle] = useState('')
 
-    function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
         event.preventDefault()
-        onAdd(title)
-        setTitle('')
+        try {
+            await addTask(title)
+            setTitle('')
+            toast.success('Task added')
+        } catch {
+            toast.error('Failed to add task')
+        }
     }
 
     return (
