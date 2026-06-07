@@ -1,7 +1,7 @@
 import { useContext } from 'react'
 import { useStore } from 'zustand'
 import { useShallow } from 'zustand/react/shallow'
-import { TodoStoreContext } from './TodoStoreProvider'
+import { TodoStoreContext } from './todoStoreContext'
 import type { TodoState } from './todoStore'
 
 export function useTodoStore<T>(selector: (state: TodoState) => T): T {
