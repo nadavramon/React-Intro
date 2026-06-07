@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import type { Task } from '@/features/todo/types'
-import { createTodoStore } from './todoStore'
+import { createTodoStore, TodoStatus } from './todoStore'
 
 // Hoisted by Vitest above all imports — replaces the tasks API with stubs.
 vi.mock('@/features/todo/api/tasksApi', () => ({
@@ -29,7 +29,7 @@ describe('todoStore', () => {
     describe('init()', () => {
         it('starts in idle status with no tasks', () => {
             const store = createTodoStore()
-            expect(store.getState().status).toBe('idle')
+            expect(store.getState().status).toBe(TodoStatus.Idle)
             expect(store.getState().tasks).toEqual([])
         })
 
@@ -38,10 +38,10 @@ describe('todoStore', () => {
             const store = createTodoStore()
 
             const promise = store.getState().init()
-            expect(store.getState().status).toBe('loading')
+            expect(store.getState().status).toBe(TodoStatus.Loading)
 
             await promise
-            expect(store.getState().status).toBe('ready')
+            expect(store.getState().status).toBe(TodoStatus.Ready)
             expect(store.getState().tasks).toEqual([TASK_A, TASK_B])
             expect(store.getState().errorMessage).toBeNull()
         })
@@ -51,7 +51,7 @@ describe('todoStore', () => {
             const store = createTodoStore()
 
             await store.getState().init()
-            expect(store.getState().status).toBe('error')
+            expect(store.getState().status).toBe(TodoStatus.Error)
             expect(store.getState().errorMessage).toBe('Could not load tasks. Please try again.')
         })
 

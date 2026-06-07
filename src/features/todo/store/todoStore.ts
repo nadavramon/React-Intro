@@ -2,7 +2,14 @@ import { createStore } from 'zustand/vanilla'
 import type { Task } from '@/features/todo/types'
 import { createTask, deleteTask, fetchTasks, updateTask } from '@/features/todo/api/tasksApi'
 
-export type TodoStatus = 'idle' | 'loading' | 'ready' | 'error'
+export const TodoStatus = {
+    Idle: 'idle',
+    Loading: 'loading',
+    Ready: 'ready',
+    Error: 'error',
+} as const
+
+export type TodoStatus = (typeof TodoStatus)[keyof typeof TodoStatus]
 
 export type TodoState = {
     tasks: Task[]
@@ -22,19 +29,19 @@ export type TodoStore = ReturnType<typeof createTodoStore>
 export function createTodoStore() {
     return createStore<TodoState>((set, get) => ({
         tasks: [],
-        status: 'idle',
+        status: TodoStatus.Idle,
         errorMessage: null,
 
         init: async () => {
-            if (get().status !== 'idle') return
-            set({ status: 'loading' })
+            if (get().status !== TodoStatus.Idle) return
+            set({ status: TodoStatus.Loading })
             try {
                 const tasks = await fetchTasks()
-                set({ tasks, status: 'ready', errorMessage: null })
+                set({ tasks, status: TodoStatus.Ready, errorMessage: null })
             } catch (err) {
                 console.error('Failed to load tasks', err)
                 set({
-                    status: 'error',
+                    status: TodoStatus.Error,
                     errorMessage: 'Could not load tasks. Please try again.',
                 })
             }
