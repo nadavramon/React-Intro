@@ -1,7 +1,11 @@
 import { test, expect } from '@playwright/test'
+import { mockTasksApi } from './helpers/mockTasksApi'
 
-// Example end-to-end test: drives a real browser against the running dev server.
-// `baseURL` and the auto-started dev server come from playwright.config.ts.
+// The TodoStoreProvider wraps the whole app, so its init() fires even on
+// /counters. Mock the tasks API so counter tests don't depend on a backend.
+test.beforeEach(async ({ page }) => {
+    await mockTasksApi(page)
+})
 
 test('home redirects to the counters page', async ({ page }) => {
     await page.goto('/')
@@ -13,12 +17,9 @@ test('home redirects to the counters page', async ({ page }) => {
 test('clicking a counter updates that counter and the total', async ({ page }) => {
     await page.goto('/counters')
 
-    // The total pill starts at 0.
     const total = page.getByTestId('total-value')
     await expect(total).toHaveText('0')
 
-    // Counter "#1": match its label exactly so it doesn't also hit #10/#11/#12.
-    // Clicking the label bubbles to the button's onClick.
     const firstCounter = page.getByText('#1', { exact: true })
     await firstCounter.click()
     await firstCounter.click()
