@@ -1,6 +1,6 @@
 import { toast } from 'sonner'
 import type { Task } from '@/features/todo/types'
-import { useTodoActions } from '@/features/todo/store/useTodoStore'
+import { useToggleTask } from '@/features/todo/store/useTodoStore'
 import TaskItem from './TaskItem/TaskItem'
 
 type TaskListProps = {
@@ -8,7 +8,7 @@ type TaskListProps = {
 }
 
 export default function TaskList({ tasks }: TaskListProps) {
-    const { toggleTask } = useTodoActions()
+    const toggleTask = useToggleTask()
 
     async function handleToggle(id: string) {
         try {

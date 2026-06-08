@@ -1,10 +1,10 @@
 import { useState } from 'react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
-import { useTodoActions } from '@/features/todo/store/useTodoStore'
+import { useAddTask } from '@/features/todo/store/useTodoStore'
 
 export default function AddTaskForm() {
-    const { addTask } = useTodoActions()
+    const addTask = useAddTask()
     const [title, setTitle] = useState('')
 
     async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {

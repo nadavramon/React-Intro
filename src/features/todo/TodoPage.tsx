@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { toast } from 'sonner'
-import { useTodoActions, useTodoStore } from './store/useTodoStore'
+import { useDeleteCompleted, useTodoStore } from './store/useTodoStore'
 import { TodoStatus } from './store/todoStore'
 import AddTaskForm from './components/AddTaskForm/AddTaskForm'
 import SearchBar from './components/SearchBar/SearchBar'
@@ -13,7 +13,7 @@ export default function TodoPage() {
     const status = useTodoStore((s) => s.status)
     const errorMessage = useTodoStore((s) => s.errorMessage)
     const tasks = useTodoStore((s) => s.tasks)
-    const { deleteCompleted } = useTodoActions()
+    const deleteCompleted = useDeleteCompleted()
 
     const [searchQuery, setSearchQuery] = useState('')
 
@@ -43,8 +43,7 @@ export default function TodoPage() {
 
     async function handleDeleteCompleted() {
         try {
-            const count = tasks.filter((t) => t.isCompleted).length
-            await deleteCompleted()
+            const count = await deleteCompleted()
             toast.success(`Deleted ${count} task${count === 1 ? '' : 's'}`)
         } catch {
             toast.error('Failed to delete tasks')

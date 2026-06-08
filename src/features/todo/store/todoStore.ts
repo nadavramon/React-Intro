@@ -21,7 +21,7 @@ export type TodoState = {
     addTask: (title: string) => Promise<void>
     toggleTask: (id: string) => Promise<void>
     deleteTask: (id: string) => Promise<void>
-    deleteCompleted: () => Promise<void>
+    deleteCompleted: () => Promise<number>
 }
 
 export type TodoStore = ReturnType<typeof createTodoStore>
@@ -88,6 +88,7 @@ export function createTodoStore() {
             try {
                 await Promise.all(completed.map((t) => deleteTask(t.id)))
                 set((state) => ({ tasks: state.tasks.filter((t) => !t.isCompleted) }))
+                return completed.length
             } catch (err) {
                 console.error('Failed to delete completed tasks', err)
                 throw err

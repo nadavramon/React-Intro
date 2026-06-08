@@ -22,7 +22,7 @@ export async function mockTasksApi(page: Page, initialTasks: Task[] = []) {
         if (req.method() === 'POST') {
             const body = req.postDataJSON() as { title: string }
             const created: Task = {
-                id: `mock-${Date.now()}-${Math.floor(Math.random() * 10000)}`,
+                id: crypto.randomUUID(),
                 title: body.title,
                 isCompleted: false,
             }
