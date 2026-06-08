@@ -8,10 +8,6 @@ const baseURL = `http://localhost:${PORT}`
 export default defineConfig({
     testDir: './e2e',
     fullyParallel: true,
-    // Run e2e serially: the dev backend is a single Express process and gets
-    // unhappy under concurrent auth-then-fetch flows from separate browser
-    // contexts. The suite is small (~5s serial), so reliability beats parallel.
-    workers: 1,
     // Fail the build on CI if test.only was left in the source.
     forbidOnly: !!process.env.CI,
     retries: process.env.CI ? 2 : 0,

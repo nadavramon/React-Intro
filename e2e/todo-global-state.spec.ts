@@ -1,6 +1,9 @@
 import { test, expect } from '@playwright/test'
+import { mockTasksApi } from './helpers/mockTasksApi'
 
-test.describe.configure({ mode: 'serial' })
+test.beforeEach(async ({ page }) => {
+    await mockTasksApi(page, [{ id: 'seed-1', title: 'Seeded task', isCompleted: false }])
+})
 
 test('navigating away from /tasks and back does not refetch GET /tasks', async ({ page }) => {
     await page.goto('/tasks')
@@ -9,7 +12,11 @@ test('navigating away from /tasks and back does not refetch GET /tasks', async (
     const getTasksAfterLoad: string[] = []
     page.on('request', (req) => {
         const url = new URL(req.url())
-        if (req.method() === 'GET' && url.pathname === '/tasks' && url.port !== '5173') {
+        if (
+            req.method() === 'GET' &&
+            url.pathname === '/tasks' &&
+            req.resourceType() !== 'document'
+        ) {
             getTasksAfterLoad.push(req.url())
         }
     })
@@ -25,11 +32,7 @@ test('navigating away from /tasks and back does not refetch GET /tasks', async (
 })
 
 test('Sidebar badge updates in real time as a task is toggled', async ({ page }) => {
-    test.slow()
-
     await page.goto('/tasks')
-    // Wait for the auth-then-fetch dance to settle before asserting readiness.
-    await page.waitForLoadState('networkidle', { timeout: 15000 })
     await expect(page.getByRole('button', { name: 'Add' })).toBeVisible()
 
     const title = `Badge test ${Date.now()}`
