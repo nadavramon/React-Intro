@@ -1,6 +1,5 @@
 import { useContext } from 'react'
 import { useStore } from 'zustand'
-import { useShallow } from 'zustand/react/shallow'
 import { TodoStoreContext } from './todoStoreContext'
 import type { TodoState } from './todoStore'
 
@@ -10,13 +9,7 @@ export function useTodoStore<T>(selector: (state: TodoState) => T): T {
     return useStore(store, selector)
 }
 
-export function useTodoActions() {
-    return useTodoStore(
-        useShallow((state) => ({
-            addTask: state.addTask,
-            toggleTask: state.toggleTask,
-            deleteTask: state.deleteTask,
-            deleteCompleted: state.deleteCompleted,
-        })),
-    )
-}
+export const useAddTask = () => useTodoStore((s) => s.addTask)
+export const useToggleTask = () => useTodoStore((s) => s.toggleTask)
+export const useDeleteTask = () => useTodoStore((s) => s.deleteTask)
+export const useDeleteCompleted = () => useTodoStore((s) => s.deleteCompleted)
