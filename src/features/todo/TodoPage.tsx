@@ -1,7 +1,6 @@
 import { useMemo, useState } from 'react'
 import { toast } from 'sonner'
-import { useDeleteCompleted, useTodoStore } from './store/useTodoStore'
-import { TodoStatus } from './store/todoStore'
+import { TodoStatus, useDeleteCompleted, useTodoStore } from './store/todoStore'
 import AddTaskForm from './components/AddTaskForm/AddTaskForm'
 import SearchBar from './components/SearchBar/SearchBar'
 import TaskStats from './components/TaskStats/TaskStats'
