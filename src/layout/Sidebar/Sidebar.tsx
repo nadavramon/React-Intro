@@ -1,4 +1,4 @@
-import { NavLink } from 'react-router-dom'
+import { Link } from '@tanstack/react-router'
 import { ROUTES } from '@/routes'
 import { cn } from '@/lib/utils'
 import { useTodoStore } from '@/features/todo'
@@ -30,17 +30,15 @@ export default function Sidebar({ isOpen }: SidebarProps) {
                 </h2>
                 <nav className="flex flex-col gap-1">
                     {NAV_ITEMS.map((item) => (
-                        <NavLink
+                        <Link
                             key={item.to}
                             to={item.to}
-                            className={({ isActive }) =>
-                                cn(
-                                    'flex items-center gap-2 rounded-md px-3 py-2 text-sm transition-colors',
-                                    isActive
-                                        ? 'bg-sidebar-accent text-foreground'
-                                        : 'text-muted-foreground hover:bg-sidebar-accent/50 hover:text-foreground',
-                                )
-                            }
+                            className="flex items-center gap-2 rounded-md px-3 py-2 text-sm transition-colors"
+                            activeProps={{ className: 'bg-sidebar-accent text-foreground' }}
+                            inactiveProps={{
+                                className:
+                                    'text-muted-foreground hover:bg-sidebar-accent/50 hover:text-foreground',
+                            }}
                         >
                             <span className="flex-1">{item.label}</span>
                             {item.to === ROUTES.todo && activeCount > 0 && (
@@ -52,7 +50,7 @@ export default function Sidebar({ isOpen }: SidebarProps) {
                                     {activeCount}
                                 </span>
                             )}
-                        </NavLink>
+                        </Link>
                     ))}
                 </nav>
             </div>

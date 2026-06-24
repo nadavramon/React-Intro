@@ -7,7 +7,7 @@ import prettier from 'eslint-config-prettier'
 import { defineConfig, globalIgnores } from 'eslint/config'
 
 export default defineConfig([
-    globalIgnores(['dist']),
+    globalIgnores(['dist', 'src/routeTree.gen.ts']),
     {
         files: ['**/*.{ts,tsx}'],
         extends: [
@@ -25,6 +25,14 @@ export default defineConfig([
         // shadcn-generated UI components conventionally export non-component
         // helpers (cva variants, etc.) alongside the component itself.
         files: ['src/components/ui/**'],
+        rules: {
+            'react-refresh/only-export-components': 'off',
+        },
+    },
+    {
+        // TanStack Router route files export `Route` (a non-component) and may
+        // define their route component inline (e.g. `__root.tsx`).
+        files: ['src/routes/**'],
         rules: {
             'react-refresh/only-export-components': 'off',
         },

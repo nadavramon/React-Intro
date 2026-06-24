@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom'
+import { Link } from '@tanstack/react-router'
 import { Menu } from 'lucide-react'
 import { ROUTES } from '@/routes'
 import { cn } from '@/lib/utils'

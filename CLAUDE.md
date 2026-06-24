@@ -18,7 +18,7 @@ A learning sandbox for React + TypeScript. Several small, self-contained apps (c
 ## Stack
 
 - **React 19** + **TypeScript** (strict), built with **Vite**.
-- Routing: **react-router-dom v7** (`BrowserRouter` lives in `App.tsx`).
+- Routing: **TanStack Router** (file-based; routes live in `src/routes/`, with the tree generated to `routeTree.gen.ts`).
 - Styling: **Tailwind CSS v4** (via `@tailwindcss/vite`) + **shadcn/radix-ui** primitives. Some older features still use CSS Modules — both coexist during the Tailwind migration.
 - Utilities: `clsx` + `tailwind-merge` (see `cn()` in `src/lib/utils.ts`), `lucide-react` icons.
 - HTTP: **axios** (`src/lib/api.ts`).
@@ -30,7 +30,7 @@ A learning sandbox for React + TypeScript. Several small, self-contained apps (c
 - **`src/layout/`** — app shell (`Header`, `Sidebar`, `Layout`).
 - **`src/pages/`** — route-level pages (e.g. `NotFoundPage`).
 - **`src/lib/`** — shared, framework-agnostic helpers (`api.ts`, `utils.ts`).
-- **`src/routes.ts`** + **`src/AppRoutes.tsx`** — route table and router wiring.
+- **`src/routes/`** — file-based routes (one file per route; `__root.tsx` owns the app shell). The `@tanstack/router-plugin` scans this dir and emits the generated `src/routeTree.gen.ts` at the `src` root (lint/format-ignored; kept out of `src/routes/` so the plugin doesn't scan its own output). `src/routes.ts` (the `ROUTES` map) is kept for nav-item paths.
 
 ## Conventions
 
