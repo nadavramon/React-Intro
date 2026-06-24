@@ -7,6 +7,7 @@ import TaskStats from './components/TaskStats/TaskStats'
 import TaskList from './components/TaskList/TaskList'
 import { Button } from '@/components/ui/button'
 import { Loader2 } from 'lucide-react'
+import { useDebouncedValue } from '@/hooks/useDebouncedValue'
 
 export default function TodoPage() {
     const status = useTodoStore((s) => s.status)
@@ -15,10 +16,11 @@ export default function TodoPage() {
     const deleteCompleted = useDeleteCompleted()
 
     const [searchQuery, setSearchQuery] = useState('')
+    const debouncedQuery = useDebouncedValue(searchQuery, 300)
 
     const filteredTasks = useMemo(
-        () => tasks.filter((task) => task.title.toLowerCase().includes(searchQuery.toLowerCase())),
-        [tasks, searchQuery],
+        () => tasks.filter((task) => task.title.toLowerCase().includes(debouncedQuery.toLowerCase())),
+        [tasks, debouncedQuery],
     )
 
     if (status === TodoStatus.Idle || status === TodoStatus.Loading) {
@@ -70,7 +72,7 @@ export default function TodoPage() {
                 <p className="text-muted-foreground text-sm">
                     {tasks.length === 0
                         ? 'No tasks yet. Add one above.'
-                        : `No tasks match "${searchQuery}".`}
+                        : `No tasks match "${debouncedQuery}".`}
                 </p>
             ) : (
                 <TaskList tasks={filteredTasks} />
