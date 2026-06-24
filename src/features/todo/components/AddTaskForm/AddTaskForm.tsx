@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
-import { useAddTask } from '@/features/todo/store/useTodoStore'
+import { useAddTask } from '@/features/todo/store/todoStore'
 
 export default function AddTaskForm() {
     const addTask = useAddTask()

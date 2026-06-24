@@ -1,6 +1,6 @@
 import { toast } from 'sonner'
 import type { Task } from '@/features/todo/types'
-import { useToggleTask } from '@/features/todo/store/useTodoStore'
+import { useToggleTask } from '@/features/todo/store/todoStore'
 import TaskItem from './TaskItem/TaskItem'
 
 type TaskListProps = {

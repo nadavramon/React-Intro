@@ -1,4 +1,4 @@
-import { useTodoStore } from '@/features/todo/store/useTodoStore'
+import { useTodoStore } from '@/features/todo/store/todoStore'
 
 const STAT_CARD = 'bg-card flex flex-1 flex-col items-center gap-1 rounded-md border p-4'
 
