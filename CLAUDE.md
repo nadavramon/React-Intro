@@ -54,6 +54,21 @@ Two layers, kept separate (Vitest excludes `e2e/**`):
 - **`/scaffold-feature <name>`** generates a new `src/features/<name>/` folder matching the conventions above.
 - A `PostToolUse` hook runs `tsc` after any `.ts/.tsx` edit, so type errors surface immediately.
 
+## Spec-driven workflow (SDD pipeline)
+
+Non-trivial features flow through three rerunnable commands. Each reads the prior artifact from disk and writes its own — so state lives in files, not the conversation. **Rerunnable = context-rot-survivable:** `/clear` any time, rerun the command, and the file reloads the slice you need.
+
+| Step | Command | Reads → Writes | Runs |
+| --- | --- | --- | --- |
+| 1 | `/specify <idea>` | idea → `docs/superpowers/specs/<date>-<topic>-design.md` | brainstorming skill, live in main |
+| 2 | `/plan [slug]` | spec → `docs/superpowers/plans/<date>-<topic>-plan.md` | writing-plans + plan mode, live in main |
+| 3 | `/implement [N-M]` | plan checkboxes → code, ticks boxes, journals | fan-out subagents, foreground |
+
+- **This file (`CLAUDE.md`) is the constitution** — the standing rules every phase inherits. No separate command; it's loaded every session.
+- **`docs/superpowers/INDEX.md`** — manifest of every feature and its spec/plan/status. The discoverability anchor.
+- **`docs/superpowers/JOURNAL.md`** — append-only debug trail; every command logs what it did. Phase boundaries are debug seams: one file in, one file out, so a wrong output tells you exactly which phase to rerun.
+- Judgment phases (`/specify`, `/plan`) stay live so you can steer; execution (`/implement`) fans out to subagents that return a tight digest while full detail lands on disk.
+
 ## Backend API contract
 
 The todo feature talks to a separate Express + Mongoose + JWT server (`../server`). Client lives in `src/features/todo/api/tasksApi.ts`, axios instance in `src/lib/api.ts`.
