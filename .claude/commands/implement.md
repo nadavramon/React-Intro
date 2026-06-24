@@ -6,7 +6,10 @@ allowed-tools: Bash(npm run lint), Bash(npm run test:run), Bash(tsc -b)
 
 You are running **/implement**, step 3 of the spec-driven pipeline (see `CLAUDE.md → "Spec-driven workflow"`). This phase **fans execution out to subagents** so implementation noise never pollutes this session.
 
-1. **Resolve the plan:** if `$ARGUMENTS` leads with a topic slug, use the matching `docs/superpowers/plans/*<slug>*-plan.md`; otherwise the most-recently-modified file in `docs/superpowers/plans/`. State which plan you picked.
+1. **Resolve the plan (ambiguity guard):**
+    - If `$ARGUMENTS` leads with a topic slug, use the matching `docs/superpowers/plans/*<slug>*-plan.md` — a slug always wins (a bare range like `1-3` is **not** a slug).
+    - Otherwise read `docs/superpowers/INDEX.md` and treat features with status `Planned` or `In progress` as candidates. **0** → stop ("no plan is ready — run `/plan` first"). **Exactly 1** → use it. **2 or more** → refuse; list the candidate slugs and ask the user to re-run `/implement <slug> <range>`. Never fall back to file mtime.
+    - State which plan you picked (or why you stopped).
 2. Parse its `- [ ]` checkbox tasks. **Select** tasks from a range in `$ARGUMENTS` (e.g. `3-5`, `2-`); if no range is given, take all unchecked tasks.
 3. For **each selected task, in order**, build the subagent dispatch from its equipment tags, then dispatch a **foreground** subagent:
     - `**Agent:**` → `subagent_type` (default `general-purpose`).
