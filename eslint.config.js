@@ -29,4 +29,12 @@ export default defineConfig([
             'react-refresh/only-export-components': 'off',
         },
     },
+    {
+        // TanStack Router route files export `Route` (a non-component) and may
+        // define their route component inline (e.g. `__root.tsx`).
+        files: ['src/routes/**'],
+        rules: {
+            'react-refresh/only-export-components': 'off',
+        },
+    },
 ])
