@@ -4,16 +4,16 @@ A learning sandbox for React + TypeScript. Several small, self-contained apps (c
 
 ## Commands
 
-| Task | Command |
-| --- | --- |
-| Dev server | `npm run dev` |
-| Build (typecheck + bundle) | `npm run build` (`tsc -b && vite build`) |
-| Lint | `npm run lint` |
-| Format (write) | `npm run format` |
-| Format (check) | `npm run format:check` |
-| Unit/component tests (watch) | `npm test` |
-| Unit/component tests (once) | `npm run test:run` |
-| E2E tests (real browser) | `npm run test:e2e` |
+| Task                         | Command                                  |
+| ---------------------------- | ---------------------------------------- |
+| Dev server                   | `npm run dev`                            |
+| Build (typecheck + bundle)   | `npm run build` (`tsc -b && vite build`) |
+| Lint                         | `npm run lint`                           |
+| Format (write)               | `npm run format`                         |
+| Format (check)               | `npm run format:check`                   |
+| Unit/component tests (watch) | `npm test`                               |
+| Unit/component tests (once)  | `npm run test:run`                       |
+| E2E tests (real browser)     | `npm run test:e2e`                       |
 
 ## Stack
 
@@ -46,7 +46,7 @@ Two layers, kept separate (Vitest excludes `e2e/**`):
 - **Unit / component** — Vitest + RTL. Specs live next to the source as `*.test.ts(x)` under `src/`. Setup: `src/test/setup.ts` (jest-dom matchers + auto-cleanup). Run with `npm run test:run`.
 - **E2E** — Playwright. Specs live in `e2e/*.spec.ts`; config in `playwright.config.ts` auto-starts the dev server. Run with `npm run test:e2e`. Note: the Todo/`/tasks` page needs the Express server running; counters and tic-tac-toe are backend-free.
 
-**Browser verification — prefer the CLI, not the MCP.** To *verify* known behavior (DOM, styles, console errors, flows), write/run a Playwright spec — its output is compact text. Reserve the Playwright **MCP** (snapshots/screenshots, which cost many tokens) for open-ended *exploration* ("why does this look wrong?"). Don't reach for the MCP when an assertion would do.
+**Browser verification — prefer the CLI, not the MCP.** To _verify_ known behavior (DOM, styles, console errors, flows), write/run a Playwright spec — its output is compact text. Reserve the Playwright **MCP** (snapshots/screenshots, which cost many tokens) for open-ended _exploration_ ("why does this look wrong?"). Don't reach for the MCP when an assertion would do.
 
 ## Project tooling (Claude Code)
 
@@ -58,16 +58,17 @@ Two layers, kept separate (Vitest excludes `e2e/**`):
 
 Non-trivial features flow through three rerunnable commands. Each reads the prior artifact from disk and writes its own — so state lives in files, not the conversation. **Rerunnable = context-rot-survivable:** `/clear` any time, rerun the command, and the file reloads the slice you need.
 
-| Step | Command | Reads → Writes | Runs |
-| --- | --- | --- | --- |
-| 1 | `/specify <idea>` | idea → `docs/superpowers/specs/<date>-<topic>-design.md` | brainstorming skill, live in main |
-| 2 | `/plan [slug]` | spec → `docs/superpowers/plans/<date>-<topic>-plan.md` | writing-plans + plan mode, live in main |
-| 3 | `/implement [N-M]` | plan checkboxes → code, ticks boxes, journals | fan-out subagents, foreground |
+| Step | Command            | Reads → Writes                                           | Runs                                    |
+| ---- | ------------------ | -------------------------------------------------------- | --------------------------------------- |
+| 1    | `/specify <idea>`  | idea → `docs/superpowers/specs/<date>-<topic>-design.md` | brainstorming skill, live in main       |
+| 2    | `/plan [slug]`     | spec → `docs/superpowers/plans/<date>-<topic>-plan.md`   | writing-plans + plan mode, live in main |
+| 3    | `/implement [N-M]` | plan checkboxes → code, ticks boxes, journals            | fan-out subagents, foreground           |
 
 - **This file (`CLAUDE.md`) is the constitution** — the standing rules every phase inherits. No separate command; it's loaded every session.
 - **`docs/superpowers/INDEX.md`** — manifest of every feature and its spec/plan/status. The discoverability anchor.
 - **`docs/superpowers/JOURNAL.md`** — append-only debug trail; every command logs what it did. Phase boundaries are debug seams: one file in, one file out, so a wrong output tells you exactly which phase to rerun.
 - Judgment phases (`/specify`, `/plan`) stay live so you can steer; execution (`/implement`) fans out to subagents that return a tight digest while full detail lands on disk.
+- Plan tasks may carry `**Skills:**`/`**Agent:**`/`**Model:**` equipment tags; `/implement` dispatches each task's subagent accordingly (see the `writing-plans` skill).
 
 ## Backend API contract
 
@@ -79,7 +80,7 @@ The todo feature talks to a separate Express + Mongoose + JWT server (`../server
 
 ## Working style
 
-This is a learning project. When implementing features, prefer explaining the *why* and, where useful, writing out steps the way a tutorial would rather than silently applying large edits. Introduce concepts in their verbose form first; compaction comes later once understood.
+This is a learning project. When implementing features, prefer explaining the _why_ and, where useful, writing out steps the way a tutorial would rather than silently applying large edits. Introduce concepts in their verbose form first; compaction comes later once understood.
 
 ## Design context
 
