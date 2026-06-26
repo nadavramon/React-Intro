@@ -14,4 +14,5 @@ export const env = {
   REFRESH_TOKEN_SECRET: requireEnv('REFRESH_TOKEN_SECRET'),
   MONGODB_URI: requireEnv('MONGODB_URI'),
   PORT: process.env.PORT,
+  REDIS_URL: process.env.REDIS_URL ?? 'redis://localhost:6379',
 };

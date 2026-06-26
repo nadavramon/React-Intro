@@ -3,6 +3,7 @@ import { TaskModel, TaskDoc } from './task.schema.ts';
 import { NotFoundError } from '../../shared/errors/AppError.ts';
 import { CreateTaskBodyDto, UpdateTaskBodyDto } from './task.dto.ts';
 import { logger } from '../../shared/utils/logger.ts';
+import * as taskCache from './task.cache.ts';
 
 function toTask(doc: TaskDoc): TaskEntity {
   return {
@@ -14,16 +15,21 @@ function toTask(doc: TaskDoc): TaskEntity {
 }
 
 export async function getAllTasks(userId: string): Promise<TaskEntity[]> {
+  const cached = await taskCache.read(userId);
+  if (cached !== null) return cached;
+
   const docs = await TaskModel.find({ userId }).lean();
-  return docs.map(toTask);
+  const tasks = docs.map(toTask);
+  await taskCache.write(userId, tasks);
+  return tasks;
 }
 
 export async function getTasksByStatus(
   userId: string,
   isCompleted: boolean,
 ): Promise<TaskEntity[]> {
-  const docs = await TaskModel.find({ userId, isCompleted }).lean();
-  return docs.map(toTask);
+  const tasks = await getAllTasks(userId);
+  return tasks.filter((t) => t.isCompleted === isCompleted);
 }
 
 export async function getTaskById(userId: string, id: string): Promise<TaskEntity> {
@@ -41,6 +47,7 @@ export async function createTask(userId: string, dto: CreateTaskBodyDto): Promis
   });
   const task = toTask(doc.toObject());
   logger.info(`Task created: id=${task.id}, title="${task.title}"`);
+  await taskCache.invalidate(userId);
   return task;
 }
 
@@ -55,6 +62,7 @@ export async function updateTask(
   if (!doc) throw new NotFoundError('Task not found');
 
   logger.info(`Task updated: id=${id}`);
+  await taskCache.invalidate(userId);
   return toTask(doc);
 }
 
@@ -63,4 +71,5 @@ export async function deleteTask(userId: string, id: string): Promise<void> {
   if (!doc) throw new NotFoundError('Task not found');
 
   logger.info(`Task deleted: id=${id}`);
+  await taskCache.invalidate(userId);
 }
