@@ -6,7 +6,7 @@ import { app } from './app.ts';
 
 async function start() {
   await connectDB();
-  await connectRedis();
+  connectRedis();
   for (const sig of ['SIGINT', 'SIGTERM'] as const) {
     process.on(sig, async () => {
       logger.info(`${sig} received, shutting down`);
