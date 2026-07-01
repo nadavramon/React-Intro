@@ -41,3 +41,6 @@ skills-lock.json
 *.njsproj
 *.sln
 *.sw?
+
+# turborepo
+.turbo

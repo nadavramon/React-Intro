@@ -23,8 +23,19 @@ active="$(printf '%s' "$input" | node -e "
 
 cd "${CLAUDE_PROJECT_DIR:-/Users/nadavramon/fullstack_projects/React_Intro}" || exit 0
 
-if ! output="$(npx tsc -b 2>&1)"; then
-    echo "Typecheck failed (tsc -b) — fix these before finishing:" >&2
+# Monorepo-aware: a flat repo has a root tsconfig.json; the pnpm/Turbo workspace
+# does not (typecheck is per-package via turbo). Mid-migration, before the
+# workspace is installed, there's nothing to check — skip gracefully.
+if [ -f tsconfig.json ]; then
+    cmd=(npx tsc -b)
+elif [ -f turbo.json ] && [ -d node_modules ]; then
+    cmd=(pnpm turbo run typecheck)
+else
+    exit 0
+fi
+
+if ! output="$("${cmd[@]}" 2>&1)"; then
+    echo "Typecheck failed (${cmd[*]}) — fix these before finishing:" >&2
     echo "$output" >&2
     exit 2
 fi
