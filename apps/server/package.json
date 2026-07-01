@@ -1,5 +1,5 @@
 {
-  "name": "server",
+  "name": "@repo/server",
   "version": "1.0.0",
   "description": "",
   "main": "dist/index.js",
@@ -12,7 +12,8 @@
     "format:check": "prettier --check \"src/**/*.ts\"",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "lint": "echo \"(server: no eslint configured)\" && exit 0"
   },
   "engines": {
     "node": ">=24 <25"
@@ -22,6 +23,7 @@
   "license": "ISC",
   "type": "module",
   "dependencies": {
+    "@repo/shared": "workspace:*",
     "bcrypt": "^6.0.0",
     "cors": "^2.8.6",
     "date-fns": "^4.1.0",

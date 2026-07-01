@@ -18,8 +18,11 @@
     // and npm install -D @types/node
     // Other Outputs
     "sourceMap": true,
-    "declaration": true,
-    "declarationMap": true,
+    // ponytail: this is a deployed app, not a consumed library — no .d.ts needed.
+    // Emitting declarations also triggers TS2883 on Express `app`/`router` under
+    // pnpm's nested node_modules (types sit at a non-portable .pnpm/ path).
+    "declaration": false,
+    "declarationMap": false,
     // Stricter Typechecking Options
     "noUncheckedIndexedAccess": true,
     "exactOptionalPropertyTypes": true,

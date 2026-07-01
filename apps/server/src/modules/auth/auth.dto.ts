@@ -8,11 +8,8 @@ export const RegisterBodySchema = z.object({
 });
 export type RegisterBodyDto = z.infer<typeof RegisterBodySchema>;
 
-export const LoginBodySchema = z.object({
-  email: z.email({ error: 'Invalid email address' }),
-  password: z.string({ error: 'Password must be a string' }).min(1, 'Password is required'),
-});
-export type LoginBodyDto = z.infer<typeof LoginBodySchema>;
+export { loginBodySchema as LoginBodySchema } from '@repo/shared';
+export type { LoginBody as LoginBodyDto } from '@repo/shared';
 
 export const RefreshBodySchema = z.object({
   refreshToken: z

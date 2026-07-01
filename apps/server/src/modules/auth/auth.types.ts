@@ -6,7 +6,4 @@ export interface JwtPayload {
   role: UserRole;
 }
 
-export interface AuthTokens {
-  accessToken: string;
-  refreshToken: string;
-}
+export type { AuthTokens } from '@repo/shared';
