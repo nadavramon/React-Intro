@@ -15,7 +15,7 @@ You are running **/implement**, step 3 of the spec-driven pipeline (see `CLAUDE.
     - `**Agent:**` → `subagent_type` (default `general-purpose`).
     - `**Model:**` → `model` override (omit to inherit).
     - `**Skills:**` → tell the subagent: "Use these skills, in order: <list>." **Always prepend the test-driven-development baseline**, even when no skills are tagged.
-    - Pass only that task's steps + the plan path. The subagent implements, then runs the relevant check (`npm run test:run`, `tsc -b`, or `npm run lint` as fits the task).
+    - Pass only that task's steps + the plan path. The subagent implements, then runs the relevant check (`npm run test:run`, `tsc -b`, or `npm run lint` as fits the task). If the task commits in a format-on-save repo (Prettier), tell the subagent to run the project formatter (`npm run format`) before it commits — format-on-save never fires for programmatic edits, so otherwise unformatted commits surface only at the final `format:check`.
     - **Guards:** if a `**Skills:**` value names a skill that isn't installed, note it in the digest + JOURNAL and continue without it (don't hard-fail). If `**Agent:** Explore` is set on a task that produces code, stop and surface the mismatch — Explore can't write.
 4. After each task returns:
     - Tick its box (`- [ ]` → `- [x]`) in the plan file.

@@ -3,7 +3,7 @@ description: SDD pipeline step 1 — turn an idea into a committed design spec v
 argument-hint: <idea>
 ---
 
-You are running **/specify**, step 1 of this project's spec-driven pipeline (`/specify → /plan → /implement`; see `CLAUDE.md → "Spec-driven workflow"`).
+You are running **/specify**, step 1 of this project's spec-driven pipeline (`/specify → /plan → /implement → /retro`; see `CLAUDE.md → "Spec-driven workflow"`).
 
 Goal: turn `$ARGUMENTS` into a committed design spec. Stay **live in this session** — this phase is a dialogue with the user, not a subagent.
 
