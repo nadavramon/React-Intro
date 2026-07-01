@@ -6,6 +6,7 @@ const swaggerSpec = {
     title: 'Tasks API',
     version: '1.0.0',
   },
+  servers: [{ url: 'http://localhost:3000/api' }],
   components: {
     schemas: {
       Task: {
