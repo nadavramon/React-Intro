@@ -1,6 +1,8 @@
 FROM node:24-alpine AS builder
 RUN corepack enable
 WORKDIR /app
+# CI=true keeps pnpm non-interactive (no confirmModulesPurge prompt on install).
+ENV CI=true
 COPY . .
 RUN pnpm install --frozen-lockfile
 RUN pnpm turbo run build

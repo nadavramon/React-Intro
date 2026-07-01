@@ -1,0 +1,27 @@
+# Keep the Docker build context lean and correct. The server Dockerfile builds
+# from the repo root (COPY . .), so host artifacts must NOT leak into the image —
+# a copied node_modules breaks `pnpm install --frozen-lockfile` in the container.
+node_modules
+**/node_modules
+dist
+**/dist
+.turbo
+**/.turbo
+coverage
+**/coverage
+.git
+.github
+docs
+*.log
+
+# Local/secret env. The runtime platform injects the server's env vars; the web
+# prod build reads apps/web/.env.production (VITE_API_BASE_URL=/api), which is
+# intentionally NOT ignored.
+**/.env.local
+**/.env.*.local
+apps/server/.env
+
+# Dev cruft
+.playwright-mcp
+.tanstack
+.vscode

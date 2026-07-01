@@ -1,16 +1,14 @@
-# UNVERIFIED ASSUMPTIONS — these must ALL be true on the EC2 box before this
-# workflow is safe to run. The SSM command below (git pull + pnpm build +
-# systemctl restart) fails or silently deploys the wrong thing otherwise:
-#   1. The box's git checkout is re-pointed at the React-Intro MONOREPO remote
-#      (it previously tracked the standalone server repo). `git pull --ff-only`
-#      must fetch this monorepo, not the old polyrepo.
-#   2. The repo lives at /opt/app on the box. If it lives elsewhere, edit the
-#      `cd /opt/app` path in the SSM command below.
-#   3. Node 24 + corepack/pnpm are installed on the box (corepack enable +
-#      pnpm install --frozen-lockfile + pnpm turbo run build must all resolve).
-#   4. The systemd `server` unit's ExecStart runs
-#      `node apps/server/dist/index.js` with WorkingDirectory at the repo root
-#      (so `apps/web/dist` resolves relative to the compiled server file).
+# Builds the monorepo image (server + shared + web, with Express serving the web
+# build) and PUSHES it to the existing ECR repo `server`. It does NOT run the
+# container: as of 2026-07-01 the old EC2 box (i-050b3d01b5fbd58fa) no longer
+# exists and there is no ECS/App Runner/Lightsail service — nothing runs the
+# image yet. Provision compute ONCE to serve it:
+#   • RECOMMENDED: an App Runner service pointed at the `server` ECR repo with
+#     auto-deploy on the `:latest` tag — managed, pulls on each push, no box.
+#   • OR a rebuilt EC2 that `docker pull`s and runs the image (then a restart
+#     step can be wired back in here).
+# Runtime env (JWT_SECRET, REFRESH_TOKEN_SECRET, MONGODB_URI, REDIS_URL, PORT)
+# is injected by the compute platform, NOT baked into the image.
 name: Deploy
 
 on:
@@ -26,31 +24,30 @@ permissions:
   contents: read
 
 jobs:
-  deploy:
-    name: Build workspace + restart on EC2
+  publish-image:
+    name: Build and push image to ECR
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v6
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: arn:aws:iam::825765398865:role/github-deploy
           aws-region: eu-central-1
-      - name: Build + restart via SSM
-        id: send
-        run: |
-          CMD_ID=$(aws ssm send-command \
-            --instance-ids i-050b3d01b5fbd58fa \
-            --document-name AWS-RunShellScript \
-            --comment "deploy ${{ github.sha }}" \
-            --parameters 'commands=["cd /opt/app && git pull --ff-only && corepack enable && pnpm install --frozen-lockfile && pnpm turbo run build && systemctl restart server"]' \
-            --query 'Command.CommandId' --output text)
-          echo "command_id=$CMD_ID" >> "$GITHUB_OUTPUT"
-      - name: Wait for command to finish
-        run: |
-          aws ssm wait command-executed --command-id "${{ steps.send.outputs.command_id }}" --instance-id i-050b3d01b5fbd58fa
-          STATUS=$(aws ssm get-command-invocation --command-id "${{ steps.send.outputs.command_id }}" --instance-id i-050b3d01b5fbd58fa --query 'Status' --output text)
-          echo "Final status: $STATUS"
-          if [ "$STATUS" != "Success" ]; then
-            aws ssm get-command-invocation --command-id "${{ steps.send.outputs.command_id }}" --instance-id i-050b3d01b5fbd58fa
-            exit 1
-          fi
+      - name: Log in to Amazon ECR
+        id: ecr
+        uses: aws-actions/amazon-ecr-login@v2
+      - name: Compute short SHA
+        id: vars
+        run: echo "sha=${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
+      - name: Build and push
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: apps/server/Dockerfile
+          push: true
+          tags: |
+            ${{ steps.ecr.outputs.registry }}/server:latest
+            ${{ steps.ecr.outputs.registry }}/server:sha-${{ steps.vars.outputs.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
