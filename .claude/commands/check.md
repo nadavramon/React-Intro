@@ -14,6 +14,6 @@ Run this project's quality gauntlet in order and report a concise pass/fail summ
 
 If the arguments contain `--e2e`, also run the slower browser tests as a final step:
 
-4. **E2E tests** — `npm run test:e2e`  *(only when `--e2e` is passed; it boots a real browser + dev server, so skip it by default)*
+4. **E2E tests** — `npm run test:e2e` _(only when `--e2e` is passed; it boots a real browser + dev server, so skip it by default)_
 
 If everything passes, say so in one line. If any step fails, show only the failing output (not the noise) and which step failed.

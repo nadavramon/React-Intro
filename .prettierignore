@@ -1,0 +1,7 @@
+pnpm-lock.yaml
+**/dist
+**/.turbo
+**/coverage
+apps/web/src/routeTree.gen.ts
+docs
+apps/server/graphify-out
