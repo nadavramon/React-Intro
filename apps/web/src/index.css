@@ -156,27 +156,55 @@ body {
 }
 
 @keyframes pop {
-    0%   { transform: scale(1); }
-    40%  { transform: scale(1.15); }
-    100% { transform: scale(1); }
+    0% {
+        transform: scale(1);
+    }
+    40% {
+        transform: scale(1.15);
+    }
+    100% {
+        transform: scale(1);
+    }
 }
 
 @keyframes slide-in {
-    from { opacity: 0; transform: translateY(-6px); }
-    to   { opacity: 1; transform: translateY(0); }
+    from {
+        opacity: 0;
+        transform: translateY(-6px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 @keyframes slide-out {
-    from { opacity: 1; transform: translateX(0); }
-    to   { opacity: 0; transform: translateX(8px); }
+    from {
+        opacity: 1;
+        transform: translateX(0);
+    }
+    to {
+        opacity: 0;
+        transform: translateX(8px);
+    }
 }
 
 @keyframes scale-in {
-    from { opacity: 0; transform: scale(0.7); }
-    to   { opacity: 1; transform: scale(1); }
+    from {
+        opacity: 0;
+        transform: scale(0.7);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
 }
 
 @keyframes pulse-once {
-    0%   { box-shadow: 0 0 0 0 oklch(0.705 0.213 47.604 / 0.5); }
-    100% { box-shadow: 0 0 0 8px oklch(0.705 0.213 47.604 / 0); }
+    0% {
+        box-shadow: 0 0 0 0 oklch(0.705 0.213 47.604 / 0.5);
+    }
+    100% {
+        box-shadow: 0 0 0 8px oklch(0.705 0.213 47.604 / 0);
+    }
 }

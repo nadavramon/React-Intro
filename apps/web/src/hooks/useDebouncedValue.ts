@@ -8,10 +8,7 @@ export function useDebouncedValue<T>(value: T, delay = 300): T {
 
     // Stable debounced setter — memoized so the SAME timer instance
     // coalesces consecutive calls. Recreated only if delay changes.
-    const update = useMemo(
-        () => debounce((next: T) => setDebounced(next), delay),
-        [delay],
-    )
+    const update = useMemo(() => debounce((next: T) => setDebounced(next), delay), [delay])
 
     useEffect(() => {
         update(value)

@@ -14,10 +14,7 @@ export default function StatusBar({ winner, isDraw, currentPlayer, onRestart }: 
     function renderPlayerBadge(player: Player) {
         return (
             <span
-                className={cn(
-                    'font-bold',
-                    player === Player.X ? 'text-primary' : 'text-secondary',
-                )}
+                className={cn('font-bold', player === Player.X ? 'text-primary' : 'text-secondary')}
             >
                 {player}
             </span>

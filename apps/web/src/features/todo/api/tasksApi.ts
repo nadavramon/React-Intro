@@ -1,5 +1,5 @@
 import { api } from '@/lib/api'
-import type { Task } from '@/features/todo/types'
+import type { Task, UpdateTaskBody } from '@repo/shared'
 
 export async function fetchTasks(): Promise<Task[]> {
     const response = await api.get<Task[]>('/tasks')
@@ -11,10 +11,7 @@ export async function createTask(title: string): Promise<Task> {
     return response.data
 }
 
-export async function updateTask(
-    id: string,
-    changes: { title?: string; isCompleted?: boolean },
-): Promise<Task> {
+export async function updateTask(id: string, changes: UpdateTaskBody): Promise<Task> {
     const response = await api.put<Task>(`/tasks/${id}`, changes)
     return response.data
 }

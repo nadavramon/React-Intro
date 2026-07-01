@@ -1,4 +1,5 @@
 import axios from 'axios'
+import type { AuthTokens } from '@repo/shared'
 
 const TOKEN_KEY = 'authToken'
 
@@ -7,7 +8,7 @@ export const api = axios.create({
 })
 
 export async function login() {
-    const { data } = await api.post<{ accessToken: string; refreshToken: string }>('/auth/login', {
+    const { data } = await api.post<AuthTokens>('/auth/login', {
         email: import.meta.env.VITE_DEV_EMAIL,
         password: import.meta.env.VITE_DEV_PASSWORD,
     })

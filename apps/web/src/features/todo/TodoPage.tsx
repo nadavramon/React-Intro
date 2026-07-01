@@ -19,7 +19,8 @@ export default function TodoPage() {
     const debouncedQuery = useDebouncedValue(searchQuery, 300)
 
     const filteredTasks = useMemo(
-        () => tasks.filter((task) => task.title.toLowerCase().includes(debouncedQuery.toLowerCase())),
+        () =>
+            tasks.filter((task) => task.title.toLowerCase().includes(debouncedQuery.toLowerCase())),
         [tasks, debouncedQuery],
     )
 

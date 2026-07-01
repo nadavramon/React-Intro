@@ -19,7 +19,7 @@ function CounterButton({ index, value, isMax, onClick }: Props) {
                 'active:translate-y-0 active:scale-[0.97] active:duration-50',
                 'focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-[3px]',
                 isMax &&
-                'border-transparent bg-linear-to-br from-accent to-(--accent-2) text-white shadow-counter-glow hover:-translate-y-0.5 hover:border-transparent',
+                    'border-transparent bg-linear-to-br from-accent to-(--accent-2) text-white shadow-counter-glow hover:-translate-y-0.5 hover:border-transparent',
             )}
         >
             <span
