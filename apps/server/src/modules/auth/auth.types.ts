@@ -1,4 +1,4 @@
-import { UserRole } from '../user/user.entity.ts';
+import type { UserRole } from '@repo/shared';
 
 export interface JwtPayload {
   userId: string;

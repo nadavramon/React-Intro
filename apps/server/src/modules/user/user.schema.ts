@@ -1,11 +1,11 @@
 import { Schema, model, InferSchemaType, Types } from 'mongoose';
-import { UserRole } from './user.entity.ts';
+import { userRoleSchema } from '@repo/shared';
 
 const userSchema = new Schema(
   {
     email: { type: String, required: true, unique: true, lowercase: true, trim: true },
     password: { type: String, required: true },
-    role: { type: String, enum: Object.values(UserRole), default: UserRole.USER },
+    role: { type: String, enum: userRoleSchema.options, default: 'user' },
   },
   { timestamps: true },
 );

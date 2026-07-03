@@ -1,6 +1,6 @@
 import { defineConfig, devices } from '@playwright/test'
 
-// E2E tests (real browser) live in ./e2e and run via `npm run test:e2e`.
+// E2E tests (real browser) live in ./e2e and run via `pnpm test:e2e`.
 // These are separate from the Vitest unit/component tests in src/ (*.test.tsx).
 const PORT = 5173
 const baseURL = `http://localhost:${PORT}`
@@ -19,9 +19,9 @@ export default defineConfig({
     },
     projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
     // Auto-start the Vite dev server before tests, and reuse it locally if it's
-    // already running (so you don't fight an existing `npm run dev`).
+    // already running (so you don't fight an existing `pnpm dev`).
     webServer: {
-        command: 'npm run dev',
+        command: 'pnpm dev',
         url: baseURL,
         reuseExistingServer: !process.env.CI,
         timeout: 120_000,

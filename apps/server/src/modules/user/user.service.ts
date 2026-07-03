@@ -1,5 +1,5 @@
 import bcrypt from 'bcrypt';
-import { UserEntity, UserRole } from './user.entity.ts';
+import type { UserEntity, UserRole } from './user.entity.ts';
 import { UserModel, UserDoc } from './user.schema.ts';
 import { ValidationError, UnauthorizedError } from '../../shared/errors/AppError.ts';
 
@@ -17,7 +17,7 @@ function toUser(doc: UserDoc): UserEntity {
 export async function createUser(
   email: string,
   password: string,
-  role: UserRole = UserRole.USER,
+  role: UserRole = 'user',
 ): Promise<UserEntity> {
   const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS);
   const doc = await UserModel.create({ email, password: hashedPassword, role });

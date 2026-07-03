@@ -1,58 +1,57 @@
-# React_Intro
+# React_Intro (monorepo)
 
-A learning sandbox for React + TypeScript. Several small, self-contained apps (counter, tic-tac-toe, todo) live side by side under `src/features/`. Code quality matters here, but the primary goal is learning — favor clarity and explanation over cleverness.
+A learning sandbox, now a **pnpm + Turborepo monorepo**: the React app (`apps/web`), the Express API (`apps/server`), and their shared zod contract (`packages/shared`) live in one repo. Code quality matters here, but the primary goal is learning — favor clarity and explanation over cleverness.
 
-## Commands
+## Commands (run from the repo root)
 
-| Task                         | Command                                  |
-| ---------------------------- | ---------------------------------------- |
-| Dev server                   | `npm run dev`                            |
-| Build (typecheck + bundle)   | `npm run build` (`tsc -b && vite build`) |
-| Lint                         | `npm run lint`                           |
-| Format (write)               | `npm run format`                         |
-| Format (check)               | `npm run format:check`                   |
-| Unit/component tests (watch) | `npm test`                               |
-| Unit/component tests (once)  | `npm run test:run`                       |
-| E2E tests (real browser)     | `npm run test:e2e`                       |
+| Task                        | Command                                                                      |
+| --------------------------- | ---------------------------------------------------------------------------- |
+| Dev (both apps in parallel) | `pnpm dev` (`turbo run dev` — builds `@repo/shared` first)                   |
+| Build everything            | `pnpm build`                                                                 |
+| Lint / typecheck / tests    | `pnpm lint` / `pnpm typecheck` / `pnpm test` (all fan out via Turbo)         |
+| Format (write / check)      | `pnpm format` / `pnpm format:check`                                          |
+| One package only            | `pnpm --filter @repo/web <script>` (same for `@repo/server`, `@repo/shared`) |
+| E2E tests (real browser)    | `pnpm --filter @repo/web test:e2e`                                           |
+
+pnpm is pinned via corepack (`packageManager` in the root `package.json`); Node 24 (`.nvmrc`). One lockfile at the root — never create per-package lockfiles. pnpm 11 note: native deps build only if listed in `allowBuilds` in `pnpm-workspace.yaml` (bcrypt, esbuild).
+
+## Workspace layout
+
+- **`apps/web`** (`@repo/web`) — the React SPA (counter, tic-tac-toe, todo features).
+- **`apps/server`** (`@repo/server`) — Express 5 + Mongoose + JWT API. Grafted from the old standalone `server` repo via `git subtree` (its history is preserved here).
+- **`packages/shared`** (`@repo/shared`) — the API contract: zod schemas + `z.infer` types (`Task`, `User`, `AuthTokens`, create/update/login bodies). **Built** package: apps consume `dist/`, Turbo builds it before them. Contract only — server internals (mongoose schemas, `password`, `userId`) never go here.
+- Apps depend on it via `"@repo/shared": "workspace:*"`. Rule: a type that crosses the HTTP boundary lives in shared; each side re-exports under its local names if needed (see `apps/server/src/modules/task/task.dto.ts`).
 
 ## Stack
 
-- **React 19** + **TypeScript** (strict), built with **Vite**.
-- Routing: **TanStack Router** (file-based; routes live in `src/routes/`, with the tree generated to `routeTree.gen.ts`).
-- Styling: **Tailwind CSS v4** (via `@tailwindcss/vite`) + **shadcn/radix-ui** primitives. Some older features still use CSS Modules — both coexist during the Tailwind migration.
-- Utilities: `clsx` + `tailwind-merge` (see `cn()` in `src/lib/utils.ts`), `lucide-react` icons.
-- HTTP: **axios** (`src/lib/api.ts`).
-- Tests: **Vitest** + **React Testing Library** (jsdom) for unit/component; **Playwright** for e2e.
+- **Web:** React 19 + TypeScript (strict), Vite, TanStack Router (file-based; `src/routes/` → generated `routeTree.gen.ts`), Tailwind CSS v4 + shadcn/radix-ui (some older features still use CSS Modules), `clsx`/`tailwind-merge` (`cn()` in `src/lib/utils.ts`), axios (`src/lib/api.ts`), zustand.
+- **Server:** Express 5 (note: bare `'*'` routes throw under path-to-regexp v8 — use a RegExp), Mongoose, JWT auth, zod validation, ioredis cache (optional — degrades to no-cache), winston. `module: nodenext`; `declaration: false` (it's an app, not a library — also avoids TS2883 under pnpm).
+- **Tests:** Vitest (+ RTL/jsdom in web); Playwright for e2e.
 
-## Architecture
+## Web app architecture (`apps/web/src/`)
 
-- **`src/features/<name>/`** — each feature is self-contained (components, hooks, logic, types) and exposes a public surface via `index.ts`. Import features through their `index.ts`, not deep paths.
-- **`src/layout/`** — app shell (`Header`, `Sidebar`, `Layout`).
-- **`src/pages/`** — route-level pages (e.g. `NotFoundPage`).
-- **`src/lib/`** — shared, framework-agnostic helpers (`api.ts`, `utils.ts`).
-- **`src/routes/`** — file-based routes (one file per route; `__root.tsx` owns the app shell). The `@tanstack/router-plugin` scans this dir and emits the generated `src/routeTree.gen.ts` at the `src` root (lint/format-ignored; kept out of `src/routes/` so the plugin doesn't scan its own output). `src/routes.ts` (the `ROUTES` map) is kept for nav-item paths.
+- **`features/<name>/`** — self-contained (components, hooks, logic, types), public surface via `index.ts`. Import features through their `index.ts`, not deep paths.
+- **`layout/`** — app shell (`Header`, `Sidebar`, `Layout`). **`pages/`** — route-level pages. **`lib/`** — shared helpers (`api.ts`, `utils.ts`).
+- **`routes/`** — file-based routes (`__root.tsx` owns the shell); the router plugin emits `src/routeTree.gen.ts` (lint/format-ignored). `src/routes.ts` (`ROUTES` map) is kept for nav-item paths.
+- **Path alias:** `@/` → `apps/web/src/` (in `tsconfig.app.json` + `vite.config.ts`).
 
 ## Conventions
 
-- **Path alias:** `@/` → `src/` (configured in both `tsconfig.app.json` and `vite.config.ts`). Use `@/features/...` over relative climbs.
-- **Formatting is Prettier's job.** Format-on-save is enabled; do not hand-tune whitespace, quotes, or semicolons. Braceless single-statement `if`/`else` is allowed.
-- **ESLint** is configured (`eslint.config.js`) with the react-hooks and react-refresh plugins; `eslint-config-prettier` disables stylistic rules so the two don't fight.
-- Prefer named exports; co-locate a feature's types in its own `types.ts`.
+- **Formatting is Prettier's job.** Format-on-save is enabled; do not hand-tune whitespace, quotes, or semicolons. Each package resolves its nearest Prettier config (web: single quotes/no semis; server: its `.prettierrc`); root `.prettierignore` covers lockfile/dist/generated. Braceless single-statement `if`/`else` is allowed.
+- **ESLint** runs in the web app only (`eslint.config.js`, react-hooks + react-refresh); the server's `lint` script is a placeholder.
+- Prefer named exports; co-locate a feature's types in its own `types.ts` (which may just re-export from `@repo/shared`).
 
 ## Testing
 
-Two layers, kept separate (Vitest excludes `e2e/**`):
-
-- **Unit / component** — Vitest + RTL. Specs live next to the source as `*.test.ts(x)` under `src/`. Setup: `src/test/setup.ts` (jest-dom matchers + auto-cleanup). Run with `npm run test:run`.
-- **E2E** — Playwright. Specs live in `e2e/*.spec.ts`; config in `playwright.config.ts` auto-starts the dev server. Run with `npm run test:e2e`. Note: the Todo/`/tasks` page needs the Express server running; counters and tic-tac-toe are backend-free.
-
-**Browser verification — prefer the CLI, not the MCP.** To _verify_ known behavior (DOM, styles, console errors, flows), write/run a Playwright spec — its output is compact text. Reserve the Playwright **MCP** (snapshots/screenshots, which cost many tokens) for open-ended _exploration_ ("why does this look wrong?"). Don't reach for the MCP when an assertion would do.
+- **Unit / component** — Vitest specs next to the source (`*.test.ts(x)`); web setup in `src/test/setup.ts`. Run all: `pnpm test`; one package: `pnpm --filter @repo/server test`.
+- **E2E** — Playwright, `apps/web/e2e/*.spec.ts`; config auto-starts the Vite dev server (`pnpm dev`). The Todo/`/tasks` flows need the API server + Mongo running; counters and tic-tac-toe are backend-free.
+- **Browser verification — prefer the CLI, not the MCP.** To _verify_ known behavior, write/run a Playwright spec. Reserve the Playwright MCP for open-ended _exploration_.
 
 ## Project tooling (Claude Code)
 
-- **`/check`** runs lint + typecheck + unit tests; **`/check --e2e`** adds the browser tests.
-- **`/scaffold-feature <name>`** generates a new `src/features/<name>/` folder matching the conventions above.
-- A `PostToolUse` hook runs `tsc` after any `.ts/.tsx` edit, so type errors surface immediately.
+- **`/check`** runs format:check + `turbo run lint typecheck test`; **`/check --e2e`** adds the browser tests.
+- **`/scaffold-feature <name>`** generates a new `apps/web/src/features/<name>/` folder.
+- A `PostToolUse` hook typechecks after any `.ts/.tsx` edit (monorepo-aware: uses `pnpm turbo run typecheck`).
 
 ## Spec-driven workflow (SDD pipeline)
 
@@ -68,17 +67,19 @@ Non-trivial features flow through four rerunnable commands. Each reads the prior
 - **This file (`CLAUDE.md`) is the constitution** — the standing rules every phase inherits. No separate command; it's loaded every session.
 - **`docs/superpowers/INDEX.md`** — manifest of every feature and its spec/plan/status. The discoverability anchor.
 - **`docs/superpowers/JOURNAL.md`** — append-only debug trail; every command logs what it did. Phase boundaries are debug seams: one file in, one file out, so a wrong output tells you exactly which phase to rerun.
-- Judgment phases (`/specify`, `/plan`) stay live so you can steer; execution (`/implement`) fans out to subagents that return a tight digest while full detail lands on disk.
+- Judgment phases (`/specify`, `/plan`) stay live so you can steer; execution (`/implement`) fans out to subagents that return a tight digest while full detail lands on disk. Subagents never edit the plan file — checkbox state is the orchestrator's.
 - Plan tasks may carry `**Skills:**`/`**Agent:**`/`**Model:**` equipment tags; `/implement` dispatches each task's subagent accordingly (see the `writing-plans` skill).
 - After a feature is `Done`, `/retro` turns its mistakes into tooling/memory changes (approval-gated) so the pipeline itself gets sharper — `docs/superpowers/LESSONS.md` is the running record.
 
 ## Backend API contract
 
-The todo feature talks to a separate Express + Mongoose + JWT server (`../server`). Client lives in `src/features/todo/api/tasksApi.ts`, axios instance in `src/lib/api.ts`.
+The todo feature talks to `apps/server` (same repo). Client in `apps/web/src/features/todo/api/tasksApi.ts`, axios instance in `apps/web/src/lib/api.ts`. **The contract types/schemas live in `@repo/shared` — change them there, both sides feel it at compile time.**
 
-- Base URL from `VITE_API_BASE_URL`; dev auth auto-logs-in via `VITE_DEV_EMAIL` / `VITE_DEV_PASSWORD` and stores `accessToken` in `localStorage`. A response interceptor retries once on `401` by re-logging in.
-- **Task shape:** `{ id: string; title: string; isCompleted: boolean }`. The server contract uses `title` (not `text`) and `isCompleted` (not `done`) — keep this naming.
-- Endpoints: `GET /tasks`, `POST /tasks` (`{ title }`), `PUT /tasks/:id` (`{ title?, isCompleted? }`), `DELETE /tasks/:id`, `POST /auth/login`.
+- **The API is mounted under `/api`** (`/health` stays at root). Base URL from `VITE_API_BASE_URL`: dev `http://localhost:3000/api` (`.env.local`), prod `/api` (same-origin; `.env.production`). `VITE_*` values are baked at build time.
+- Dev auth auto-logs-in via `VITE_DEV_EMAIL` / `VITE_DEV_PASSWORD` and stores `accessToken` in `localStorage`; a response interceptor retries once on `401`. There is **no production auth flow yet** (known gap).
+- **Task shape:** `{ id: string; title: string; isCompleted: boolean }` — `title` (not `text`), `isCompleted` (not `done`).
+- Endpoints: `GET/POST /api/tasks`, `PUT/DELETE /api/tasks/:id`, `POST /api/auth/login`, swagger at `/api/api-docs`.
+- In prod the Express server also serves the web build (`apps/web/dist`) with an SPA fallback for non-`/api` paths — one deployable image (see `apps/server/Dockerfile`; CI pushes it to ECR on `main`).
 
 ## Working style
 
@@ -86,7 +87,7 @@ This is a learning project. When implementing features, prefer explaining the _w
 
 ## Design context
 
-Design work uses the `impeccable` skill. Full strategic context is in `PRODUCT.md` (and visual system in `DESIGN.md` when present).
+Design work uses the `impeccable` skill. Full strategic context is in `apps/web/PRODUCT.md` (and visual system in `DESIGN.md` when present).
 
 - **Register:** product (a tool, but one with a deliberate point of view).
 - **Direction:** bold & distinctive, **retro-arcade**; playful, not childish; commit to the aesthetic rather than piling on decoration.
