@@ -2,13 +2,14 @@ import express from 'express';
 import { existsSync } from 'node:fs';
 import path from 'node:path';
 import taskRoutes from './modules/task/task.routes.ts';
-import authRoutes from './modules/auth/auth.routes.ts';
 import postRoutes from './modules/post/post.routes.ts';
 import { httpLogger } from './shared/middlewares/httpLogger.ts';
 import { errorHandler } from './shared/middlewares/errorHandler.ts';
 import { swaggerUi, swaggerSpec } from './shared/utils/swagger.ts';
 import { limiter } from './shared/middlewares/rateLimiter.ts';
 import cors from 'cors';
+import { toNodeHandler } from 'better-auth/node';
+import { auth } from './shared/config/auth.ts';
 
 export const app = express();
 
@@ -18,10 +19,11 @@ app.get('/health', (_req, res) => {
 
 app.use(httpLogger);
 app.use(cors({ origin: 'http://localhost:5173', credentials: true }));
+// Must be mounted before express.json(): better-auth reads the raw body itself.
+app.all('/api/auth/*splat', toNodeHandler(auth)); // Express 5 wildcard syntax
 app.use(express.json());
 
 app.use(limiter);
-app.use('/api/auth', authRoutes);
 app.use('/api/tasks', taskRoutes);
 app.use('/api/posts', postRoutes);
 app.use('/api/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
