@@ -1,0 +1,16 @@
+packages:
+  - "apps/*"
+  - "packages/*"
+
+# pnpm 11 blocks post-install build scripts by default (supply-chain safety).
+# Allow exactly the deps that legitimately need to build a native/binary artifact.
+# pnpm 11 supersedes onlyBuiltDependencies with allowBuilds; keep both so the
+# native bcrypt binding + esbuild binary actually build on a clean install.
+allowBuilds:
+  "@scarf/scarf": false
+  bcrypt: true
+  esbuild: true
+
+onlyBuiltDependencies:
+  - bcrypt
+  - esbuild

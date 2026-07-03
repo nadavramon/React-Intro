@@ -1,5 +1,7 @@
-node_modules
-dist
-*.tsbuildinfo
-package-lock.json
-src/routeTree.gen.ts
+pnpm-lock.yaml
+**/dist
+**/.turbo
+**/coverage
+apps/web/src/routeTree.gen.ts
+docs
+apps/server/graphify-out

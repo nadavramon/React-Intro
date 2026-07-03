@@ -1,0 +1,53 @@
+# Builds the monorepo image (server + shared + web, with Express serving the web
+# build) and PUSHES it to the existing ECR repo `server`. It does NOT run the
+# container: as of 2026-07-01 the old EC2 box (i-050b3d01b5fbd58fa) no longer
+# exists and there is no ECS/App Runner/Lightsail service — nothing runs the
+# image yet. Provision compute ONCE to serve it:
+#   • RECOMMENDED: an App Runner service pointed at the `server` ECR repo with
+#     auto-deploy on the `:latest` tag — managed, pulls on each push, no box.
+#   • OR a rebuilt EC2 that `docker pull`s and runs the image (then a restart
+#     step can be wired back in here).
+# Runtime env (JWT_SECRET, REFRESH_TOKEN_SECRET, MONGODB_URI, REDIS_URL, PORT)
+# is injected by the compute platform, NOT baked into the image.
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  publish-image:
+    name: Build and push image to ECR
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::825765398865:role/github-deploy
+          aws-region: eu-central-1
+      - name: Log in to Amazon ECR
+        id: ecr
+        uses: aws-actions/amazon-ecr-login@v2
+      - name: Compute short SHA
+        id: vars
+        run: echo "sha=${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
+      - name: Build and push
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: apps/server/Dockerfile
+          push: true
+          tags: |
+            ${{ steps.ecr.outputs.registry }}/server:latest
+            ${{ steps.ecr.outputs.registry }}/server:sha-${{ steps.vars.outputs.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
