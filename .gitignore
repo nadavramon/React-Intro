@@ -25,7 +25,12 @@ dist-ssr
 !.claude/hooks/
 !.claude/statusline.sh
 .playwright-mcp/
-docs/
+
+# SDD docs — specs/plans/INDEX are versioned; the journal & lessons diaries stay local.
+docs/superpowers/JOURNAL.md
+docs/superpowers/LESSONS.md
+# Personal notes (any language variants)
+docs/*-he.md
 
 # Agent skills (installed via `npx skills`)
 .agents/
