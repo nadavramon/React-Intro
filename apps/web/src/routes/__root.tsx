@@ -1,20 +1,21 @@
-import { useEffect } from 'react'
-import { createRootRoute } from '@tanstack/react-router'
+import { createRootRoute, redirect } from '@tanstack/react-router'
 import { TanStackRouterDevtools } from '@tanstack/react-router-devtools'
 import Layout from '@/layout/Layout/Layout'
 import NotFoundPage from '@/pages/NotFoundPage'
 import { Toaster } from '@/components/ui/sonner'
-import { useTodoStore } from '@/features/todo'
+import { authClient } from '@/lib/authClient'
 
 export const Route = createRootRoute({
+    beforeLoad: async ({ location }) => {
+        if (location.pathname === '/login') return
+        const { data: session } = await authClient.getSession()
+        if (!session) throw redirect({ to: '/login' })
+    },
     component: RootComponent,
     notFoundComponent: NotFoundPage,
 })
 
 function RootComponent() {
-    useEffect(() => {
-        useTodoStore.getState().init()
-    }, [])
     return (
         <>
             <Layout />
