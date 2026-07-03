@@ -13,8 +13,10 @@ permissions:
   contents: read
 
 jobs:
+  # Job reports as check context "verify" — the exact name the `main protection`
+  # ruleset requires. Don't add a display name; that changes the context and
+  # blocks every merge with "Expected — waiting for status to be reported".
   verify:
-    name: Verify
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
