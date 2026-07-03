@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as TicTacToeRouteImport } from './routes/tic-tac-toe'
 import { Route as TasksRouteImport } from './routes/tasks'
+import { Route as LoginRouteImport } from './routes/login'
 import { Route as CountersRouteImport } from './routes/counters'
 import { Route as IndexRouteImport } from './routes/index'
 
@@ -22,6 +23,11 @@ const TicTacToeRoute = TicTacToeRouteImport.update({
 const TasksRoute = TasksRouteImport.update({
   id: '/tasks',
   path: '/tasks',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CountersRoute = CountersRouteImport.update({
@@ -38,12 +44,14 @@ const IndexRoute = IndexRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/counters': typeof CountersRoute
+  '/login': typeof LoginRoute
   '/tasks': typeof TasksRoute
   '/tic-tac-toe': typeof TicTacToeRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/counters': typeof CountersRoute
+  '/login': typeof LoginRoute
   '/tasks': typeof TasksRoute
   '/tic-tac-toe': typeof TicTacToeRoute
 }
@@ -51,20 +59,22 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/counters': typeof CountersRoute
+  '/login': typeof LoginRoute
   '/tasks': typeof TasksRoute
   '/tic-tac-toe': typeof TicTacToeRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/counters' | '/tasks' | '/tic-tac-toe'
+  fullPaths: '/' | '/counters' | '/login' | '/tasks' | '/tic-tac-toe'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/counters' | '/tasks' | '/tic-tac-toe'
-  id: '__root__' | '/' | '/counters' | '/tasks' | '/tic-tac-toe'
+  to: '/' | '/counters' | '/login' | '/tasks' | '/tic-tac-toe'
+  id: '__root__' | '/' | '/counters' | '/login' | '/tasks' | '/tic-tac-toe'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   CountersRoute: typeof CountersRoute
+  LoginRoute: typeof LoginRoute
   TasksRoute: typeof TasksRoute
   TicTacToeRoute: typeof TicTacToeRoute
 }
@@ -83,6 +93,13 @@ declare module '@tanstack/react-router' {
       path: '/tasks'
       fullPath: '/tasks'
       preLoaderRoute: typeof TasksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/counters': {
@@ -105,6 +122,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   CountersRoute: CountersRoute,
+  LoginRoute: LoginRoute,
   TasksRoute: TasksRoute,
   TicTacToeRoute: TicTacToeRoute,
 }
