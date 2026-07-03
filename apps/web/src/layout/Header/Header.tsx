@@ -1,5 +1,5 @@
 import { Link } from '@tanstack/react-router'
-import { Menu } from 'lucide-react'
+import { Menu, User } from 'lucide-react'
 import { ROUTES } from '@/routes'
 import { cn } from '@/lib/utils'
 import { authClient } from '@/lib/authClient'
@@ -38,12 +38,20 @@ export default function Header({ sidebarOpen, onToggleSidebar }: HeaderProps) {
             </Link>
             {session && (
                 <div className="ml-auto flex items-center gap-3">
-                    {session.user.image && (
+                    {session.user.image ? (
                         <img
                             src={session.user.image}
                             alt=""
                             className="border-foreground size-7 rounded-full border-2"
                         />
+                    ) : (
+                        <span
+                            data-testid="avatar-fallback"
+                            aria-hidden="true"
+                            className="border-foreground bg-muted text-muted-foreground inline-flex size-7 items-center justify-center rounded-full border-2"
+                        >
+                            <User className="size-4" />
+                        </span>
                     )}
                     <span className="text-muted-foreground text-xs font-bold tracking-widest uppercase">
                         {session.user.name}

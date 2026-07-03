@@ -15,4 +15,6 @@ test('authenticated user passes the guard and sees the header account', async ({
     await page.goto('/tasks')
     await expect(page).toHaveURL(/\/tasks$/)
     await expect(page.getByRole('button', { name: /sign out/i })).toBeVisible()
+    // no photo on the session (email/password user) → generic avatar fallback shows
+    await expect(page.getByTestId('avatar-fallback')).toBeVisible()
 })
