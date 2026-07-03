@@ -10,8 +10,6 @@ function requireEnv(name: string): string {
 }
 
 export const env = {
-  JWT_SECRET: requireEnv('JWT_SECRET'), // dies in Task 5
-  REFRESH_TOKEN_SECRET: requireEnv('REFRESH_TOKEN_SECRET'), // dies in Task 5
   MONGODB_URI: requireEnv('MONGODB_URI'),
   GOOGLE_CLIENT_ID: requireEnv('GOOGLE_CLIENT_ID'),
   GOOGLE_CLIENT_SECRET: requireEnv('GOOGLE_CLIENT_SECRET'),
