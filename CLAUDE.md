@@ -18,14 +18,14 @@ pnpm is pinned via corepack (`packageManager` in the root `package.json`); Node 
 ## Workspace layout
 
 - **`apps/web`** (`@repo/web`) — the React SPA (counter, tic-tac-toe, todo features).
-- **`apps/server`** (`@repo/server`) — Express 5 + Mongoose + JWT API. Grafted from the old standalone `server` repo via `git subtree` (its history is preserved here).
-- **`packages/shared`** (`@repo/shared`) — the API contract: zod schemas + `z.infer` types (`Task`, `User`, `AuthTokens`, create/update/login bodies). **Built** package: apps consume `dist/`, Turbo builds it before them. Contract only — server internals (mongoose schemas, `password`, `userId`) never go here.
+- **`apps/server`** (`@repo/server`) — Express 5 + Mongoose API, auth via better-auth. Grafted from the old standalone `server` repo via `git subtree` (its history is preserved here).
+- **`packages/shared`** (`@repo/shared`) — the API contract: zod schemas + `z.infer` types (`Task`, `User`, create/update bodies). **Built** package: apps consume `dist/`, Turbo builds it before them. Contract only — server internals (mongoose schemas, `password`, `userId`) never go here.
 - Apps depend on it via `"@repo/shared": "workspace:*"`. Rule: a type that crosses the HTTP boundary lives in shared; each side re-exports under its local names if needed (see `apps/server/src/modules/task/task.dto.ts`).
 
 ## Stack
 
 - **Web:** React 19 + TypeScript (strict), Vite, TanStack Router (file-based; `src/routes/` → generated `routeTree.gen.ts`), Tailwind CSS v4 + shadcn/radix-ui (some older features still use CSS Modules), `clsx`/`tailwind-merge` (`cn()` in `src/lib/utils.ts`), axios (`src/lib/api.ts`), zustand.
-- **Server:** Express 5 (note: bare `'*'` routes throw under path-to-regexp v8 — use a RegExp), Mongoose, JWT auth, zod validation, ioredis cache (optional — degrades to no-cache), winston. `module: nodenext`; `declaration: false` (it's an app, not a library — also avoids TS2883 under pnpm).
+- **Server:** Express 5 (note: bare `'*'` routes throw under path-to-regexp v8 — use a RegExp), Mongoose, better-auth (Google + email/password, cookie sessions), zod validation, ioredis cache (optional — degrades to no-cache), winston. `module: nodenext`; `declaration: false` (it's an app, not a library — also avoids TS2883 under pnpm).
 - **Tests:** Vitest (+ RTL/jsdom in web); Playwright for e2e.
 
 ## Web app architecture (`apps/web/src/`)
@@ -44,7 +44,7 @@ pnpm is pinned via corepack (`packageManager` in the root `package.json`); Node 
 ## Testing
 
 - **Unit / component** — Vitest specs next to the source (`*.test.ts(x)`); web setup in `src/test/setup.ts`. Run all: `pnpm test`; one package: `pnpm --filter @repo/server test`.
-- **E2E** — Playwright, `apps/web/e2e/*.spec.ts`; config auto-starts the Vite dev server (`pnpm dev`). The Todo/`/tasks` flows need the API server + Mongo running; counters and tic-tac-toe are backend-free.
+- **E2E** — Playwright, `apps/web/e2e/*.spec.ts`; config auto-starts the Vite dev server (`pnpm dev`). E2E is fully network-mocked (`mockTasksApi` + a `get-session` stub) — no API server or Mongo needed; only manual verification needs live servers.
 - **Browser verification — prefer the CLI, not the MCP.** To _verify_ known behavior, write/run a Playwright spec. Reserve the Playwright MCP for open-ended _exploration_.
 
 ## Project tooling (Claude Code)
@@ -76,9 +76,10 @@ Non-trivial features flow through four rerunnable commands. Each reads the prior
 The todo feature talks to `apps/server` (same repo). Client in `apps/web/src/features/todo/api/tasksApi.ts`, axios instance in `apps/web/src/lib/api.ts`. **The contract types/schemas live in `@repo/shared` — change them there, both sides feel it at compile time.**
 
 - **The API is mounted under `/api`** (`/health` stays at root). Base URL from `VITE_API_BASE_URL`: dev `http://localhost:3000/api` (`.env.local`), prod `/api` (same-origin; `.env.production`). `VITE_*` values are baked at build time.
-- Dev auth auto-logs-in via `VITE_DEV_EMAIL` / `VITE_DEV_PASSWORD` and stores `accessToken` in `localStorage`; a response interceptor retries once on `401`. There is **no production auth flow yet** (known gap).
+- **Auth is better-auth** at `/api/auth/*` via `toNodeHandler`, mounted **before** `express.json()` — a hard constraint: better-auth reads the raw body, so anyone editing `app.ts` must keep that ordering.
+- The web holds the session in an **httpOnly cookie** (axios `withCredentials: true`); there is no token in `localStorage` and no dev auto-login — `VITE_DEV_EMAIL` / `VITE_DEV_PASSWORD` are gone. Sign in at `/login` (Google or email/password); the whole app sits behind a root `beforeLoad` guard.
 - **Task shape:** `{ id: string; title: string; isCompleted: boolean }` — `title` (not `text`), `isCompleted` (not `done`).
-- Endpoints: `GET/POST /api/tasks`, `PUT/DELETE /api/tasks/:id`, `POST /api/auth/login`, swagger at `/api/api-docs`.
+- Endpoints: `GET/POST /api/tasks`, `PUT/DELETE /api/tasks/:id`, swagger at `/api/api-docs`. Auth endpoints are better-auth's, under `/api/auth/*` (e.g. `sign-in/email`, `sign-up/email`, `callback/google`, `get-session`).
 - In prod the Express server also serves the web build (`apps/web/dist`) with an SPA fallback for non-`/api` paths — one deployable image (see `apps/server/Dockerfile`; CI pushes it to ECR on `main`).
 
 ## Working style
