@@ -71,11 +71,19 @@ No session → `UnauthorizedError` (401). Session → `req.user = { userId: sess
 - Dependencies: `jsonwebtoken`, `bcrypt`, `@types/*` for both (nothing else uses them). Also removes the `allowBuilds` bcrypt entry's reason for existing — leave `pnpm-workspace.yaml` cleanup to the plan.
 - Swagger docs for the old auth endpoints.
 
+### Small but load-bearing follow-ons
+
+- **Move `mongodb` from `devDependencies` to `dependencies`** — today it's dev-only (used just for types), but `mongodbAdapter` needs the driver at runtime; a pruned prod image would crash on boot without this.
+- `task.schema.ts`: drop the now-dangling `ref: 'User'` on `userId` (no `populate` anywhere; the mongoose `User` model is deleted). better-auth's Mongo adapter uses `ObjectId` ids, so the hex-string `session.user.id` still casts cleanly into the existing `ObjectId` field.
+- `shared/types/express.d.ts` imports `JwtPayload` from the deleted module — repoint it at the replacement `AuthUser` type.
+- **Rate limiting (accepted gap):** the better-auth handler mounts *before* `limiter`, so express-rate-limit no longer covers auth endpoints. better-auth ships its own rate limiting (enabled by default in production) — rely on that.
+- Two findings from the 2026-07-03 security review are subsumed for free: the login **user-enumeration** leak ('Invalid email' vs 'Invalid password' — better-auth returns uniform credential errors) and the **localStorage-token XSS exposure** (cookie sessions).
+
 ## Phase 3 — Web: login screen + auth client
 
 - **`src/lib/authClient.ts`:** `createAuthClient` from `better-auth/react` with `baseURL: new URL(import.meta.env.VITE_API_BASE_URL + '/auth', window.location.origin).href` — dev resolves to `http://localhost:3000/api/auth`, prod's relative `/api` resolves against the page origin to `<origin>/api/auth` (better-auth accepts a baseURL that includes the basePath).
 - **New `src/routes/login.tsx`** (the only public route), retro-arcade styling per `PRODUCT.md`:
-  - Primary: **"Connect via Google"** → `authClient.signIn.social({ provider: 'google', callbackURL: '/tasks' })`
+  - Primary: **"Connect via Google"** → `authClient.signIn.social({ provider: 'google', callbackURL: \`${window.location.origin}/tasks\` })`. **The callbackURL must be absolute in dev:** the Google callback lands on the *server* (`:3000`), so a relative `/tasks` would redirect to `localhost:3000/tasks` — which serves nothing in dev (the SPA lives on `:5173`; only prod serves it from Express). `window.location.origin` yields the right origin in both envs, and `:5173` is already in `trustedOrigins`.
   - Secondary: email/password form with sign-in/sign-up toggle (`authClient.signIn.email` / `signUp.email`)
 - **`src/lib/api.ts` rewrite:** delete `login()`, `ensureLogin`, the localStorage token, the request interceptor, and the 401 auto-relogin. Replace with `withCredentials: true` (the session cookie rides along automatically) and a 401 response interceptor that redirects to `/login`.
 - **Header:** show the signed-in user (name/avatar from the session — Google supplies both) + a **Sign out** button (`authClient.signOut()` → redirect to `/login`).
@@ -94,14 +102,17 @@ Nothing to build — this phase is *understanding*. On the Google callback, bett
 ## Testing
 
 - **Unit:** rewritten `authenticate` — session present → `req.user` populated + `next()`; absent → 401 — with `auth.api.getSession` mocked. Existing task service/cache tests unaffected.
-- **E2E (Playwright):** Google's consent screen can't be automated (bot detection), so the e2e signs up/in via the **email/password** path — it exercises the same better-auth session machinery, cookie, guard, and redirect. The Google flow is verified **manually once**: click the button, consent, land on `/tasks`, check the `user`/`account`/`session` collections in Mongo.
-- Needs the API + Mongo running, same as today's `/tasks` e2e.
+- **E2E reality check:** the existing suite does **not** hit a real API — `e2e/helpers/mockTasksApi.ts` intercepts `**/auth/login` and `**/tasks` at the network layer, and Playwright's `webServer` starts only Vite. The spec keeps that pattern:
+  - `mockTasksApi` swaps its `/auth/login` stub for a **`GET /api/auth/get-session` stub** returning a fake session (that's the one endpoint the root guard calls).
+  - **Every existing spec needs the session stub — including `counter.spec.ts`** — because the whole-app guard now fronts every route. This is the biggest blast radius of the guard decision.
+  - One new spec covers the login screen itself: unauthenticated visit → redirected to `/login`; both buttons render; mocked sign-in → lands on `/tasks`.
+- **Real-flow verification is manual, once:** email/password sign-up against the running server, and the Google flow (click the button, consent, land on `/tasks`, then inspect the `user`/`account`/`session` collections in Mongo). A real-server auth e2e (API + Mongo in `webServer`) is deliberately out of scope — new infra for marginal coverage.
 
 ## Ops notes
 
 - **Dev cookies work as-is:** `localhost:5173` ↔ `localhost:3000` is same-site (`SameSite=Lax` suffices) — the pain starts only with cross-*domain* setups, which we don't have.
 - **Prod:** same-origin (Express serves the SPA), so cookies are trivially fine. Needs `BETTER_AUTH_URL=<prod origin>`, a prod redirect URI added in the Google console, and secrets injected via the deploy pipeline (SSM/env — *not* the image). No live prod environment exists right now (EC2 gone; ECR image only), so this is a checklist for later, not work now.
-- **README:** the root README answers assignment questions — extend it with the four questions below.
+- **Docs that must move with the code** (all describe the old auth today): root `README.md` (the "JWT API" label, the dev-credentials setup line, and the shared-contract list — `loginBodySchema`/`authTokensSchema` die with this change), `CLAUDE.md`'s "Backend API contract" section (dev auto-login, localStorage token, known-gap note), both `.env.example` files, and the swagger spec. README additionally gains the four questions below.
 
 ## The four assignment questions (answers to land in README)
 
