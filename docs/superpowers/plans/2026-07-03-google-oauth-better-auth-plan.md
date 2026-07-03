@@ -48,7 +48,7 @@
 
 **Files:** none (verification only). Nadav creates the Google Cloud OAuth client per spec Phase 1 (redirect URI `http://localhost:3000/api/auth/callback/google`).
 
-- [ ] **Step 1: Verify env keys exist without echoing values**
+- [x] **Step 1: Verify env keys exist without echoing values**
 
 Run:
 ```bash
@@ -58,7 +58,7 @@ done
 ```
 Expected: five `present` lines. **Never print the values.** If `BETTER_AUTH_SECRET` is missing, Nadav generates one: `openssl rand -base64 32` (pasted by him, not echoed into the transcript). If any `MISSING` remains → **stop and ask Nadav**; Tasks 3+ cannot be runtime-verified without them.
 
-- [ ] **Step 2: Create the feature branch**
+- [x] **Step 2: Create the feature branch**
 
 ```bash
 git switch main && git pull --ff-only && git switch -c feat/better-auth-google
@@ -68,7 +68,7 @@ git switch main && git pull --ff-only && git switch -c feat/better-auth-google
 
 **Files:** Modify: `apps/server/package.json`, `apps/web/package.json`, `pnpm-lock.yaml` (root)
 
-- [ ] **Step 1: Add better-auth to both apps; move mongodb to runtime deps**
+- [x] **Step 1: Add better-auth to both apps; move mongodb to runtime deps**
 
 ```bash
 pnpm --filter @repo/server add better-auth mongodb
@@ -77,17 +77,17 @@ pnpm --filter @repo/web add better-auth
 ```
 Then verify `apps/server/package.json`: `mongodb` appears under `dependencies` only (delete the `devDependencies` line by hand if pnpm left it).
 
-- [ ] **Step 2: Clean root install + lockfile sanity**
+- [x] **Step 2: Clean root install + lockfile sanity**
 
 Run: `pnpm install`
 Expected: exits 0. Inspect `git diff pnpm-lock.yaml --stat` — additions for better-auth/its transitive deps; no surprise deletions of unrelated packages (lockfile-drift memory).
 
-- [ ] **Step 3: Baseline gauntlet still green**
+- [x] **Step 3: Baseline gauntlet still green**
 
 Run: `pnpm turbo run typecheck test`
 Expected: all packages pass (nothing imports better-auth yet).
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add apps/server/package.json apps/web/package.json pnpm-lock.yaml
@@ -100,7 +100,7 @@ git commit -m "chore(auth): add better-auth; move mongodb to runtime deps"
 
 **Green-chain strategy (Tasks 2→5):** each task compiles, tests green, and commits on its own. The old JWT module keeps compiling until Task 5 deletes it in one stroke — so the new env keys are *added* here and the old `JWT_SECRET`/`REFRESH_TOKEN_SECRET` are only *removed* in Task 5, together with their last consumers.
 
-- [ ] **Step 1: Extend `env.ts`** — add four keys, **keep the two JWT keys for now** (the not-yet-deleted old module still reads them):
+- [x] **Step 1: Extend `env.ts`** — add four keys, **keep the two JWT keys for now** (the not-yet-deleted old module still reads them):
 
 ```ts
 export const env = {
@@ -116,9 +116,9 @@ export const env = {
 };
 ```
 
-- [ ] **Step 2: Update `.env.example`** — add the four new keys with placeholders (`GOOGLE_CLIENT_ID=replace_me`, `BETTER_AUTH_URL=http://localhost:3000`, …); leave the JWT keys until Task 5 removes them.
+- [x] **Step 2: Update `.env.example`** — add the four new keys with placeholders (`GOOGLE_CLIENT_ID=replace_me`, `BETTER_AUTH_URL=http://localhost:3000`, …); leave the JWT keys until Task 5 removes them.
 
-- [ ] **Step 3: Verify green + commit**
+- [x] **Step 3: Verify green + commit**
 
 Run: `pnpm --filter @repo/server typecheck && pnpm --filter @repo/server test`
 Expected: PASS.
@@ -131,7 +131,7 @@ git commit -m "feat(server): env contract for better-auth (Google creds, secret,
 
 **Files:** Create: `apps/server/src/shared/config/auth.ts`. Modify: `apps/server/src/app.ts`
 
-- [ ] **Step 1: Create `auth.ts`**
+- [x] **Step 1: Create `auth.ts`**
 
 ```ts
 import { betterAuth } from 'better-auth';
@@ -164,7 +164,7 @@ export const auth = betterAuth({
 });
 ```
 
-- [ ] **Step 2: Mount in `app.ts`** — delete `import authRoutes …` and `app.use('/api/auth', authRoutes)`; add after the `cors()` line and **before** `express.json()` (handler needs the raw body):
+- [x] **Step 2: Mount in `app.ts`** — delete `import authRoutes …` and `app.use('/api/auth', authRoutes)`; add after the `cors()` line and **before** `express.json()` (handler needs the raw body):
 
 ```ts
 import { toNodeHandler } from 'better-auth/node';
@@ -176,13 +176,13 @@ app.use(express.json());
 ```
 (Known accepted gap: auth endpoints now sit before `limiter`; better-auth's own rate limiting covers prod.)
 
-- [ ] **Step 3: Runtime smoke — better-auth answers**
+- [x] **Step 3: Runtime smoke — better-auth answers**
 
 Run: `pnpm --filter @repo/server dev` (needs Mongo up), then in another shell:
 `curl -s http://localhost:3000/api/auth/ok`
 Expected: `{"ok":true}`. Also `curl -s -o /dev/null -w '%{http_code}' -X POST http://localhost:3000/api/auth/sign-up/email -H 'content-type: application/json' -d '{"name":"Smoke","email":"smoke@test.dev","password":"smoke-pass-123"}'` → `200`, and the `user`/`account`/`session` collections now exist in Mongo (`mongosh --eval 'db.getSiblingDB("server_dev").getCollectionNames()'` — adjust db name to MONGODB_URI).
 
-- [ ] **Step 4: Verify green + commit** (the old auth module still compiles — it still finds its env keys; it's simply unrouted now)
+- [x] **Step 4: Verify green + commit** (the old auth module still compiles — it still finds its env keys; it's simply unrouted now)
 
 Run: `pnpm --filter @repo/server typecheck && pnpm --filter @repo/server test`
 Expected: PASS.
@@ -195,7 +195,7 @@ git commit -m "feat(server): mount better-auth at /api/auth (Google + email/pass
 
 **Files:** Create: `apps/server/src/shared/middlewares/authenticate.test.ts`. Rewrite: `authenticate.ts`. Modify: `apps/server/src/shared/types/express.d.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 import { describe, it, expect, vi, beforeEach } from 'vitest';
@@ -242,10 +242,10 @@ describe('authenticate (better-auth session)', () => {
 });
 ```
 
-- [ ] **Step 2: Run it — must fail** — `pnpm --filter @repo/server test -- authenticate`
+- [x] **Step 2: Run it — must fail** — `pnpm --filter @repo/server test -- authenticate`
 Expected: FAIL (old implementation is sync + JWT-based; `req.user` shape comes from `jwt.verify`).
 
-- [ ] **Step 3: Rewrite `authenticate.ts`**
+- [x] **Step 3: Rewrite `authenticate.ts`**
 
 ```ts
 import { Request, Response, NextFunction } from 'express';
@@ -276,7 +276,7 @@ export async function authenticate(req: Request, _res: Response, next: NextFunct
 }
 ```
 
-- [ ] **Step 4: Repoint `express.d.ts`**
+- [x] **Step 4: Repoint `express.d.ts`**
 
 ```ts
 import { AuthUser } from '../middlewares/authenticate.ts';
@@ -291,7 +291,7 @@ declare global {
 export {};
 ```
 
-- [ ] **Step 5: Run the test — green, whole package green, commit**
+- [x] **Step 5: Run the test — green, whole package green, commit**
 
 Run: `pnpm --filter @repo/server typecheck && pnpm --filter @repo/server test`
 Expected: PASS (the old auth module is unrouted but still compiles until Task 5).
@@ -304,21 +304,21 @@ git commit -m "feat(server): authenticate via better-auth session; preserve req.
 
 **Files:** Delete: `apps/server/src/modules/auth/` (all 6 files), `apps/server/src/modules/user/` (all 3 files). Modify: `apps/server/src/shared/config/env.ts` (drop the two JWT keys now), `apps/server/.env.example` (same), `apps/server/src/modules/task/task.schema.ts` (drop `ref: 'User'`), `apps/server/package.json` (−`bcrypt`, −`jsonwebtoken`, −their `@types`), `pnpm-workspace.yaml` (drop `bcrypt` from `allowBuilds`; keep `esbuild`), `apps/server/src/shared/utils/swagger.ts` (remove old auth-endpoint docs if any survive the module deletion — the JSDoc lives in the deleted `auth.routes.ts`; grep to confirm).
 
-- [ ] **Step 1: Delete + prune**
+- [x] **Step 1: Delete + prune**
 
 ```bash
 git rm -r apps/server/src/modules/auth apps/server/src/modules/user
 pnpm --filter @repo/server remove bcrypt jsonwebtoken @types/bcrypt @types/jsonwebtoken
 grep -rn "auth/login\|/auth\b" apps/server/src/shared/utils/swagger.ts   # clean any leftovers
 ```
-Now finish the env cleanup deferred from Task 2: remove `JWT_SECRET` + `REFRESH_TOKEN_SECRET` from `env.ts` and `.env.example` (their last consumers just got deleted). In `task.schema.ts`: `userId: { type: Schema.Types.ObjectId, required: true }` (ref gone). In `pnpm-workspace.yaml`: remove the `bcrypt` allowBuilds entry. Run `pnpm install` (lockfile shrinks; check diff for surprise deletions).
+Now finish the env cleanup deferred from Task 2: remove `JWT_SECRET` + `REFRESH_TOKEN_SECRET` from `env.ts`, `.env.example`, **and their stubs in `apps/server/tests/setup.ts`** (Task 2 discovered env.ts is evaluated transitively by two test suites; four new-key stubs were added there — keep those) (their last consumers just got deleted). In `task.schema.ts`: `userId: { type: Schema.Types.ObjectId, required: true }` (ref gone). In `pnpm-workspace.yaml`: remove the `bcrypt` allowBuilds entry. Run `pnpm install` (lockfile shrinks; check diff for surprise deletions).
 
-- [ ] **Step 2: Server green again**
+- [x] **Step 2: Server green again**
 
 Run: `pnpm --filter @repo/server typecheck && pnpm --filter @repo/server test`
 Expected: PASS; `grep -rn "jsonwebtoken\|bcrypt\|JwtPayload\|user.service\|refresh-token\|JWT_SECRET" apps/server/src` returns nothing.
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add -A apps/server pnpm-workspace.yaml pnpm-lock.yaml
