@@ -6,6 +6,8 @@ test('unauthenticated visit is walled off to /login', async ({ page }) => {
     await page.goto('/tasks')
     await expect(page).toHaveURL(/\/login$/)
     await expect(page.getByRole('button', { name: /connect via google/i })).toBeVisible()
+    // the app shell (sidebar nav) must not frame the login screen
+    await expect(page.getByRole('navigation')).toHaveCount(0)
 })
 
 test('authenticated user passes the guard and sees the header account', async ({ page }) => {

@@ -1,4 +1,4 @@
-import { createRootRoute, redirect } from '@tanstack/react-router'
+import { createRootRoute, redirect, Outlet, useRouterState } from '@tanstack/react-router'
 import { TanStackRouterDevtools } from '@tanstack/react-router-devtools'
 import Layout from '@/layout/Layout/Layout'
 import NotFoundPage from '@/pages/NotFoundPage'
@@ -16,9 +16,11 @@ export const Route = createRootRoute({
 })
 
 function RootComponent() {
+    // /login stands alone — no app shell (sidebar/header) around the sign-in screen
+    const pathname = useRouterState({ select: (s) => s.location.pathname })
     return (
         <>
-            <Layout />
+            {pathname === '/login' ? <Outlet /> : <Layout />}
             <Toaster richColors position="top-right" />
             {import.meta.env.DEV && <TanStackRouterDevtools />}
         </>
