@@ -7,7 +7,7 @@ See `CLAUDE.md → "Spec-driven workflow"` for how the pipeline works.
 
 | Feature | Date | Spec | Plan | Status |
 | --- | --- | --- | --- | --- |
-| Google OAuth via better-auth | 2026-07-03 | [spec](specs/2026-07-03-google-oauth-better-auth-design.md) | [plan](plans/2026-07-03-google-oauth-better-auth-plan.md) | In progress |
+| Google OAuth via better-auth | 2026-07-03 | [spec](specs/2026-07-03-google-oauth-better-auth-design.md) | [plan](plans/2026-07-03-google-oauth-better-auth-plan.md) | Done |
 | Polyrepo → Turborepo monorepo | 2026-06-30 | [spec](specs/2026-06-30-polyrepo-to-monorepo-design.md) | [plan](plans/2026-06-30-polyrepo-to-monorepo-plan.md) | Done |
 | Todo cache (Redis cache-aside) | 2026-06-24 | [spec](specs/2026-06-24-todo-cache-design.md) | [plan](plans/2026-06-24-todo-cache-plan.md) | Done |
 | Todo search debounce | 2026-06-24 | [spec](specs/2026-06-24-todo-search-debounce-design.md) | [plan](plans/2026-06-24-todo-search-debounce-plan.md) | Done |

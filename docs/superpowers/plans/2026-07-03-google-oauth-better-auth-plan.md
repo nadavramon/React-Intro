@@ -329,7 +329,7 @@ git commit -m "feat(server): delete JWT auth module — better-auth owns users, 
 
 **Files:** Create: `apps/web/src/lib/authClient.ts`. Rewrite: `apps/web/src/lib/api.ts`. Modify: `apps/web/.env.example` + `apps/web/.env.local` (drop `VITE_DEV_EMAIL`/`VITE_DEV_PASSWORD`)
 
-- [ ] **Step 1: `authClient.ts`**
+- [x] **Step 1: `authClient.ts`**
 
 ```ts
 import { createAuthClient } from 'better-auth/react'
@@ -341,7 +341,7 @@ export const authClient = createAuthClient({
 })
 ```
 
-- [ ] **Step 2: Rewrite `api.ts`** (delete `login()`, `ensureLogin`, `TOKEN_KEY`, both old interceptors, the `AuthTokens` import):
+- [x] **Step 2: Rewrite `api.ts`** (delete `login()`, `ensureLogin`, `TOKEN_KEY`, both old interceptors, the `AuthTokens` import):
 
 ```ts
 import axios from 'axios'
@@ -361,19 +361,19 @@ api.interceptors.response.use(
 )
 ```
 
-- [ ] **Step 3: Web unit tests + typecheck**
+- [x] **Step 3: Web unit tests + typecheck**
 
 Run: `pnpm --filter @repo/web typecheck && pnpm --filter @repo/web test`
 Expected: PASS (todoStore tests mock the api module's methods, not the interceptors). If a test imported `login()` — delete that expectation; nothing else uses it (`grep -rn "lib/api" apps/web/src` to confirm call sites only use `api`).
 
-- [ ] **Step 4: Commit** — `git add apps/web/src/lib apps/web/.env.example && git commit -m "feat(web): better-auth client; cookie-credentialed axios, drop dev auto-login"` (`.env.local` is untracked — edit it but it won't be in the commit).
+- [x] **Step 4: Commit** — `git add apps/web/src/lib apps/web/.env.example && git commit -m "feat(web): better-auth client; cookie-credentialed axios, drop dev auto-login"` (`.env.local` is untracked — edit it but it won't be in the commit).
 
 ### Task 7: Login page — TDD component, then route
 
 **Files:** Create: `apps/web/src/pages/LoginPage.test.tsx`, `apps/web/src/pages/LoginPage.tsx`, `apps/web/src/routes/login.tsx`
 **Skills:** frontend-design
 
-- [ ] **Step 1: Failing RTL test first** (`LoginPage.test.tsx`):
+- [x] **Step 1: Failing RTL test first** (`LoginPage.test.tsx`):
 
 ```tsx
 import { describe, it, expect, vi, beforeEach } from 'vitest'
@@ -427,15 +427,15 @@ describe('LoginPage', () => {
 ```
 Run `pnpm --filter @repo/web test -- LoginPage` → FAIL (module missing).
 
-- [ ] **Step 2: Implement `LoginPage.tsx`** — retro-arcade per `PRODUCT.md`/CLAUDE.md design context (bold, playful, WCAG AA, keyboard-navigable, no color-only state). Structure (styling is the implementer's craft, behavior is fixed):
+- [x] **Step 2: Implement `LoginPage.tsx`** — retro-arcade per `PRODUCT.md`/CLAUDE.md design context (bold, playful, WCAG AA, keyboard-navigable, no color-only state). Structure (styling is the implementer's craft, behavior is fixed):
   - `signIn.social({ provider: 'google', callbackURL: `${window.location.origin}/tasks` })` — **absolute URL, spec-critical** (relative would strand dev logins on `:3000`).
   - Email/password form with a sign-in ⇄ sign-up mode toggle ("Need an account? Sign up"); sign-up adds the **required `name` field** (better-auth 1.6 requires it).
   - On success: `window.location.assign('/tasks')` (full reload lets the root guard re-fetch the session). On `error`: `toast.error(error.message)` via the existing `sonner` Toaster; also render the message inline for AA (not color-alone).
   - Labels wired with `htmlFor`/`id` so the RTL `getByLabelText` queries pass.
 
-- [ ] **Step 3: Test green** — `pnpm --filter @repo/web test -- LoginPage` → 3 pass.
+- [x] **Step 3: Test green** — `pnpm --filter @repo/web test -- LoginPage` → 3 pass.
 
-- [ ] **Step 4: Route file `routes/login.tsx`** (public; authed users bounce):
+- [x] **Step 4: Route file `routes/login.tsx`** (public; authed users bounce):
 
 ```tsx
 import { createFileRoute, redirect } from '@tanstack/react-router'
@@ -452,13 +452,13 @@ export const Route = createFileRoute('/login')({
 ```
 Vite dev regenerates `routeTree.gen.ts` (generated; lint/format-ignored).
 
-- [ ] **Step 5: Commit** — `git add apps/web/src/pages/LoginPage* apps/web/src/routes/login.tsx apps/web/src/routeTree.gen.ts && git commit -m "feat(web): login screen — Google + email/password via better-auth"`
+- [x] **Step 5: Commit** — `git add apps/web/src/pages/LoginPage* apps/web/src/routes/login.tsx apps/web/src/routeTree.gen.ts && git commit -m "feat(web): login screen — Google + email/password via better-auth"`
 
 ### Task 8: Whole-app guard + Header session UI — e2e-first
 
 **Files:** Modify: `apps/web/e2e/helpers/mockTasksApi.ts`, `apps/web/src/routes/__root.tsx`, `apps/web/src/routes/tasks.tsx`, `apps/web/src/layout/Header/Header.tsx`. Create: `apps/web/e2e/auth.spec.ts`
 
-- [ ] **Step 1: Update the mock helper** — in `mockTasksApi.ts`, replace the `**/auth/login` stub with a session stub (all existing specs — counter included — call this helper in `beforeEach`, so they inherit authentication for free):
+- [x] **Step 1: Update the mock helper** — in `mockTasksApi.ts`, replace the `**/auth/login` stub with a session stub (all existing specs — counter included — call this helper in `beforeEach`, so they inherit authentication for free):
 
 ```ts
 const now = () => new Date().toISOString()
@@ -475,7 +475,7 @@ export async function mockAuthSession(page: Page, session: typeof mockSession | 
 ```
 Call `await mockAuthSession(page)` at the top of `mockTasksApi` (so existing specs stay one-call). Keep the `**/tasks` stubs unchanged.
 
-- [ ] **Step 2: Failing e2e first** (`e2e/auth.spec.ts`):
+- [x] **Step 2: Failing e2e first** (`e2e/auth.spec.ts`):
 
 ```ts
 import { test, expect } from '@playwright/test'
@@ -497,7 +497,7 @@ test('authenticated user passes the guard and sees the header account', async ({
 ```
 Run: `pnpm --filter @repo/web test:e2e -- auth.spec.ts` → FAIL (no guard yet, no Sign out).
 
-- [ ] **Step 3: Root guard in `__root.tsx`** — add `beforeLoad`; move the todo `init()` effect out (it would fire a doomed fetch on `/login`):
+- [x] **Step 3: Root guard in `__root.tsx`** — add `beforeLoad`; move the todo `init()` effect out (it would fire a doomed fetch on `/login`):
 
 ```tsx
 export const Route = createRootRoute({
@@ -519,34 +519,34 @@ useEffect(() => {
 }, [])
 ```
 
-- [ ] **Step 4: Header account UI** — in `Header.tsx`, right-aligned cluster: `const { data: session } = authClient.useSession()`; when present show `session.user.name` (+ avatar `img` if `session.user.image`, with empty-`alt` since the name is adjacent) and a **Sign out** button → `authClient.signOut()` then `window.location.assign('/login')`. Keyboard-focusable, visible focus ring, matches the existing header idiom.
+- [x] **Step 4: Header account UI** — in `Header.tsx`, right-aligned cluster: `const { data: session } = authClient.useSession()`; when present show `session.user.name` (+ avatar `img` if `session.user.image`, with empty-`alt` since the name is adjacent) and a **Sign out** button → `authClient.signOut()` then `window.location.assign('/login')`. Keyboard-focusable, visible focus ring, matches the existing header idiom.
 
-- [ ] **Step 5: e2e green — new and old**
+- [x] **Step 5: e2e green — new and old**
 
 Run: `pnpm --filter @repo/web test:e2e`
 Expected: `auth.spec.ts` passes AND the pre-existing suite (counter, todo-global-state) still passes — proving the guard didn't break the mocked specs.
 
-- [ ] **Step 6: Commit** — `git add apps/web/src apps/web/e2e && git commit -m "feat(web): whole-app session guard, header account UI; e2e session stubs"`
+- [x] **Step 6: Commit** — `git add apps/web/src apps/web/e2e && git commit -m "feat(web): whole-app session guard, header account UI; e2e session stubs"`
 
 ### Task 9: Shared contract + docs blast radius
 
 **Files:** Delete: `packages/shared/src/auth.ts`. Modify: `packages/shared/src/index.ts`, `README.md`, `CLAUDE.md`, (already done: both `.env.example`s)
 
-- [ ] **Step 1: Shared cleanup** — delete `packages/shared/src/auth.ts` (`loginBodySchema`, `authTokensSchema` have no remaining importers — verify: `grep -rn "AuthTokens\|loginBodySchema\|authTokensSchema" apps packages --include='*.ts*' | grep -v shared/src` → empty); drop the `export * from './auth.ts'` line from `index.ts`. `userPublicSchema`/`UserRole` stay. Run `pnpm --filter @repo/shared build && pnpm turbo run typecheck` → green.
+- [x] **Step 1: Shared cleanup** — delete `packages/shared/src/auth.ts` (`loginBodySchema`, `authTokensSchema` have no remaining importers — verify: `grep -rn "AuthTokens\|loginBodySchema\|authTokensSchema" apps packages --include='*.ts*' | grep -v shared/src` → empty); drop the `export * from './auth.ts'` line from `index.ts`. `userPublicSchema`/`UserRole` stay. Run `pnpm --filter @repo/shared build && pnpm turbo run typecheck` → green.
 
-- [ ] **Step 2: README** — fix the "JWT API" label (line ~8), the dev-credentials setup line (~26: now "sign in via Google or email/password; server needs Google OAuth credentials — see `apps/server/.env.example`"), the shared-contract list (~46: remove `loginBodySchema`/`authTokensSchema`); append the spec's four Q&A prose blocks (redirect/callback/exchange; secret placement; what better-auth replaces; identity vs authorization — copy from the spec's "four assignment questions" section).
+- [x] **Step 2: README** — fix the "JWT API" label (line ~8), the dev-credentials setup line (~26: now "sign in via Google or email/password; server needs Google OAuth credentials — see `apps/server/.env.example`"), the shared-contract list (~46: remove `loginBodySchema`/`authTokensSchema`); append the spec's four Q&A prose blocks (redirect/callback/exchange; secret placement; what better-auth replaces; identity vs authorization — copy from the spec's "four assignment questions" section).
 
-- [ ] **Step 3: CLAUDE.md** — rewrite the "Backend API contract" auth paragraphs: cookie sessions via better-auth, `/api/auth/*` handled by `toNodeHandler` (mounted before `express.json()` — note this as a constraint), login screen at `/login`, whole-app guard, no more `VITE_DEV_*`/localStorage/known-gap note; stack line: replace "JWT auth" with "better-auth (Google + email/password, cookie sessions)".
+- [x] **Step 3: CLAUDE.md** — rewrite the "Backend API contract" auth paragraphs: cookie sessions via better-auth, `/api/auth/*` handled by `toNodeHandler` (mounted before `express.json()` — note this as a constraint), login screen at `/login`, whole-app guard, no more `VITE_DEV_*`/localStorage/known-gap note; stack line: replace "JWT auth" with "better-auth (Google + email/password, cookie sessions)".
 
-- [ ] **Step 4: Commit** — `git add packages/shared README.md CLAUDE.md && git commit -m "docs+shared: retire JWT contract; document better-auth flow and the four assignment answers"`
+- [x] **Step 4: Commit** — `git add packages/shared README.md CLAUDE.md && git commit -m "docs+shared: retire JWT contract; document better-auth flow and the four assignment answers"`
 
 ### Task 10: Full verification — gauntlet + real flows
 
 **Files:** none (verification)
 
-- [ ] **Step 1: The gauntlet** — run `/check --e2e` (= `pnpm format:check` + `turbo run lint typecheck test` + Playwright). Expected: all green. Fix anything it surfaces before proceeding.
+- [x] **Step 1: The gauntlet** — run `/check --e2e` (= `pnpm format:check` + `turbo run lint typecheck test` + Playwright). Expected: all green. Fix anything it surfaces before proceeding.
 
-- [ ] **Step 2: Real email/password round-trip (dev servers + Mongo up)**
+- [x] **Step 2: Real email/password round-trip (dev servers + Mongo up)**
 
 ```bash
 # sign-up sets a session cookie; the cookie jar proves the round-trip
@@ -557,9 +557,9 @@ curl -s -b /tmp/ba-jar http://localhost:3000/api/tasks | head -c 200; echo      
 curl -s -o /dev/null -w '%{http_code}\n' http://localhost:3000/api/tasks                                          # 401 (no cookie)
 ```
 
-- [ ] **Step 3: Manual Google flow (Nadav, once)** — browser at `http://localhost:5173` → redirected to `/login` → "Connect via Google" → consent → lands on `/tasks`; header shows Google name/avatar; `mongosh` shows the `google` row in `account` linked to the `user` doc; Sign out returns to `/login` and `/tasks` is walled again. Result recorded in the journal.
+- [x] **Step 3: Manual Google flow (Nadav, once)** — browser at `http://localhost:5173` → redirected to `/login` → "Connect via Google" → consent → lands on `/tasks`; header shows Google name/avatar; `mongosh` shows the `google` row in `account` linked to the `user` doc; Sign out returns to `/login` and `/tasks` is walled again. Result recorded in the journal.
 
-- [ ] **Step 4: Push + PR**
+- [x] **Step 4: Push + PR**
 
 ```bash
 git push -u origin feat/better-auth-google
