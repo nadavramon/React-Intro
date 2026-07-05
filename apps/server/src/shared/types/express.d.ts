@@ -1,11 +1,10 @@
-import { JwtPayload } from '../../modules/auth/auth.types.ts';
+import { AuthUser } from '../middlewares/authenticate.ts';
 
 declare global {
   namespace Express {
     interface Request {
-      user?: JwtPayload;
+      user?: AuthUser;
     }
   }
 }
-
 export {};

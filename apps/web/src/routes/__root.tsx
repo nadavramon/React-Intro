@@ -1,10 +1,7 @@
-import { useEffect } from 'react'
-import { createRootRoute } from '@tanstack/react-router'
+import { createRootRoute, Outlet } from '@tanstack/react-router'
 import { TanStackRouterDevtools } from '@tanstack/react-router-devtools'
-import Layout from '@/layout/Layout/Layout'
 import NotFoundPage from '@/pages/NotFoundPage'
 import { Toaster } from '@/components/ui/sonner'
-import { useTodoStore } from '@/features/todo'
 
 export const Route = createRootRoute({
     component: RootComponent,
@@ -12,12 +9,9 @@ export const Route = createRootRoute({
 })
 
 function RootComponent() {
-    useEffect(() => {
-        useTodoStore.getState().init()
-    }, [])
     return (
         <>
-            <Layout />
+            <Outlet />
             <Toaster richColors position="top-right" />
             {import.meta.env.DEV && <TanStackRouterDevtools />}
         </>

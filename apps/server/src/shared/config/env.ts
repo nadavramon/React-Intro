@@ -10,9 +10,11 @@ function requireEnv(name: string): string {
 }
 
 export const env = {
-  JWT_SECRET: requireEnv('JWT_SECRET'),
-  REFRESH_TOKEN_SECRET: requireEnv('REFRESH_TOKEN_SECRET'),
   MONGODB_URI: requireEnv('MONGODB_URI'),
+  GOOGLE_CLIENT_ID: requireEnv('GOOGLE_CLIENT_ID'),
+  GOOGLE_CLIENT_SECRET: requireEnv('GOOGLE_CLIENT_SECRET'),
+  BETTER_AUTH_SECRET: requireEnv('BETTER_AUTH_SECRET'),
+  BETTER_AUTH_URL: requireEnv('BETTER_AUTH_URL'),
   PORT: process.env.PORT,
   REDIS_URL: process.env.REDIS_URL ?? 'redis://localhost:6379',
 };

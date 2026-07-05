@@ -17,7 +17,7 @@ RUN pnpm install --frozen-lockfile --prod
 COPY --from=builder /app/packages/shared/dist ./packages/shared/dist
 COPY --from=builder /app/apps/server/dist ./apps/server/dist
 COPY --from=builder /app/apps/web/dist ./apps/web/dist
-ENV NODE_ENV=dev
+ENV NODE_ENV=production
 ENV PORT=3000
 USER node
 EXPOSE 3000

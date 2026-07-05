@@ -48,7 +48,7 @@
 
 **Files:** none (verification only). Nadav creates the Google Cloud OAuth client per spec Phase 1 (redirect URI `http://localhost:3000/api/auth/callback/google`).
 
-- [ ] **Step 1: Verify env keys exist without echoing values**
+- [x] **Step 1: Verify env keys exist without echoing values**
 
 Run:
 ```bash
@@ -58,7 +58,7 @@ done
 ```
 Expected: five `present` lines. **Never print the values.** If `BETTER_AUTH_SECRET` is missing, Nadav generates one: `openssl rand -base64 32` (pasted by him, not echoed into the transcript). If any `MISSING` remains → **stop and ask Nadav**; Tasks 3+ cannot be runtime-verified without them.
 
-- [ ] **Step 2: Create the feature branch**
+- [x] **Step 2: Create the feature branch**
 
 ```bash
 git switch main && git pull --ff-only && git switch -c feat/better-auth-google
@@ -68,7 +68,7 @@ git switch main && git pull --ff-only && git switch -c feat/better-auth-google
 
 **Files:** Modify: `apps/server/package.json`, `apps/web/package.json`, `pnpm-lock.yaml` (root)
 
-- [ ] **Step 1: Add better-auth to both apps; move mongodb to runtime deps**
+- [x] **Step 1: Add better-auth to both apps; move mongodb to runtime deps**
 
 ```bash
 pnpm --filter @repo/server add better-auth mongodb
@@ -77,17 +77,17 @@ pnpm --filter @repo/web add better-auth
 ```
 Then verify `apps/server/package.json`: `mongodb` appears under `dependencies` only (delete the `devDependencies` line by hand if pnpm left it).
 
-- [ ] **Step 2: Clean root install + lockfile sanity**
+- [x] **Step 2: Clean root install + lockfile sanity**
 
 Run: `pnpm install`
 Expected: exits 0. Inspect `git diff pnpm-lock.yaml --stat` — additions for better-auth/its transitive deps; no surprise deletions of unrelated packages (lockfile-drift memory).
 
-- [ ] **Step 3: Baseline gauntlet still green**
+- [x] **Step 3: Baseline gauntlet still green**
 
 Run: `pnpm turbo run typecheck test`
 Expected: all packages pass (nothing imports better-auth yet).
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add apps/server/package.json apps/web/package.json pnpm-lock.yaml
@@ -100,7 +100,7 @@ git commit -m "chore(auth): add better-auth; move mongodb to runtime deps"
 
 **Green-chain strategy (Tasks 2→5):** each task compiles, tests green, and commits on its own. The old JWT module keeps compiling until Task 5 deletes it in one stroke — so the new env keys are *added* here and the old `JWT_SECRET`/`REFRESH_TOKEN_SECRET` are only *removed* in Task 5, together with their last consumers.
 
-- [ ] **Step 1: Extend `env.ts`** — add four keys, **keep the two JWT keys for now** (the not-yet-deleted old module still reads them):
+- [x] **Step 1: Extend `env.ts`** — add four keys, **keep the two JWT keys for now** (the not-yet-deleted old module still reads them):
 
 ```ts
 export const env = {
@@ -116,9 +116,9 @@ export const env = {
 };
 ```
 
-- [ ] **Step 2: Update `.env.example`** — add the four new keys with placeholders (`GOOGLE_CLIENT_ID=replace_me`, `BETTER_AUTH_URL=http://localhost:3000`, …); leave the JWT keys until Task 5 removes them.
+- [x] **Step 2: Update `.env.example`** — add the four new keys with placeholders (`GOOGLE_CLIENT_ID=replace_me`, `BETTER_AUTH_URL=http://localhost:3000`, …); leave the JWT keys until Task 5 removes them.
 
-- [ ] **Step 3: Verify green + commit**
+- [x] **Step 3: Verify green + commit**
 
 Run: `pnpm --filter @repo/server typecheck && pnpm --filter @repo/server test`
 Expected: PASS.
@@ -131,7 +131,7 @@ git commit -m "feat(server): env contract for better-auth (Google creds, secret,
 
 **Files:** Create: `apps/server/src/shared/config/auth.ts`. Modify: `apps/server/src/app.ts`
 
-- [ ] **Step 1: Create `auth.ts`**
+- [x] **Step 1: Create `auth.ts`**
 
 ```ts
 import { betterAuth } from 'better-auth';
@@ -164,7 +164,7 @@ export const auth = betterAuth({
 });
 ```
 
-- [ ] **Step 2: Mount in `app.ts`** — delete `import authRoutes …` and `app.use('/api/auth', authRoutes)`; add after the `cors()` line and **before** `express.json()` (handler needs the raw body):
+- [x] **Step 2: Mount in `app.ts`** — delete `import authRoutes …` and `app.use('/api/auth', authRoutes)`; add after the `cors()` line and **before** `express.json()` (handler needs the raw body):
 
 ```ts
 import { toNodeHandler } from 'better-auth/node';
@@ -176,13 +176,13 @@ app.use(express.json());
 ```
 (Known accepted gap: auth endpoints now sit before `limiter`; better-auth's own rate limiting covers prod.)
 
-- [ ] **Step 3: Runtime smoke — better-auth answers**
+- [x] **Step 3: Runtime smoke — better-auth answers**
 
 Run: `pnpm --filter @repo/server dev` (needs Mongo up), then in another shell:
 `curl -s http://localhost:3000/api/auth/ok`
 Expected: `{"ok":true}`. Also `curl -s -o /dev/null -w '%{http_code}' -X POST http://localhost:3000/api/auth/sign-up/email -H 'content-type: application/json' -d '{"name":"Smoke","email":"smoke@test.dev","password":"smoke-pass-123"}'` → `200`, and the `user`/`account`/`session` collections now exist in Mongo (`mongosh --eval 'db.getSiblingDB("server_dev").getCollectionNames()'` — adjust db name to MONGODB_URI).
 
-- [ ] **Step 4: Verify green + commit** (the old auth module still compiles — it still finds its env keys; it's simply unrouted now)
+- [x] **Step 4: Verify green + commit** (the old auth module still compiles — it still finds its env keys; it's simply unrouted now)
 
 Run: `pnpm --filter @repo/server typecheck && pnpm --filter @repo/server test`
 Expected: PASS.
@@ -195,7 +195,7 @@ git commit -m "feat(server): mount better-auth at /api/auth (Google + email/pass
 
 **Files:** Create: `apps/server/src/shared/middlewares/authenticate.test.ts`. Rewrite: `authenticate.ts`. Modify: `apps/server/src/shared/types/express.d.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 import { describe, it, expect, vi, beforeEach } from 'vitest';
@@ -242,10 +242,10 @@ describe('authenticate (better-auth session)', () => {
 });
 ```
 
-- [ ] **Step 2: Run it — must fail** — `pnpm --filter @repo/server test -- authenticate`
+- [x] **Step 2: Run it — must fail** — `pnpm --filter @repo/server test -- authenticate`
 Expected: FAIL (old implementation is sync + JWT-based; `req.user` shape comes from `jwt.verify`).
 
-- [ ] **Step 3: Rewrite `authenticate.ts`**
+- [x] **Step 3: Rewrite `authenticate.ts`**
 
 ```ts
 import { Request, Response, NextFunction } from 'express';
@@ -276,7 +276,7 @@ export async function authenticate(req: Request, _res: Response, next: NextFunct
 }
 ```
 
-- [ ] **Step 4: Repoint `express.d.ts`**
+- [x] **Step 4: Repoint `express.d.ts`**
 
 ```ts
 import { AuthUser } from '../middlewares/authenticate.ts';
@@ -291,7 +291,7 @@ declare global {
 export {};
 ```
 
-- [ ] **Step 5: Run the test — green, whole package green, commit**
+- [x] **Step 5: Run the test — green, whole package green, commit**
 
 Run: `pnpm --filter @repo/server typecheck && pnpm --filter @repo/server test`
 Expected: PASS (the old auth module is unrouted but still compiles until Task 5).
@@ -304,21 +304,21 @@ git commit -m "feat(server): authenticate via better-auth session; preserve req.
 
 **Files:** Delete: `apps/server/src/modules/auth/` (all 6 files), `apps/server/src/modules/user/` (all 3 files). Modify: `apps/server/src/shared/config/env.ts` (drop the two JWT keys now), `apps/server/.env.example` (same), `apps/server/src/modules/task/task.schema.ts` (drop `ref: 'User'`), `apps/server/package.json` (−`bcrypt`, −`jsonwebtoken`, −their `@types`), `pnpm-workspace.yaml` (drop `bcrypt` from `allowBuilds`; keep `esbuild`), `apps/server/src/shared/utils/swagger.ts` (remove old auth-endpoint docs if any survive the module deletion — the JSDoc lives in the deleted `auth.routes.ts`; grep to confirm).
 
-- [ ] **Step 1: Delete + prune**
+- [x] **Step 1: Delete + prune**
 
 ```bash
 git rm -r apps/server/src/modules/auth apps/server/src/modules/user
 pnpm --filter @repo/server remove bcrypt jsonwebtoken @types/bcrypt @types/jsonwebtoken
 grep -rn "auth/login\|/auth\b" apps/server/src/shared/utils/swagger.ts   # clean any leftovers
 ```
-Now finish the env cleanup deferred from Task 2: remove `JWT_SECRET` + `REFRESH_TOKEN_SECRET` from `env.ts` and `.env.example` (their last consumers just got deleted). In `task.schema.ts`: `userId: { type: Schema.Types.ObjectId, required: true }` (ref gone). In `pnpm-workspace.yaml`: remove the `bcrypt` allowBuilds entry. Run `pnpm install` (lockfile shrinks; check diff for surprise deletions).
+Now finish the env cleanup deferred from Task 2: remove `JWT_SECRET` + `REFRESH_TOKEN_SECRET` from `env.ts`, `.env.example`, **and their stubs in `apps/server/tests/setup.ts`** (Task 2 discovered env.ts is evaluated transitively by two test suites; four new-key stubs were added there — keep those) (their last consumers just got deleted). In `task.schema.ts`: `userId: { type: Schema.Types.ObjectId, required: true }` (ref gone). In `pnpm-workspace.yaml`: remove the `bcrypt` allowBuilds entry. Run `pnpm install` (lockfile shrinks; check diff for surprise deletions).
 
-- [ ] **Step 2: Server green again**
+- [x] **Step 2: Server green again**
 
 Run: `pnpm --filter @repo/server typecheck && pnpm --filter @repo/server test`
 Expected: PASS; `grep -rn "jsonwebtoken\|bcrypt\|JwtPayload\|user.service\|refresh-token\|JWT_SECRET" apps/server/src` returns nothing.
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add -A apps/server pnpm-workspace.yaml pnpm-lock.yaml
@@ -329,7 +329,7 @@ git commit -m "feat(server): delete JWT auth module — better-auth owns users, 
 
 **Files:** Create: `apps/web/src/lib/authClient.ts`. Rewrite: `apps/web/src/lib/api.ts`. Modify: `apps/web/.env.example` + `apps/web/.env.local` (drop `VITE_DEV_EMAIL`/`VITE_DEV_PASSWORD`)
 
-- [ ] **Step 1: `authClient.ts`**
+- [x] **Step 1: `authClient.ts`**
 
 ```ts
 import { createAuthClient } from 'better-auth/react'
@@ -341,7 +341,7 @@ export const authClient = createAuthClient({
 })
 ```
 
-- [ ] **Step 2: Rewrite `api.ts`** (delete `login()`, `ensureLogin`, `TOKEN_KEY`, both old interceptors, the `AuthTokens` import):
+- [x] **Step 2: Rewrite `api.ts`** (delete `login()`, `ensureLogin`, `TOKEN_KEY`, both old interceptors, the `AuthTokens` import):
 
 ```ts
 import axios from 'axios'
@@ -361,19 +361,19 @@ api.interceptors.response.use(
 )
 ```
 
-- [ ] **Step 3: Web unit tests + typecheck**
+- [x] **Step 3: Web unit tests + typecheck**
 
 Run: `pnpm --filter @repo/web typecheck && pnpm --filter @repo/web test`
 Expected: PASS (todoStore tests mock the api module's methods, not the interceptors). If a test imported `login()` — delete that expectation; nothing else uses it (`grep -rn "lib/api" apps/web/src` to confirm call sites only use `api`).
 
-- [ ] **Step 4: Commit** — `git add apps/web/src/lib apps/web/.env.example && git commit -m "feat(web): better-auth client; cookie-credentialed axios, drop dev auto-login"` (`.env.local` is untracked — edit it but it won't be in the commit).
+- [x] **Step 4: Commit** — `git add apps/web/src/lib apps/web/.env.example && git commit -m "feat(web): better-auth client; cookie-credentialed axios, drop dev auto-login"` (`.env.local` is untracked — edit it but it won't be in the commit).
 
 ### Task 7: Login page — TDD component, then route
 
 **Files:** Create: `apps/web/src/pages/LoginPage.test.tsx`, `apps/web/src/pages/LoginPage.tsx`, `apps/web/src/routes/login.tsx`
 **Skills:** frontend-design
 
-- [ ] **Step 1: Failing RTL test first** (`LoginPage.test.tsx`):
+- [x] **Step 1: Failing RTL test first** (`LoginPage.test.tsx`):
 
 ```tsx
 import { describe, it, expect, vi, beforeEach } from 'vitest'
@@ -427,15 +427,15 @@ describe('LoginPage', () => {
 ```
 Run `pnpm --filter @repo/web test -- LoginPage` → FAIL (module missing).
 
-- [ ] **Step 2: Implement `LoginPage.tsx`** — retro-arcade per `PRODUCT.md`/CLAUDE.md design context (bold, playful, WCAG AA, keyboard-navigable, no color-only state). Structure (styling is the implementer's craft, behavior is fixed):
+- [x] **Step 2: Implement `LoginPage.tsx`** — retro-arcade per `PRODUCT.md`/CLAUDE.md design context (bold, playful, WCAG AA, keyboard-navigable, no color-only state). Structure (styling is the implementer's craft, behavior is fixed):
   - `signIn.social({ provider: 'google', callbackURL: `${window.location.origin}/tasks` })` — **absolute URL, spec-critical** (relative would strand dev logins on `:3000`).
   - Email/password form with a sign-in ⇄ sign-up mode toggle ("Need an account? Sign up"); sign-up adds the **required `name` field** (better-auth 1.6 requires it).
   - On success: `window.location.assign('/tasks')` (full reload lets the root guard re-fetch the session). On `error`: `toast.error(error.message)` via the existing `sonner` Toaster; also render the message inline for AA (not color-alone).
   - Labels wired with `htmlFor`/`id` so the RTL `getByLabelText` queries pass.
 
-- [ ] **Step 3: Test green** — `pnpm --filter @repo/web test -- LoginPage` → 3 pass.
+- [x] **Step 3: Test green** — `pnpm --filter @repo/web test -- LoginPage` → 3 pass.
 
-- [ ] **Step 4: Route file `routes/login.tsx`** (public; authed users bounce):
+- [x] **Step 4: Route file `routes/login.tsx`** (public; authed users bounce):
 
 ```tsx
 import { createFileRoute, redirect } from '@tanstack/react-router'
@@ -452,13 +452,13 @@ export const Route = createFileRoute('/login')({
 ```
 Vite dev regenerates `routeTree.gen.ts` (generated; lint/format-ignored).
 
-- [ ] **Step 5: Commit** — `git add apps/web/src/pages/LoginPage* apps/web/src/routes/login.tsx apps/web/src/routeTree.gen.ts && git commit -m "feat(web): login screen — Google + email/password via better-auth"`
+- [x] **Step 5: Commit** — `git add apps/web/src/pages/LoginPage* apps/web/src/routes/login.tsx apps/web/src/routeTree.gen.ts && git commit -m "feat(web): login screen — Google + email/password via better-auth"`
 
 ### Task 8: Whole-app guard + Header session UI — e2e-first
 
 **Files:** Modify: `apps/web/e2e/helpers/mockTasksApi.ts`, `apps/web/src/routes/__root.tsx`, `apps/web/src/routes/tasks.tsx`, `apps/web/src/layout/Header/Header.tsx`. Create: `apps/web/e2e/auth.spec.ts`
 
-- [ ] **Step 1: Update the mock helper** — in `mockTasksApi.ts`, replace the `**/auth/login` stub with a session stub (all existing specs — counter included — call this helper in `beforeEach`, so they inherit authentication for free):
+- [x] **Step 1: Update the mock helper** — in `mockTasksApi.ts`, replace the `**/auth/login` stub with a session stub (all existing specs — counter included — call this helper in `beforeEach`, so they inherit authentication for free):
 
 ```ts
 const now = () => new Date().toISOString()
@@ -475,7 +475,7 @@ export async function mockAuthSession(page: Page, session: typeof mockSession | 
 ```
 Call `await mockAuthSession(page)` at the top of `mockTasksApi` (so existing specs stay one-call). Keep the `**/tasks` stubs unchanged.
 
-- [ ] **Step 2: Failing e2e first** (`e2e/auth.spec.ts`):
+- [x] **Step 2: Failing e2e first** (`e2e/auth.spec.ts`):
 
 ```ts
 import { test, expect } from '@playwright/test'
@@ -497,7 +497,7 @@ test('authenticated user passes the guard and sees the header account', async ({
 ```
 Run: `pnpm --filter @repo/web test:e2e -- auth.spec.ts` → FAIL (no guard yet, no Sign out).
 
-- [ ] **Step 3: Root guard in `__root.tsx`** — add `beforeLoad`; move the todo `init()` effect out (it would fire a doomed fetch on `/login`):
+- [x] **Step 3: Root guard in `__root.tsx`** — add `beforeLoad`; move the todo `init()` effect out (it would fire a doomed fetch on `/login`):
 
 ```tsx
 export const Route = createRootRoute({
@@ -519,34 +519,34 @@ useEffect(() => {
 }, [])
 ```
 
-- [ ] **Step 4: Header account UI** — in `Header.tsx`, right-aligned cluster: `const { data: session } = authClient.useSession()`; when present show `session.user.name` (+ avatar `img` if `session.user.image`, with empty-`alt` since the name is adjacent) and a **Sign out** button → `authClient.signOut()` then `window.location.assign('/login')`. Keyboard-focusable, visible focus ring, matches the existing header idiom.
+- [x] **Step 4: Header account UI** — in `Header.tsx`, right-aligned cluster: `const { data: session } = authClient.useSession()`; when present show `session.user.name` (+ avatar `img` if `session.user.image`, with empty-`alt` since the name is adjacent) and a **Sign out** button → `authClient.signOut()` then `window.location.assign('/login')`. Keyboard-focusable, visible focus ring, matches the existing header idiom.
 
-- [ ] **Step 5: e2e green — new and old**
+- [x] **Step 5: e2e green — new and old**
 
 Run: `pnpm --filter @repo/web test:e2e`
 Expected: `auth.spec.ts` passes AND the pre-existing suite (counter, todo-global-state) still passes — proving the guard didn't break the mocked specs.
 
-- [ ] **Step 6: Commit** — `git add apps/web/src apps/web/e2e && git commit -m "feat(web): whole-app session guard, header account UI; e2e session stubs"`
+- [x] **Step 6: Commit** — `git add apps/web/src apps/web/e2e && git commit -m "feat(web): whole-app session guard, header account UI; e2e session stubs"`
 
 ### Task 9: Shared contract + docs blast radius
 
 **Files:** Delete: `packages/shared/src/auth.ts`. Modify: `packages/shared/src/index.ts`, `README.md`, `CLAUDE.md`, (already done: both `.env.example`s)
 
-- [ ] **Step 1: Shared cleanup** — delete `packages/shared/src/auth.ts` (`loginBodySchema`, `authTokensSchema` have no remaining importers — verify: `grep -rn "AuthTokens\|loginBodySchema\|authTokensSchema" apps packages --include='*.ts*' | grep -v shared/src` → empty); drop the `export * from './auth.ts'` line from `index.ts`. `userPublicSchema`/`UserRole` stay. Run `pnpm --filter @repo/shared build && pnpm turbo run typecheck` → green.
+- [x] **Step 1: Shared cleanup** — delete `packages/shared/src/auth.ts` (`loginBodySchema`, `authTokensSchema` have no remaining importers — verify: `grep -rn "AuthTokens\|loginBodySchema\|authTokensSchema" apps packages --include='*.ts*' | grep -v shared/src` → empty); drop the `export * from './auth.ts'` line from `index.ts`. `userPublicSchema`/`UserRole` stay. Run `pnpm --filter @repo/shared build && pnpm turbo run typecheck` → green.
 
-- [ ] **Step 2: README** — fix the "JWT API" label (line ~8), the dev-credentials setup line (~26: now "sign in via Google or email/password; server needs Google OAuth credentials — see `apps/server/.env.example`"), the shared-contract list (~46: remove `loginBodySchema`/`authTokensSchema`); append the spec's four Q&A prose blocks (redirect/callback/exchange; secret placement; what better-auth replaces; identity vs authorization — copy from the spec's "four assignment questions" section).
+- [x] **Step 2: README** — fix the "JWT API" label (line ~8), the dev-credentials setup line (~26: now "sign in via Google or email/password; server needs Google OAuth credentials — see `apps/server/.env.example`"), the shared-contract list (~46: remove `loginBodySchema`/`authTokensSchema`); append the spec's four Q&A prose blocks (redirect/callback/exchange; secret placement; what better-auth replaces; identity vs authorization — copy from the spec's "four assignment questions" section).
 
-- [ ] **Step 3: CLAUDE.md** — rewrite the "Backend API contract" auth paragraphs: cookie sessions via better-auth, `/api/auth/*` handled by `toNodeHandler` (mounted before `express.json()` — note this as a constraint), login screen at `/login`, whole-app guard, no more `VITE_DEV_*`/localStorage/known-gap note; stack line: replace "JWT auth" with "better-auth (Google + email/password, cookie sessions)".
+- [x] **Step 3: CLAUDE.md** — rewrite the "Backend API contract" auth paragraphs: cookie sessions via better-auth, `/api/auth/*` handled by `toNodeHandler` (mounted before `express.json()` — note this as a constraint), login screen at `/login`, whole-app guard, no more `VITE_DEV_*`/localStorage/known-gap note; stack line: replace "JWT auth" with "better-auth (Google + email/password, cookie sessions)".
 
-- [ ] **Step 4: Commit** — `git add packages/shared README.md CLAUDE.md && git commit -m "docs+shared: retire JWT contract; document better-auth flow and the four assignment answers"`
+- [x] **Step 4: Commit** — `git add packages/shared README.md CLAUDE.md && git commit -m "docs+shared: retire JWT contract; document better-auth flow and the four assignment answers"`
 
 ### Task 10: Full verification — gauntlet + real flows
 
 **Files:** none (verification)
 
-- [ ] **Step 1: The gauntlet** — run `/check --e2e` (= `pnpm format:check` + `turbo run lint typecheck test` + Playwright). Expected: all green. Fix anything it surfaces before proceeding.
+- [x] **Step 1: The gauntlet** — run `/check --e2e` (= `pnpm format:check` + `turbo run lint typecheck test` + Playwright). Expected: all green. Fix anything it surfaces before proceeding.
 
-- [ ] **Step 2: Real email/password round-trip (dev servers + Mongo up)**
+- [x] **Step 2: Real email/password round-trip (dev servers + Mongo up)**
 
 ```bash
 # sign-up sets a session cookie; the cookie jar proves the round-trip
@@ -557,9 +557,9 @@ curl -s -b /tmp/ba-jar http://localhost:3000/api/tasks | head -c 200; echo      
 curl -s -o /dev/null -w '%{http_code}\n' http://localhost:3000/api/tasks                                          # 401 (no cookie)
 ```
 
-- [ ] **Step 3: Manual Google flow (Nadav, once)** — browser at `http://localhost:5173` → redirected to `/login` → "Connect via Google" → consent → lands on `/tasks`; header shows Google name/avatar; `mongosh` shows the `google` row in `account` linked to the `user` doc; Sign out returns to `/login` and `/tasks` is walled again. Result recorded in the journal.
+- [x] **Step 3: Manual Google flow (Nadav, once)** — browser at `http://localhost:5173` → redirected to `/login` → "Connect via Google" → consent → lands on `/tasks`; header shows Google name/avatar; `mongosh` shows the `google` row in `account` linked to the `user` doc; Sign out returns to `/login` and `/tasks` is walled again. Result recorded in the journal.
 
-- [ ] **Step 4: Push + PR**
+- [x] **Step 4: Push + PR**
 
 ```bash
 git push -u origin feat/better-auth-google

@@ -2,14 +2,25 @@ import type { Page } from '@playwright/test'
 
 type Task = { id: string; title: string; isCompleted: boolean }
 
+// expiresAt must be in the future or the client treats the session as dead.
+const inOneHour = () => new Date(Date.now() + 3600_000).toISOString()
+
+export const mockSession = {
+    session: { id: 'e2e-session', userId: 'e2e-user', expiresAt: inOneHour() },
+    user: { id: 'e2e-user', email: 'e2e@test.dev', name: 'E2E', role: 'user' },
+}
+
+export async function mockAuthSession(
+    page: Page,
+    session: typeof mockSession | null = mockSession,
+) {
+    await page.route('**/api/auth/get-session', (route) => route.fulfill({ json: session }))
+}
+
 export async function mockTasksApi(page: Page, initialTasks: Task[] = []) {
     let tasks = [...initialTasks]
 
-    await page.route('**/auth/login', (route) =>
-        route.fulfill({
-            json: { accessToken: 'mock-access', refreshToken: 'mock-refresh' },
-        }),
-    )
+    await mockAuthSession(page)
 
     await page.route('**/tasks', async (route) => {
         const req = route.request()

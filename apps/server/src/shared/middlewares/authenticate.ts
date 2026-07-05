@@ -1,27 +1,36 @@
-import jwt from 'jsonwebtoken';
-import { env } from '../config/env.ts';
 import { Request, Response, NextFunction } from 'express';
-import { JwtPayload } from '../../modules/auth/auth.types.ts';
+import { fromNodeHeaders } from 'better-auth/node';
+import type { UserRole } from '@repo/shared';
+import { auth } from '../config/auth.ts';
 import { UnauthorizedError } from '../errors/AppError.ts';
 
-export function authenticate(req: Request, _res: Response, next: NextFunction): void {
+export interface AuthUser {
+  userId: string;
+  email: string;
+  role: UserRole;
+}
+
+export async function authenticate(
+  req: Request,
+  _res: Response,
+  next: NextFunction,
+): Promise<void> {
+  let session;
   try {
-    const authHeader = req.headers.authorization;
-
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      throw new UnauthorizedError('Missing or invalid Authorization header');
-    }
-
-    const token = authHeader.split(' ')[1]!;
-    const payload = jwt.verify(token, env.JWT_SECRET) as JwtPayload;
-
-    req.user = payload;
-    next();
+    session = await auth.api.getSession({ headers: fromNodeHeaders(req.headers) });
   } catch (err) {
-    if (err instanceof UnauthorizedError) {
-      next(err);
-    } else {
-      next(new UnauthorizedError('Invalid or expired token'));
-    }
+    // Infra failure (Mongo down, adapter error) — let errorHandler 500 it, don't fake a 401
+    next(err);
+    return;
   }
+  if (!session) {
+    next(new UnauthorizedError('Not authenticated'));
+    return;
+  }
+  req.user = {
+    userId: session.user.id,
+    email: session.user.email,
+    role: (session.user.role ?? 'user') as UserRole,
+  };
+  next();
 }
