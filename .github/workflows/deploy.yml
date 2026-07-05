@@ -7,8 +7,9 @@
 #     auto-deploy on the `:latest` tag — managed, pulls on each push, no box.
 #   • OR a rebuilt EC2 that `docker pull`s and runs the image (then a restart
 #     step can be wired back in here).
-# Runtime env (JWT_SECRET, REFRESH_TOKEN_SECRET, MONGODB_URI, REDIS_URL, PORT)
-# is injected by the compute platform, NOT baked into the image.
+# Runtime env (MONGODB_URI, GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET,
+# BETTER_AUTH_SECRET, BETTER_AUTH_URL (the public prod origin, NOT localhost),
+# REDIS_URL, PORT) is injected by the compute platform, NOT baked into the image.
 name: Deploy
 
 on:

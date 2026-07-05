@@ -33,10 +33,12 @@ describe('authenticate (better-auth session)', () => {
     expect(next).toHaveBeenCalledWith(expect.any(UnauthorizedError));
   });
 
-  it('401s when getSession throws', async () => {
-    getSession.mockRejectedValue(new Error('boom'));
+  it('passes infrastructure errors through untouched (5xx path, not 401)', async () => {
+    const boom = new Error('boom');
+    getSession.mockRejectedValue(boom);
     const next = vi.fn() as NextFunction;
     await authenticate(makeReq(), res, next);
-    expect(next).toHaveBeenCalledWith(expect.any(UnauthorizedError));
+    expect(next).toHaveBeenCalledWith(boom);
+    expect(next).not.toHaveBeenCalledWith(expect.any(UnauthorizedError));
   });
 });

@@ -16,6 +16,9 @@ export const auth = betterAuth({
   baseURL: env.BETTER_AUTH_URL,
   trustedOrigins: ['http://localhost:5173'],
   emailAndPassword: { enabled: true },
+  session: {
+    cookieCache: { enabled: true, maxAge: 300 }, // 5 min signed-cookie cache — skips the per-request Mongo read
+  },
   socialProviders: {
     google: {
       clientId: env.GOOGLE_CLIENT_ID,

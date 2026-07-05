@@ -19,11 +19,13 @@ app.get('/health', (_req, res) => {
 
 app.use(httpLogger);
 app.use(cors({ origin: 'http://localhost:5173', credentials: true }));
+// Before the better-auth mount so auth endpoints are rate-limited too
+// (express-rate-limit doesn't need a parsed body).
+app.use(limiter);
 // Must be mounted before express.json(): better-auth reads the raw body itself.
 app.all('/api/auth/*splat', toNodeHandler(auth)); // Express 5 wildcard syntax
 app.use(express.json());
 
-app.use(limiter);
 app.use('/api/tasks', taskRoutes);
 app.use('/api/posts', postRoutes);
 app.use('/api/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
