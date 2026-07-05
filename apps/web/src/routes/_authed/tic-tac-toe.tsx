@@ -1,4 +1,4 @@
 import { createFileRoute } from '@tanstack/react-router'
 import TicTacToe from '@/features/tic-tac-toe'
 
-export const Route = createFileRoute('/tic-tac-toe')({ component: TicTacToe })
+export const Route = createFileRoute('/_authed/tic-tac-toe')({ component: TicTacToe })

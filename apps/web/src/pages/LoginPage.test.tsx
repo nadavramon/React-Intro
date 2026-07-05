@@ -24,6 +24,16 @@ describe('LoginPage', () => {
         })
     })
 
+    it('surfaces a Google sign-in error instead of dropping it', async () => {
+        vi.mocked(authClient.signIn.social).mockResolvedValueOnce({
+            data: null,
+            error: { message: 'Provider not configured' },
+        } as never)
+        render(<LoginPage />)
+        await userEvent.click(screen.getByRole('button', { name: /connect via google/i }))
+        expect(await screen.findByRole('alert')).toHaveTextContent(/provider not configured/i)
+    })
+
     it('signs in with email/password', async () => {
         render(<LoginPage />)
         await userEvent.type(screen.getByLabelText(/email/i), 'a@b.c')

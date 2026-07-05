@@ -31,6 +31,11 @@ test('navigating away from /tasks and back does not refetch GET /tasks', async (
     expect(getTasksAfterLoad).toHaveLength(0)
 })
 
+test('Sidebar badge is hydrated on a fresh load of a non-todo page', async ({ page }) => {
+    await page.goto('/counters')
+    await expect(page.getByLabel(/active tasks/)).toBeVisible()
+})
+
 test('Sidebar badge updates in real time as a task is toggled', async ({ page }) => {
     await page.goto('/tasks')
     await expect(page.getByRole('button', { name: 'Add' })).toBeVisible()

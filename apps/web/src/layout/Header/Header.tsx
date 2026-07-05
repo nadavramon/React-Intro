@@ -1,4 +1,5 @@
 import { Link } from '@tanstack/react-router'
+import { toast } from 'sonner'
 import { Menu, User } from 'lucide-react'
 import { ROUTES } from '@/routes'
 import { cn } from '@/lib/utils'
@@ -13,7 +14,12 @@ export default function Header({ sidebarOpen, onToggleSidebar }: HeaderProps) {
     const { data: session } = authClient.useSession()
 
     async function handleSignOut() {
-        await authClient.signOut()
+        try {
+            await authClient.signOut()
+        } catch {
+            toast.error('Sign out failed — check your connection')
+            return
+        }
         window.location.assign('/login')
     }
 

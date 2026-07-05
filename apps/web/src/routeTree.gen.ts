@@ -9,92 +9,88 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as TicTacToeRouteImport } from './routes/tic-tac-toe'
-import { Route as TasksRouteImport } from './routes/tasks'
 import { Route as LoginRouteImport } from './routes/login'
-import { Route as CountersRouteImport } from './routes/counters'
-import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthedRouteImport } from './routes/_authed'
+import { Route as AuthedIndexRouteImport } from './routes/_authed/index'
+import { Route as AuthedTicTacToeRouteImport } from './routes/_authed/tic-tac-toe'
+import { Route as AuthedTasksRouteImport } from './routes/_authed/tasks'
+import { Route as AuthedCountersRouteImport } from './routes/_authed/counters'
 
-const TicTacToeRoute = TicTacToeRouteImport.update({
-  id: '/tic-tac-toe',
-  path: '/tic-tac-toe',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const TasksRoute = TasksRouteImport.update({
-  id: '/tasks',
-  path: '/tasks',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
-const CountersRoute = CountersRouteImport.update({
-  id: '/counters',
-  path: '/counters',
+const AuthedRoute = AuthedRouteImport.update({
+  id: '/_authed',
   getParentRoute: () => rootRouteImport,
 } as any)
-const IndexRoute = IndexRouteImport.update({
+const AuthedIndexRoute = AuthedIndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => AuthedRoute,
+} as any)
+const AuthedTicTacToeRoute = AuthedTicTacToeRouteImport.update({
+  id: '/tic-tac-toe',
+  path: '/tic-tac-toe',
+  getParentRoute: () => AuthedRoute,
+} as any)
+const AuthedTasksRoute = AuthedTasksRouteImport.update({
+  id: '/tasks',
+  path: '/tasks',
+  getParentRoute: () => AuthedRoute,
+} as any)
+const AuthedCountersRoute = AuthedCountersRouteImport.update({
+  id: '/counters',
+  path: '/counters',
+  getParentRoute: () => AuthedRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
-  '/': typeof IndexRoute
-  '/counters': typeof CountersRoute
+  '/': typeof AuthedIndexRoute
   '/login': typeof LoginRoute
-  '/tasks': typeof TasksRoute
-  '/tic-tac-toe': typeof TicTacToeRoute
+  '/counters': typeof AuthedCountersRoute
+  '/tasks': typeof AuthedTasksRoute
+  '/tic-tac-toe': typeof AuthedTicTacToeRoute
 }
 export interface FileRoutesByTo {
-  '/': typeof IndexRoute
-  '/counters': typeof CountersRoute
   '/login': typeof LoginRoute
-  '/tasks': typeof TasksRoute
-  '/tic-tac-toe': typeof TicTacToeRoute
+  '/counters': typeof AuthedCountersRoute
+  '/tasks': typeof AuthedTasksRoute
+  '/tic-tac-toe': typeof AuthedTicTacToeRoute
+  '/': typeof AuthedIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
-  '/': typeof IndexRoute
-  '/counters': typeof CountersRoute
+  '/_authed': typeof AuthedRouteWithChildren
   '/login': typeof LoginRoute
-  '/tasks': typeof TasksRoute
-  '/tic-tac-toe': typeof TicTacToeRoute
+  '/_authed/counters': typeof AuthedCountersRoute
+  '/_authed/tasks': typeof AuthedTasksRoute
+  '/_authed/tic-tac-toe': typeof AuthedTicTacToeRoute
+  '/_authed/': typeof AuthedIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/counters' | '/login' | '/tasks' | '/tic-tac-toe'
+  fullPaths: '/' | '/login' | '/counters' | '/tasks' | '/tic-tac-toe'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/counters' | '/login' | '/tasks' | '/tic-tac-toe'
-  id: '__root__' | '/' | '/counters' | '/login' | '/tasks' | '/tic-tac-toe'
+  to: '/login' | '/counters' | '/tasks' | '/tic-tac-toe' | '/'
+  id:
+    | '__root__'
+    | '/_authed'
+    | '/login'
+    | '/_authed/counters'
+    | '/_authed/tasks'
+    | '/_authed/tic-tac-toe'
+    | '/_authed/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute
-  CountersRoute: typeof CountersRoute
+  AuthedRoute: typeof AuthedRouteWithChildren
   LoginRoute: typeof LoginRoute
-  TasksRoute: typeof TasksRoute
-  TicTacToeRoute: typeof TicTacToeRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/tic-tac-toe': {
-      id: '/tic-tac-toe'
-      path: '/tic-tac-toe'
-      fullPath: '/tic-tac-toe'
-      preLoaderRoute: typeof TicTacToeRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/tasks': {
-      id: '/tasks'
-      path: '/tasks'
-      fullPath: '/tasks'
-      preLoaderRoute: typeof TasksRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/login': {
       id: '/login'
       path: '/login'
@@ -102,29 +98,64 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/counters': {
-      id: '/counters'
-      path: '/counters'
-      fullPath: '/counters'
-      preLoaderRoute: typeof CountersRouteImport
+    '/_authed': {
+      id: '/_authed'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthedRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/': {
-      id: '/'
+    '/_authed/': {
+      id: '/_authed/'
       path: '/'
       fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof AuthedIndexRouteImport
+      parentRoute: typeof AuthedRoute
+    }
+    '/_authed/tic-tac-toe': {
+      id: '/_authed/tic-tac-toe'
+      path: '/tic-tac-toe'
+      fullPath: '/tic-tac-toe'
+      preLoaderRoute: typeof AuthedTicTacToeRouteImport
+      parentRoute: typeof AuthedRoute
+    }
+    '/_authed/tasks': {
+      id: '/_authed/tasks'
+      path: '/tasks'
+      fullPath: '/tasks'
+      preLoaderRoute: typeof AuthedTasksRouteImport
+      parentRoute: typeof AuthedRoute
+    }
+    '/_authed/counters': {
+      id: '/_authed/counters'
+      path: '/counters'
+      fullPath: '/counters'
+      preLoaderRoute: typeof AuthedCountersRouteImport
+      parentRoute: typeof AuthedRoute
     }
   }
 }
 
+interface AuthedRouteChildren {
+  AuthedCountersRoute: typeof AuthedCountersRoute
+  AuthedTasksRoute: typeof AuthedTasksRoute
+  AuthedTicTacToeRoute: typeof AuthedTicTacToeRoute
+  AuthedIndexRoute: typeof AuthedIndexRoute
+}
+
+const AuthedRouteChildren: AuthedRouteChildren = {
+  AuthedCountersRoute: AuthedCountersRoute,
+  AuthedTasksRoute: AuthedTasksRoute,
+  AuthedTicTacToeRoute: AuthedTicTacToeRoute,
+  AuthedIndexRoute: AuthedIndexRoute,
+}
+
+const AuthedRouteWithChildren =
+  AuthedRoute._addFileChildren(AuthedRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
-  IndexRoute: IndexRoute,
-  CountersRoute: CountersRoute,
+  AuthedRoute: AuthedRouteWithChildren,
   LoginRoute: LoginRoute,
-  TasksRoute: TasksRoute,
-  TicTacToeRoute: TicTacToeRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

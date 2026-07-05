@@ -50,11 +50,21 @@ export default function LoginPage() {
     const [pending, setPending] = useState(false)
     const isSignUp = mode === 'sign-up'
 
-    function handleGoogle() {
-        void authClient.signIn.social({
-            provider: 'google',
-            callbackURL: `${window.location.origin}/tasks`,
-        })
+    function showError(message: string) {
+        setError(message)
+        toast.error(message)
+    }
+
+    async function handleGoogle() {
+        try {
+            const result = await authClient.signIn.social({
+                provider: 'google',
+                callbackURL: `${window.location.origin}/tasks`,
+            })
+            if (result?.error) showError(result.error.message ?? 'Google sign-in failed')
+        } catch {
+            showError('Could not reach the server — check your connection and try again')
+        }
     }
 
     async function handleSubmit(e: FormEvent<HTMLFormElement>) {
@@ -73,13 +83,13 @@ export default function LoginPage() {
                   })
                 : await authClient.signIn.email({ email, password })
             if (result.error) {
-                const message = result.error.message ?? 'Something went wrong. Try again.'
-                setError(message)
-                toast.error(message)
+                showError(result.error.message ?? 'Something went wrong. Try again.')
                 return
             }
-            // Full reload so the root guard re-fetches the session.
+            // Full reload so the auth guard re-fetches the session.
             window.location.assign('/tasks')
+        } catch {
+            showError('Could not reach the server — check your connection and try again')
         } finally {
             setPending(false)
         }
