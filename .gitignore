@@ -12,11 +12,11 @@ dist
 dist-ssr
 *.local
 
-# Playwright (e2e) artifacts
-/test-results/
-/playwright-report/
-/blob-report/
-/playwright/.cache/
+# Playwright (e2e) artifacts — unanchored so they match under apps/web/ (monorepo)
+test-results/
+playwright-report/
+blob-report/
+playwright/.cache/
 
 # Claude Code — version the durable config, ignore personal/installed/noisy bits.
 # Commit: CLAUDE.md, .mcp.json, .claude/commands, .claude/hooks, .claude/statusline.sh
