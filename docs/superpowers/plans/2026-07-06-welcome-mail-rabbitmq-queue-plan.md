@@ -864,7 +864,7 @@ Connect the seam: better-auth publishes on user creation; `index.ts` connects th
 - Modify: `apps/server/src/shared/config/auth.ts`
 - Modify: `apps/server/src/index.ts`
 
-- [ ] **Step 1: Add the `databaseHooks` block to `auth.ts`**
+- [x] **Step 1: Add the `databaseHooks` block to `auth.ts`**
 
 Import at the top: `import { publishWelcomeEmail } from '../../modules/mail/welcomeMail.publisher.ts';`
 
@@ -886,7 +886,7 @@ Add inside the `betterAuth({ … })` config object (e.g. after the `session` blo
   },
 ```
 
-- [ ] **Step 2: Wire boot + shutdown in `index.ts`**
+- [x] **Step 2: Wire boot + shutdown in `index.ts`**
 
 Add imports:
 
@@ -908,7 +908,7 @@ And add `disconnectRabbitMQ()` to the shutdown `Promise.all`:
       await Promise.all([disconnectDB(), disconnectRedis(), disconnectRabbitMQ()]);
 ```
 
-- [ ] **Step 3: Typecheck + full unit suite**
+- [x] **Step 3: Typecheck + full unit suite**
 
 ```bash
 pnpm --filter @repo/server typecheck && pnpm --filter @repo/server test
@@ -916,7 +916,7 @@ pnpm --filter @repo/server typecheck && pnpm --filter @repo/server test
 
 Expected: typecheck passes; all unit specs (existing + the new mail specs) green.
 
-- [ ] **Step 4: Boot smoke — the broker connects and the consumer subscribes**
+- [x] **Step 4: Boot smoke — the broker connects and the consumer subscribes**
 
 With Task 1's docker services up:
 
@@ -926,7 +926,7 @@ cd apps/server && pnpm dev
 
 Expected logs: `Connected to RabbitMQ` and `[welcome-mail] consumer subscribed to welcome.email`. In the RabbitMQ mgmt UI (<http://localhost:15672>) the `welcome.email`, `welcome.email.dlq` queues and `welcome.email.dlx` exchange exist. Stop with Ctrl-C → `Disconnected from RabbitMQ`. (Also verify graceful degradation: stop the rabbitmq container, restart `pnpm dev` → it logs `RabbitMQ unavailable, retrying in 3s` and does **not** crash; `docker compose start rabbitmq` → it logs `Connected to RabbitMQ` and subscribes.)
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add apps/server/src/shared/config/auth.ts apps/server/src/index.ts
@@ -943,7 +943,7 @@ Prove the whole assignment end to end against real infra, then document it. Per 
 - Modify: `apps/server/README.md`
 - Modify: root `CLAUDE.md` (Stack + dev-services note)
 
-- [ ] **Step 1: Live exactly-once check**
+- [x] **Step 1: Live exactly-once check**
 
 With docker services up and `pnpm dev` running (server on :3000):
 
@@ -979,12 +979,12 @@ curl -s http://localhost:8025/api/v1/messages | EMAIL="$EMAIL" node -e \
 
 Expected: step 2 prints `1`, step 4 still prints `1`. (View the mail in the Mailpit inbox at <http://localhost:8025>.)
 
-- [ ] **Step 2: Update docs**
+- [x] **Step 2: Update docs**
 
 - `apps/server/README.md`: add a "Welcome mail (queue)" section — the flow diagram from the spec, the dev services (`docker compose up -d` now brings rabbitmq + mailpit), and the exactly-once explanation (at-least-once transport + idempotent consumer).
 - Root `CLAUDE.md`: in the Stack/Testing notes, mention RabbitMQ + Mailpit are part of the server dev stack and the `modules/mail/` feature.
 
-- [ ] **Step 3: Full gauntlet (mirrors CI)**
+- [x] **Step 3: Full gauntlet (mirrors CI)**
 
 ```bash
 pnpm format:check && pnpm turbo run lint typecheck test
@@ -992,7 +992,7 @@ pnpm format:check && pnpm turbo run lint typecheck test
 
 Expected: all green. (Run `/check` as the equivalent.)
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add apps/server/README.md CLAUDE.md
