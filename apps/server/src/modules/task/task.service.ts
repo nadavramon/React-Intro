@@ -1,20 +1,22 @@
-import { TaskEntity } from './task.entity.ts';
+import { Task, taskSchema } from '@repo/shared';
 import { TaskModel, TaskDoc } from './task.schema.ts';
 import { NotFoundError } from '../../shared/errors/AppError.ts';
 import { CreateTaskBodyDto, UpdateTaskBodyDto } from './task.dto.ts';
 import { logger } from '../../shared/utils/logger.ts';
 import * as taskCache from './task.cache.ts';
 
-function toTask(doc: TaskDoc): TaskEntity {
-  return {
+// Project the DB doc through the shared out-schema. parse() strips anything
+// not in the contract (so userId can never reach the client) and throws if the
+// server ever produces a malformed shape. Symmetric with validate() on the in side.
+function toTask(doc: TaskDoc): Task {
+  return taskSchema.parse({
     id: doc._id.toString(),
-    userId: doc.userId.toString(),
     title: doc.title,
     isCompleted: doc.isCompleted,
-  };
+  });
 }
 
-export async function getAllTasks(userId: string): Promise<TaskEntity[]> {
+export async function getAllTasks(userId: string): Promise<Task[]> {
   const cached = await taskCache.read(userId);
   if (cached !== null) return cached;
 
@@ -24,22 +26,19 @@ export async function getAllTasks(userId: string): Promise<TaskEntity[]> {
   return tasks;
 }
 
-export async function getTasksByStatus(
-  userId: string,
-  isCompleted: boolean,
-): Promise<TaskEntity[]> {
+export async function getTasksByStatus(userId: string, isCompleted: boolean): Promise<Task[]> {
   const tasks = await getAllTasks(userId);
   return tasks.filter((t) => t.isCompleted === isCompleted);
 }
 
-export async function getTaskById(userId: string, id: string): Promise<TaskEntity> {
+export async function getTaskById(userId: string, id: string): Promise<Task> {
   const doc = await TaskModel.findOne({ _id: id, userId }).lean();
   if (!doc) throw new NotFoundError('Task not found');
 
   return toTask(doc);
 }
 
-export async function createTask(userId: string, dto: CreateTaskBodyDto): Promise<TaskEntity> {
+export async function createTask(userId: string, dto: CreateTaskBodyDto): Promise<Task> {
   const doc = await TaskModel.create({
     userId,
     title: dto.title,
@@ -55,7 +54,7 @@ export async function updateTask(
   userId: string,
   id: string,
   dto: UpdateTaskBodyDto,
-): Promise<TaskEntity> {
+): Promise<Task> {
   const doc = await TaskModel.findOneAndUpdate({ _id: id, userId }, dto, {
     returnDocument: 'after',
   }).lean();
