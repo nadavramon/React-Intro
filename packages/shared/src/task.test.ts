@@ -28,3 +28,16 @@ describe("taskSchema", () => {
     expect(taskSchema.parse(t)).toEqual(t);
   });
 });
+
+describe("taskSchema — out-DTO enforcement", () => {
+  it("strips DB-internal fields (userId) that are not in the contract", () => {
+    const parsed = taskSchema.parse({
+      id: "1",
+      userId: "secret-owner",
+      title: "x",
+      isCompleted: false,
+    });
+    expect(parsed).toEqual({ id: "1", title: "x", isCompleted: false });
+    expect(parsed).not.toHaveProperty("userId");
+  });
+});

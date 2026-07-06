@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import type { Task } from '@/features/todo/types'
 import { createTask, deleteTask, fetchTasks, updateTask } from '@/features/todo/api/tasksApi'
+import { parseApiError } from '@/lib/errors'
 
 export const TodoStatus = {
     Idle: 'idle',
@@ -39,7 +40,7 @@ export const useTodoStore = create<TodoState>((set, get) => ({
             console.error('Failed to load tasks', err)
             set({
                 status: TodoStatus.Error,
-                errorMessage: 'Could not load tasks. Please try again.',
+                errorMessage: parseApiError(err, 'Could not load tasks. Please try again.'),
             })
         }
     },
