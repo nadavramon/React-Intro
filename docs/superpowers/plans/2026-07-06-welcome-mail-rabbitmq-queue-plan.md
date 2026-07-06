@@ -45,7 +45,7 @@ Infra + wiring. No unit test — verified by a **runtime smoke** (containers up,
 - Modify: `apps/server/src/shared/config/env.ts`
 - Modify: `apps/server/.env.example`
 
-- [ ] **Step 1: Add the two services to `docker-compose.yml`**
+- [x] **Step 1: Add the two services to `docker-compose.yml`**
 
 Append to `services:` (keep the existing `redis` service and the `volumes:` block; add `rabbitmq-data` to it):
 
@@ -66,7 +66,7 @@ Append to `services:` (keep the existing `redis` service and the `volumes:` bloc
 
 And under `volumes:` add `rabbitmq-data:` next to `redis-data:`.
 
-- [ ] **Step 2: Add dependencies (pnpm — one root lockfile)**
+- [x] **Step 2: Add dependencies (pnpm — one root lockfile)**
 
 Run from the repo root:
 
@@ -77,7 +77,7 @@ pnpm add -D --filter @repo/server @types/nodemailer
 
 `amqplib@2` **ships its own bundled types** (`node_modules/amqplib/index.d.ts`, which TypeScript resolves under `nodenext` in preference to `@types/amqplib`) — so **do not** add `@types/amqplib` (it's frozen on the stale pre-1.0 API and would only mislead). `nodemailer` ships no types, so `@types/nodemailer` is required. Both libs are pure-JS (no native post-install build), so **no `pnpm-workspace.yaml` `allowBuilds` entry is needed** (unlike `esbuild`/`bcrypt`). The root `pnpm-lock.yaml` updates in place — never create a per-package lockfile.
 
-- [ ] **Step 3: Expose the new env vars in `env.ts`**
+- [x] **Step 3: Expose the new env vars in `env.ts`**
 
 Append to the `env` object (optional-with-default, mirroring `REDIS_URL`):
 
@@ -90,7 +90,7 @@ Append to the `env` object (optional-with-default, mirroring `REDIS_URL`):
 
 Defaults point at the local Docker services, so **local dev needs no `.env/.env.dev` edits**. Document them in `.env.example` (Step 4) for prod.
 
-- [ ] **Step 4: Document the vars in `.env.example`**
+- [x] **Step 4: Document the vars in `.env.example`**
 
 Append:
 
@@ -102,7 +102,7 @@ SMTP_PORT=1025
 MAIL_FROM=React_Intro <no-reply@react-intro.local>
 ```
 
-- [ ] **Step 5: Runtime smoke — bring the stack up**
+- [x] **Step 5: Runtime smoke — bring the stack up**
 
 ```bash
 cd apps/server && docker compose up -d
@@ -113,7 +113,7 @@ curl -fsS http://localhost:8025/api/v1/messages >/dev/null && echo "mailpit OK"
 
 Expected: both `OK` lines print. Then `pnpm --filter @repo/server typecheck` → passes (env.ts still compiles).
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add apps/server/docker-compose.yml apps/server/package.json apps/server/.env.example apps/server/src/shared/config/env.ts pnpm-lock.yaml
@@ -130,7 +130,7 @@ The durable idempotency record. `userId` is a **String** (better-auth's `user.id
 - Create: `apps/server/src/modules/mail/welcomeEmail.schema.ts`
 - Test: `apps/server/src/modules/mail/welcomeEmail.schema.test.ts`
 
-- [ ] **Step 1: Write the failing test** (`welcomeEmail.schema.test.ts`)
+- [x] **Step 1: Write the failing test** (`welcomeEmail.schema.test.ts`)
 
 A Mongoose model can be instantiated without a DB connection, so defaults + the unique index are checkable offline:
 
@@ -153,13 +153,13 @@ describe('WelcomeEmailModel', () => {
 });
 ```
 
-- [ ] **Step 2: Run it — expect FAIL** (`Cannot find module './welcomeEmail.schema.ts'`)
+- [x] **Step 2: Run it — expect FAIL** (`Cannot find module './welcomeEmail.schema.ts'`)
 
 ```bash
 pnpm --filter @repo/server test welcomeEmail.schema
 ```
 
-- [ ] **Step 3: Implement the model**
+- [x] **Step 3: Implement the model**
 
 ```ts
 import { Schema, model, InferSchemaType, Types } from 'mongoose';
@@ -183,13 +183,13 @@ export type WelcomeEmailDoc = InferSchemaType<typeof welcomeEmailSchema> & {
 export const WelcomeEmailModel = model('WelcomeEmail', welcomeEmailSchema);
 ```
 
-- [ ] **Step 4: Run it — expect PASS**
+- [x] **Step 4: Run it — expect PASS**
 
 ```bash
 pnpm --filter @repo/server test welcomeEmail.schema
 ```
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add apps/server/src/modules/mail/welcomeEmail.schema.ts apps/server/src/modules/mail/welcomeEmail.schema.test.ts
@@ -206,7 +206,7 @@ nodemailer transport + `sendWelcomeEmail`. The greeting must tolerate an empty `
 - Create: `apps/server/src/modules/mail/mailer.ts`
 - Test: `apps/server/src/modules/mail/mailer.test.ts`
 
-- [ ] **Step 1: Write the failing test** (`mailer.test.ts`)
+- [x] **Step 1: Write the failing test** (`mailer.test.ts`)
 
 Mock nodemailer; assert the greeting fallback and the envelope. `renderWelcome` is a pure helper so the copy is testable without the transport:
 
@@ -242,13 +242,13 @@ describe('sendWelcomeEmail', () => {
 });
 ```
 
-- [ ] **Step 2: Run it — expect FAIL**
+- [x] **Step 2: Run it — expect FAIL**
 
 ```bash
 pnpm --filter @repo/server test mailer
 ```
 
-- [ ] **Step 3: Implement `mailer.ts`**
+- [x] **Step 3: Implement `mailer.ts`**
 
 ```ts
 import nodemailer from 'nodemailer';
@@ -274,13 +274,13 @@ export async function sendWelcomeEmail(email: string, name: string): Promise<voi
 }
 ```
 
-- [ ] **Step 4: Run it — expect PASS**
+- [x] **Step 4: Run it — expect PASS**
 
 ```bash
 pnpm --filter @repo/server test mailer
 ```
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add apps/server/src/modules/mail/mailer.ts apps/server/src/modules/mail/mailer.test.ts
