@@ -2,6 +2,7 @@ import { betterAuth } from 'better-auth';
 import { mongodbAdapter } from 'better-auth/adapters/mongodb';
 import { MongoClient } from 'mongodb';
 import { env } from './env.ts';
+import { publishWelcomeEmail } from '../../modules/mail/welcomeMail.publisher.ts';
 
 // Dedicated client: the adapter needs a Db handle at module init,
 // before mongoose's connectDB() has run.
@@ -18,6 +19,19 @@ export const auth = betterAuth({
   emailAndPassword: { enabled: true },
   session: {
     cookieCache: { enabled: true, maxAge: 300 }, // 5 min signed-cookie cache — skips the per-request Mongo read
+  },
+  databaseHooks: {
+    user: {
+      create: {
+        after: async (user) => {
+          // The user row is already committed before this runs (create.after is
+          // post-write, and transaction:false means no DB transaction). An uncaught
+          // throw here would fail the sign-up REQUEST (no rollback), so publishWelcomeEmail
+          // swallows all errors and resolves to void — the hook never throws.
+          await publishWelcomeEmail({ userId: user.id, email: user.email, name: user.name });
+        },
+      },
+    },
   },
   socialProviders: {
     google: {
