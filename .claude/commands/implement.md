@@ -19,7 +19,7 @@ You are running **/implement**, step 3 of the spec-driven pipeline (see `CLAUDE.
    - **Tell the subagent explicitly: do NOT edit the plan file** (no checkbox ticking, no touching the plan at all). Plan-file state is the orchestrator's job (step 4). A subagent that edits the plan can corrupt the rerunnable state — one over-ticked every box and stripped a task header, which then had to be reconstructed.
    - **Guards:** if a `**Skills:**` value names a skill that isn't installed, note it in the digest + JOURNAL and continue without it (don't hard-fail). If `**Agent:** Explore` is set on a task that produces code, stop and surface the mismatch — Explore can't write.
 4. After each task returns:
-   - Tick its box (`- [ ]` → `- [x]`) in the plan file.
+   - Tick its box (`- [ ]` → `- [x]`) in the plan file. **Tick with a targeted single-line edit** (Edit tool on that step's line, or `sed -i` on it) — never an `awk`/whole-file rewrite, which makes the harness re-inject the entire plan into context on every tick (pure token waste).
    - Append `## <timestamp> — implement task N: <title>` to `docs/superpowers/JOURNAL.md` — what changed, key decisions, deviations, check result (pass/fail), and the chosen equipment (e.g. `task 4 → general-purpose / opus + typescript-advanced-types`).
    - Report a **tight digest** to the user: files touched · key decisions · chosen equipment · open questions · suggested next step. (Full detail is in the plan + journal.)
 5. If a task's check **fails**, stop and surface it — do **not** tick the box. The user decides whether to fix or rerun.
