@@ -17,4 +17,8 @@ export const env = {
   BETTER_AUTH_URL: requireEnv('BETTER_AUTH_URL'),
   PORT: process.env.PORT,
   REDIS_URL: process.env.REDIS_URL ?? 'redis://localhost:6379',
+  RABBITMQ_URL: process.env.RABBITMQ_URL ?? 'amqp://localhost:5672',
+  SMTP_HOST: process.env.SMTP_HOST ?? 'localhost',
+  SMTP_PORT: Number(process.env.SMTP_PORT ?? 1025),
+  MAIL_FROM: process.env.MAIL_FROM ?? 'React_Intro <no-reply@react-intro.local>',
 };
