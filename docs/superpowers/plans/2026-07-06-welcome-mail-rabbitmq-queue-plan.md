@@ -299,7 +299,7 @@ The heart of the assignment. `processWelcomeMessage(rawContent)` parses, atomica
 
 **Skills:** test-driven-development
 
-- [ ] **Step 1: Write the failing test** (`welcomeMail.service.test.ts`) — the full exactly-once suite
+- [x] **Step 1: Write the failing test** (`welcomeMail.service.test.ts`) — the full exactly-once suite
 
 ```ts
 import { describe, it, expect, vi, beforeEach } from 'vitest';
@@ -407,13 +407,13 @@ describe('processWelcomeMessage — exactly once', () => {
 });
 ```
 
-- [ ] **Step 2: Run it — expect FAIL** (`Cannot find module './welcomeMail.service.ts'`)
+- [x] **Step 2: Run it — expect FAIL** (`Cannot find module './welcomeMail.service.ts'`)
 
 ```bash
 pnpm --filter @repo/server test welcomeMail.service
 ```
 
-- [ ] **Step 3: Implement `welcomeMail.service.ts`**
+- [x] **Step 3: Implement `welcomeMail.service.ts`**
 
 ```ts
 import { WelcomeEmailModel } from './welcomeEmail.schema.ts';
@@ -509,13 +509,13 @@ export async function processWelcomeMessage(rawContent: string): Promise<Process
 }
 ```
 
-- [ ] **Step 4: Run it — expect all PASS**
+- [x] **Step 4: Run it — expect all PASS**
 
 ```bash
 pnpm --filter @repo/server test welcomeMail.service
 ```
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add apps/server/src/modules/mail/welcomeMail.service.ts apps/server/src/modules/mail/welcomeMail.service.test.ts
