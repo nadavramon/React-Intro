@@ -32,8 +32,10 @@ const docA = {
   title: 'A',
   isCompleted: false,
 };
-const entityA = { id: 't1', userId, title: 'A', isCompleted: false };
-const entityDone = { id: 't2', userId, title: 'B', isCompleted: true };
+// The mapped/cached shape is the shared Task out-DTO — no userId (docA, a DB
+// doc, keeps its userId; toTask strips it via taskSchema.parse).
+const entityA = { id: 't1', title: 'A', isCompleted: false };
+const entityDone = { id: 't2', title: 'B', isCompleted: true };
 
 beforeEach(() => vi.clearAllMocks());
 
@@ -55,6 +57,18 @@ describe('getAllTasks cache-aside', () => {
     expect(result).toEqual([entityA]);
     expect(TaskModel.find).toHaveBeenCalledWith({ userId });
     expect(taskCache.write).toHaveBeenCalledWith(userId, [entityA]);
+  });
+
+  it('never returns userId on task objects (out-DTO enforced)', async () => {
+    vi.mocked(taskCache.read).mockResolvedValue(null);
+    vi.mocked(TaskModel.find).mockReturnValue({
+      lean: () => Promise.resolve([docA]),
+    } as never);
+
+    const tasks = await getAllTasks(userId);
+
+    expect(tasks[0]).not.toHaveProperty('userId');
+    expect(tasks[0]).toEqual({ id: 't1', title: docA.title, isCompleted: docA.isCompleted });
   });
 });
 

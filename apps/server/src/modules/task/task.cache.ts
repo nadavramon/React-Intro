@@ -1,6 +1,6 @@
 import { redis } from '../../shared/config/redis.ts';
 import { logger } from '../../shared/utils/logger.ts';
-import { TaskEntity } from './task.entity.ts';
+import { Task } from '@repo/shared';
 
 const TTL_SECONDS = 60;
 
@@ -8,7 +8,7 @@ function keyFor(userId: string): string {
   return `tasks:user:${userId}`;
 }
 
-export async function read(userId: string): Promise<TaskEntity[] | null> {
+export async function read(userId: string): Promise<Task[] | null> {
   try {
     const cached = await redis.get(keyFor(userId));
     if (cached === null) {
@@ -16,14 +16,14 @@ export async function read(userId: string): Promise<TaskEntity[] | null> {
       return null;
     }
     logger.info(`[cache] HIT tasks user=${userId}`);
-    return JSON.parse(cached) as TaskEntity[];
+    return JSON.parse(cached) as Task[];
   } catch (err) {
     logger.warn(`[cache] read failed user=${userId}: ${err}`);
     return null;
   }
 }
 
-export async function write(userId: string, tasks: TaskEntity[]): Promise<void> {
+export async function write(userId: string, tasks: Task[]): Promise<void> {
   try {
     await redis.set(keyFor(userId), JSON.stringify(tasks), 'EX', TTL_SECONDS);
   } catch (err) {

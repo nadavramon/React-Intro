@@ -1,4 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
+import { ApiError } from '@repo/shared';
 import { AppError, ValidationError } from '../errors/AppError.ts';
 import { logger } from '../utils/logger.ts';
 import mongoose from 'mongoose';
@@ -18,9 +19,7 @@ export function errorHandler(err: Error, req: Request, res: Response, _next: Nex
     logger.error(`${req.method} ${req.path} >> StatusCode: ${statusCode} - ${message}`);
   }
 
-  const payload: Record<string, unknown> = {
-    error: message,
-  };
+  const payload: ApiError & { stack?: string | undefined } = { error: message };
 
   if (process.env.NODE_ENV === 'development') {
     payload.stack = err.stack;

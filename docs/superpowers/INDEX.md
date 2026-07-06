@@ -7,6 +7,7 @@ See `CLAUDE.md → "Spec-driven workflow"` for how the pipeline works.
 
 | Feature | Date | Spec | Plan | Status |
 | --- | --- | --- | --- | --- |
+| Shared contract hardening (DTO-out) | 2026-07-05 | [spec](specs/2026-07-05-shared-contract-hardening-design.md) | [plan](plans/2026-07-05-shared-contract-hardening-plan.md) | Done |
 | Google OAuth via better-auth | 2026-07-03 | [spec](specs/2026-07-03-google-oauth-better-auth-design.md) | [plan](plans/2026-07-03-google-oauth-better-auth-plan.md) | Done |
 | Polyrepo → Turborepo monorepo | 2026-06-30 | [spec](specs/2026-06-30-polyrepo-to-monorepo-design.md) | [plan](plans/2026-06-30-polyrepo-to-monorepo-plan.md) | Done |
 | Todo cache (Redis cache-aside) | 2026-06-24 | [spec](specs/2026-06-24-todo-cache-design.md) | [plan](plans/2026-06-24-todo-cache-plan.md) | Done |

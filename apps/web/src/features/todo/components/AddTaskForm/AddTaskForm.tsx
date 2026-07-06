@@ -1,7 +1,9 @@
 import { useState } from 'react'
 import { toast } from 'sonner'
+import { TASK_TITLE_MAX_LENGTH } from '@repo/shared'
 import { Button } from '@/components/ui/button'
 import { useAddTask } from '@/features/todo/store/todoStore'
+import { parseApiError } from '@/lib/errors'
 
 export default function AddTaskForm() {
     const addTask = useAddTask()
@@ -13,8 +15,8 @@ export default function AddTaskForm() {
             await addTask(title)
             setTitle('')
             toast.success('Task added')
-        } catch {
-            toast.error('Failed to add task')
+        } catch (err) {
+            toast.error(parseApiError(err, 'Failed to add task'))
         }
     }
 
@@ -27,6 +29,7 @@ export default function AddTaskForm() {
                 onChange={(event) => setTitle(event.target.value)}
                 aria-label="New task"
                 placeholder="New task..."
+                maxLength={TASK_TITLE_MAX_LENGTH}
             />
             <Button type="submit" disabled={title.trim() === ''}>
                 Add
