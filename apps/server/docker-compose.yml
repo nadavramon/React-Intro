@@ -5,5 +5,18 @@ services:
       - '6379:6379'
     volumes:
       - redis-data:/data
+  rabbitmq:
+    image: rabbitmq:3-management-alpine # -management ships the web UI + CLI
+    ports:
+      - '5672:5672' # AMQP — the app connects here
+      - '15672:15672' # management UI (guest/guest)
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq # durable queues survive a restart
+  mailpit:
+    image: axllent/mailpit:v1.30 # pinned like rabbitmq — stable REST API
+    ports:
+      - '1025:1025' # SMTP sink (nodemailer connects here)
+      - '8025:8025' # web inbox — watch the welcome mail land
 volumes:
   redis-data:
+  rabbitmq-data:
