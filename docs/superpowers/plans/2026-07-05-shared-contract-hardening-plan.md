@@ -28,14 +28,14 @@
 - Create: `packages/shared/src/constants.ts`, `packages/shared/src/error.ts`, `packages/shared/src/error.test.ts`
 - Modify: `packages/shared/src/task.ts`, `packages/shared/src/index.ts`, `packages/shared/src/task.test.ts`
 
-- [ ] **Step 1: Create `packages/shared/src/constants.ts`**
+- [x] **Step 1: Create `packages/shared/src/constants.ts`**
 
 ```ts
 export const TASK_TITLE_MIN_LENGTH = 1
 export const TASK_TITLE_MAX_LENGTH = 255
 ```
 
-- [ ] **Step 2: Create `packages/shared/src/error.ts`**
+- [x] **Step 2: Create `packages/shared/src/error.ts`**
 
 ```ts
 import { z } from 'zod'
@@ -46,7 +46,7 @@ export const errorResponseSchema = z.object({ error: z.string() })
 export type ApiError = z.infer<typeof errorResponseSchema>
 ```
 
-- [ ] **Step 3: Wire the constants into `packages/shared/src/task.ts`**
+- [x] **Step 3: Wire the constants into `packages/shared/src/task.ts`**
 
 Replace the two hardcoded lengths in both `createTaskBodySchema` and `updateTaskBodySchema`. Add the import at the top, then use the constants:
 
@@ -66,7 +66,7 @@ In each schema the `title` field becomes:
 ```
 (In `updateTaskBodySchema` this `title` is followed by `.optional()`, exactly as today — keep that.)
 
-- [ ] **Step 4: Export the new modules from `packages/shared/src/index.ts`**
+- [x] **Step 4: Export the new modules from `packages/shared/src/index.ts`**
 
 ```ts
 export * from './task.ts'
@@ -75,7 +75,7 @@ export * from './constants.ts'
 export * from './error.ts'
 ```
 
-- [ ] **Step 5: Write the failing tests — the out-DTO strip + error schema**
+- [x] **Step 5: Write the failing tests — the out-DTO strip + error schema**
 
 Append to `packages/shared/src/task.test.ts` (inside the existing `taskSchema` describe or a new one):
 
@@ -106,17 +106,17 @@ describe('errorResponseSchema', () => {
 })
 ```
 
-- [ ] **Step 6: Run the shared tests — expect PASS (schemas already support this)**
+- [x] **Step 6: Run the shared tests — expect PASS (schemas already support this)**
 
 Run: `pnpm --filter @repo/shared test`
 Expected: all pass (the strip test passes because zod object schemas strip unknown keys by default; the constant wiring didn't change the schema shape).
 
-- [ ] **Step 7: Build shared so downstream packages see the new exports**
+- [x] **Step 7: Build shared so downstream packages see the new exports**
 
 Run: `pnpm --filter @repo/shared build`
 Expected: `packages/shared/dist` includes `constants.js/.d.ts` and `error.js/.d.ts`.
 
-- [ ] **Step 8: Commit (local only — no push)**
+- [x] **Step 8: Commit (local only — no push)**
 
 ```bash
 pnpm --filter @repo/shared exec prettier --write "src/**/*.ts"
@@ -132,7 +132,7 @@ git commit -m "feat(shared): title-length constants + error-response schema; out
 - Modify: `apps/server/src/modules/task/task.service.ts`, `apps/server/src/modules/task/task.cache.ts`, `apps/server/src/modules/task/task.service.test.ts`
 - Delete: `apps/server/src/modules/task/task.entity.ts`
 
-- [ ] **Step 1: Add the failing assertion to `task.service.test.ts`**
+- [x] **Step 1: Add the failing assertion to `task.service.test.ts`**
 
 The existing suite mocks `TaskModel` + `task.cache` and its `docA`/`docB` fixtures include a `userId`. Add a test asserting the mapped result no longer carries it (put it after the existing `getAllTasks` tests):
 
@@ -151,12 +151,12 @@ it('never returns userId on task objects (out-DTO enforced)', async () => {
 ```
 (Match `docA`'s actual `title`/`isCompleted` values from the top of the file; if the fixture lacks a `userId`, add one to `docA` so the test is meaningful.)
 
-- [ ] **Step 2: Run it — expect FAIL (service still returns userId)**
+- [x] **Step 2: Run it — expect FAIL (service still returns userId)**
 
 Run: `pnpm --filter @repo/server test -- task.service`
 Expected: FAIL on `not.toHaveProperty('userId')`.
 
-- [ ] **Step 3: Rewrite `toTask` to return the shared `Task` via `taskSchema.parse`**
+- [x] **Step 3: Rewrite `toTask` to return the shared `Task` via `taskSchema.parse`**
 
 In `apps/server/src/modules/task/task.service.ts`, replace the `TaskEntity` import and `toTask`, and swap every `TaskEntity` return type for `Task`:
 
@@ -182,7 +182,7 @@ function toTask(doc: TaskDoc): Task {
 
 Then change the six signatures: `Promise<TaskEntity[]>` → `Promise<Task[]>` (getAllTasks, getTasksByStatus) and `Promise<TaskEntity>` → `Promise<Task>` (getTaskById, createTask, updateTask). No other logic changes.
 
-- [ ] **Step 4: Update `task.cache.ts` to cache `Task[]` (drops userId from the cache too)**
+- [x] **Step 4: Update `task.cache.ts` to cache `Task[]` (drops userId from the cache too)**
 
 Replace the `TaskEntity` import + the two type references:
 
@@ -193,24 +193,24 @@ import { Task } from '@repo/shared';
 ```
 Then `Promise<TaskEntity[] | null>` → `Promise<Task[] | null>`, `as TaskEntity[]` → `as Task[]`, and `tasks: TaskEntity[]` → `tasks: Task[]`.
 
-- [ ] **Step 5: Delete the now-unused entity**
+- [x] **Step 5: Delete the now-unused entity**
 
 ```bash
 git rm apps/server/src/modules/task/task.entity.ts
 ```
 (Confirm no remaining importers: `grep -rn TaskEntity apps/server/src` should return nothing.)
 
-- [ ] **Step 6: Run server tests — expect PASS**
+- [x] **Step 6: Run server tests — expect PASS**
 
 Run: `pnpm --filter @repo/server test`
 Expected: the new assertion passes; `task.cache.test` and the rest stay green.
 
-- [ ] **Step 7: Typecheck the server**
+- [x] **Step 7: Typecheck the server**
 
 Run: `pnpm --filter @repo/server typecheck`
 Expected: exit 0 (no dangling `TaskEntity` references).
 
-- [ ] **Step 8: Commit (local only)**
+- [x] **Step 8: Commit (local only)**
 
 ```bash
 pnpm --filter @repo/server format
@@ -225,7 +225,7 @@ git commit -m "feat(server): enforce Task out-DTO via taskSchema.parse; drop Tas
 **Files:**
 - Modify: `apps/server/src/shared/middlewares/errorHandler.ts`
 
-- [ ] **Step 1: Type the payload against the shared envelope**
+- [x] **Step 1: Type the payload against the shared envelope**
 
 In `apps/server/src/shared/middlewares/errorHandler.ts`, import `ApiError` and type the payload so the guaranteed shape is `{ error }` (the dev-only `stack` is an explicit extra):
 
@@ -245,12 +245,12 @@ Replace the payload construction:
 ```
 (Everything above — the 11000 remap, statusCode/message derivation, logging — is unchanged.)
 
-- [ ] **Step 2: Typecheck + tests**
+- [x] **Step 2: Typecheck + tests**
 
 Run: `pnpm --filter @repo/server typecheck && pnpm --filter @repo/server test`
 Expected: green (pure type-alignment; runtime behavior identical).
 
-- [ ] **Step 3: Commit (local only)**
+- [x] **Step 3: Commit (local only)**
 
 ```bash
 pnpm --filter @repo/server format
@@ -266,7 +266,7 @@ git commit -m "refactor(server): type error payload as shared ApiError"
 - Create: `apps/web/src/lib/errors.ts`, `apps/web/src/lib/errors.test.ts`
 - Modify: `apps/web/src/features/todo/store/todoStore.ts`, `apps/web/src/features/todo/components/AddTaskForm/AddTaskForm.tsx`
 
-- [ ] **Step 1: Write the failing test `apps/web/src/lib/errors.test.ts`**
+- [x] **Step 1: Write the failing test `apps/web/src/lib/errors.test.ts`**
 
 ```ts
 import { describe, it, expect } from 'vitest'
@@ -294,12 +294,12 @@ describe('parseApiError', () => {
 })
 ```
 
-- [ ] **Step 2: Run it — expect FAIL (module not found)**
+- [x] **Step 2: Run it — expect FAIL (module not found)**
 
 Run: `pnpm --filter @repo/web test -- errors`
 Expected: FAIL — `parseApiError` / `./errors` doesn't exist yet.
 
-- [ ] **Step 3: Implement `apps/web/src/lib/errors.ts`**
+- [x] **Step 3: Implement `apps/web/src/lib/errors.ts`**
 
 ```ts
 import { isAxiosError } from 'axios'
@@ -316,12 +316,12 @@ export function parseApiError(err: unknown, fallback: string): string {
 }
 ```
 
-- [ ] **Step 4: Run it — expect PASS**
+- [x] **Step 4: Run it — expect PASS**
 
 Run: `pnpm --filter @repo/web test -- errors`
 Expected: 3 passing.
 
-- [ ] **Step 5: Surface server messages in `todoStore.ts`**
+- [x] **Step 5: Surface server messages in `todoStore.ts`**
 
 Add the import and use `parseApiError` in the `init` catch (the one that sets `errorMessage`):
 
@@ -339,7 +339,7 @@ import { parseApiError } from '@/lib/errors'
 ```
 (The add/toggle/delete catches rethrow to components — leave them; the AddTaskForm one is handled in Step 6.)
 
-- [ ] **Step 6: `AddTaskForm.tsx` — input maxLength + surface server message on add**
+- [x] **Step 6: `AddTaskForm.tsx` — input maxLength + surface server message on add**
 
 Add the constant import and the maxLength attribute; bind `err` in the catch and surface it:
 
@@ -355,12 +355,12 @@ Input gains `maxLength={TASK_TITLE_MAX_LENGTH}` alongside the existing attribute
         }
 ```
 
-- [ ] **Step 7: Typecheck + web tests + a smoke of the todo unit tests**
+- [x] **Step 7: Typecheck + web tests + a smoke of the todo unit tests**
 
 Run: `pnpm --filter @repo/web typecheck && pnpm --filter @repo/web test`
 Expected: green — `errors.test`, the existing `todoStore.test`, and RTL component tests all pass (behavior for existing tests is unchanged; only the error *text source* moved).
 
-- [ ] **Step 8: Commit (local only)**
+- [x] **Step 8: Commit (local only)**
 
 ```bash
 pnpm --filter @repo/web format
@@ -374,19 +374,19 @@ git commit -m "feat(web): parseApiError surfaces server messages; title maxLengt
 
 **Files:** none (verification + final local commit if formatting shifts)
 
-- [ ] **Step 1: Clean whole-repo gauntlet**
+- [x] **Step 1: Clean whole-repo gauntlet**
 
 Run: `pnpm format:check && pnpm turbo run lint typecheck test build`
 Expected: format clean; all packages green (shared builds first). If `format:check` flags anything, run `pnpm format`, re-check, and `git commit -am "chore: format"`.
 
-- [ ] **Step 2: Prove the leak is closed at the HTTP layer (fast, no Mongo)**
+- [x] **Step 2: Prove the leak is closed at the HTTP layer (fast, no Mongo)**
 
 Reuse the app-boot smoke from the monorepo work: build, boot the compiled `app.js` with dummy env, and assert `GET /api/tasks` is auth-gated (401) — i.e. no unauthenticated leak. (Full authenticated end-to-end needs a live session + Mongo; the shared strip test + service test already prove `userId` can't appear in a task object.)
 
 Run: `pnpm --filter @repo/server build && pnpm --filter @repo/shared build`
 Expected: both build clean. Note in the digest that the unit-level tests (shared strip + service no-userId) are the authoritative proof.
 
-- [ ] **Step 3: Confirm branch state — everything committed, nothing pushed**
+- [x] **Step 3: Confirm branch state — everything committed, nothing pushed**
 
 Run: `git log --oneline main..HEAD && git status --short`
 Expected: the spec commit + the four task commits present; clean working tree; branch has **no upstream** (push happens once, after this plan, at the end of the pipeline).
