@@ -25,7 +25,7 @@ pnpm is pinned via corepack (`packageManager` in the root `package.json`); Node 
 ## Stack
 
 - **Web:** React 19 + TypeScript (strict), Vite, TanStack Router (file-based; `src/routes/` → generated `routeTree.gen.ts`), Tailwind CSS v4 + shadcn/radix-ui (some older features still use CSS Modules), `clsx`/`tailwind-merge` (`cn()` in `src/lib/utils.ts`), axios (`src/lib/api.ts`), zustand.
-- **Server:** Express 5 (note: bare `'*'` routes throw under path-to-regexp v8 — use a RegExp), Mongoose, better-auth (Google + email/password, cookie sessions), zod validation, ioredis cache (optional — degrades to no-cache), winston. `module: nodenext`; `declaration: false` (it's an app, not a library — also avoids TS2883 under pnpm).
+- **Server:** Express 5 (note: bare `'*'` routes throw under path-to-regexp v8 — use a RegExp), Mongoose, better-auth (Google + email/password, cookie sessions), zod validation, ioredis cache (optional — degrades to no-cache), RabbitMQ via amqplib + Mailpit SMTP sink for the welcome-mail queue (`modules/mail/`; dev services via `docker compose up -d`), winston. `module: nodenext`; `declaration: false` (it's an app, not a library — also avoids TS2883 under pnpm).
 - **Tests:** Vitest (+ RTL/jsdom in web); Playwright for e2e.
 
 ## Web app architecture (`apps/web/src/`)

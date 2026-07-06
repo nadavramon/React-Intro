@@ -67,6 +67,7 @@ src/
     task/                  # tasks (todos)
     post/                  # blog posts (CRUD + like, soft-delete)
     comment/               # comments on posts (CRUD, soft-delete with cascade)
+    mail/                  # welcome-mail queue: publisher, consumer, idempotent service, mailer
   shared/
     config/                # env loader, Mongoose connection
     middlewares/           # auth, rate limiter, error handler, http logger
@@ -164,3 +165,26 @@ erDiagram
 When a `Post` is soft-deleted, `postService.deletePost` also runs `commentModel.softRemoveByPostId` — `updateMany` on all live comments under that post, in one batched operation. Both layers hide together, no orphans.
 
 `User`, `Task`, and `RefreshToken` use **hard-delete** (no soft-delete fields).
+
+## Welcome mail (queue)
+
+New sign-ups get a welcome email, delivered asynchronously through RabbitMQ so the HTTP request never waits on (or fails because of) SMTP.
+
+### Dev services
+
+```bash
+docker compose up -d   # redis + rabbitmq (UI at :15672, guest/guest) + mailpit (inbox at :8025)
+```
+
+Mailpit is a local SMTP sink — mails land in its web inbox at <http://localhost:8025> instead of going anywhere real.
+
+### End-to-end flow
+
+1. Sign-up completes → better-auth's `user.create.after` hook fires.
+2. `welcomeMail.publisher` publishes `{ userId, email, name }` to the durable `welcome.email` queue — persistent delivery on a confirm channel, and it swallows all errors so sign-up can never fail because the broker is down.
+3. The consumer (`prefetch(1)`) hands each message to the idempotent `processWelcomeMessage`, which sends via nodemailer → Mailpit.
+4. The message is **acked only after the send succeeds**. Transient failures (SMTP down) → `nack(requeue: true)`, bounded by an attempts counter (max 5). Poison messages (bad JSON, invalid shape, attempts exhausted) → `nack(requeue: false)` → fanout DLX → `welcome.email.dlq` for inspection.
+
+### Why effectively-once
+
+RabbitMQ only guarantees **at-least-once** delivery — a redelivery after a crash or requeue is always possible. Exactly-once therefore lives in the consumer: each message upserts a dedup document keyed on `userId` (unique index in Mongo), and a doc already in `status: 'sent'` makes the redelivery a no-op skip. At-least-once transport + idempotent consumer = effectively exactly one mail per user.
