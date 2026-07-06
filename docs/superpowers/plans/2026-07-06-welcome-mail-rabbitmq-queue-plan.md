@@ -533,7 +533,7 @@ Owns the connection, a shared **confirm** channel for publishing, the topology (
 
 No unit test (a reconnect loop against a real broker isn't meaningfully unit-testable); covered by the boot smoke in Step 3 and the integration proof in Task 9.
 
-- [ ] **Step 1: Implement `rabbitmq.ts`**
+- [x] **Step 1: Implement `rabbitmq.ts`**
 
 ```ts
 import amqp, { type ChannelModel, type ConfirmChannel } from 'amqplib';
@@ -626,7 +626,7 @@ export async function disconnectRabbitMQ(): Promise<void> {
 }
 ```
 
-- [ ] **Step 2: Typecheck**
+- [x] **Step 2: Typecheck**
 
 ```bash
 pnpm --filter @repo/server typecheck
@@ -634,11 +634,11 @@ pnpm --filter @repo/server typecheck
 
 Expected: PASS. (amqplib's own bundled types export `ChannelModel` / `ConfirmChannel` and type `connect()` as `Promise<ChannelModel>`, so the imports compile as written.)
 
-- [ ] **Step 3: Boot smoke (deferred to Task 8 wiring)**
+- [x] **Step 3: Boot smoke (deferred to Task 8 wiring)**
 
 `rabbitmq.ts` isn't reachable until `index.ts` calls `connectRabbitMQ()` (Task 8). No standalone run here; commit and proceed.
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add apps/server/src/shared/config/rabbitmq.ts
