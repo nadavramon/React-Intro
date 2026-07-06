@@ -655,7 +655,7 @@ git commit -m "feat(server): rabbitmq config — confirm channel, fanout DLX top
 - Create: `apps/server/src/modules/mail/welcomeMail.publisher.ts`
 - Test: `apps/server/src/modules/mail/welcomeMail.publisher.test.ts`
 
-- [ ] **Step 1: Write the failing test** (`welcomeMail.publisher.test.ts`)
+- [x] **Step 1: Write the failing test** (`welcomeMail.publisher.test.ts`)
 
 ```ts
 import { describe, it, expect, vi, beforeEach } from 'vitest';
@@ -700,13 +700,13 @@ describe('publishWelcomeEmail', () => {
 });
 ```
 
-- [ ] **Step 2: Run it — expect FAIL**
+- [x] **Step 2: Run it — expect FAIL**
 
 ```bash
 pnpm --filter @repo/server test welcomeMail.publisher
 ```
 
-- [ ] **Step 3: Implement `welcomeMail.publisher.ts`**
+- [x] **Step 3: Implement `welcomeMail.publisher.ts`**
 
 ```ts
 import { getPublishChannel, WELCOME_QUEUE } from '../../shared/config/rabbitmq.ts';
@@ -731,13 +731,13 @@ export async function publishWelcomeEmail(msg: WelcomeMessage): Promise<void> {
 }
 ```
 
-- [ ] **Step 4: Run it — expect PASS**
+- [x] **Step 4: Run it — expect PASS**
 
 ```bash
 pnpm --filter @repo/server test welcomeMail.publisher
 ```
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add apps/server/src/modules/mail/welcomeMail.publisher.ts apps/server/src/modules/mail/welcomeMail.publisher.test.ts
@@ -754,7 +754,7 @@ git commit -m "feat(server): welcome-mail publisher — persistent + confirm, er
 - Create: `apps/server/src/modules/mail/welcomeMail.consumer.ts`
 - Test: `apps/server/src/modules/mail/welcomeMail.consumer.test.ts`
 
-- [ ] **Step 1: Write the failing test** (`welcomeMail.consumer.test.ts`) — verify the result→AMQP mapping
+- [x] **Step 1: Write the failing test** (`welcomeMail.consumer.test.ts`) — verify the result→AMQP mapping
 
 ```ts
 import { describe, it, expect, vi, beforeEach } from 'vitest';
@@ -802,13 +802,13 @@ describe('handleDelivery maps service result → AMQP action', () => {
 });
 ```
 
-- [ ] **Step 2: Run it — expect FAIL**
+- [x] **Step 2: Run it — expect FAIL**
 
 ```bash
 pnpm --filter @repo/server test welcomeMail.consumer
 ```
 
-- [ ] **Step 3: Implement `welcomeMail.consumer.ts`**
+- [x] **Step 3: Implement `welcomeMail.consumer.ts`**
 
 ```ts
 import type { Channel, ConsumeMessage } from 'amqplib';
@@ -841,13 +841,13 @@ export function startWelcomeConsumer(): void {
 }
 ```
 
-- [ ] **Step 4: Run it — expect PASS**
+- [x] **Step 4: Run it — expect PASS**
 
 ```bash
 pnpm --filter @repo/server test welcomeMail.consumer
 ```
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add apps/server/src/modules/mail/welcomeMail.consumer.ts apps/server/src/modules/mail/welcomeMail.consumer.test.ts
