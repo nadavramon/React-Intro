@@ -20,7 +20,7 @@ export async function getAllTasks(userId: string): Promise<Task[]> {
   const cached = await taskCache.read(userId);
   if (cached !== null) return cached;
 
-  const docs = await TaskModel.find({ userId }).lean();
+  const docs = await TaskModel.find({ userId, isDeleted: { $ne: true } }).lean();
   const tasks = docs.map(toTask);
   await taskCache.write(userId, tasks);
   return tasks;
@@ -32,7 +32,7 @@ export async function getTasksByStatus(userId: string, isCompleted: boolean): Pr
 }
 
 export async function getTaskById(userId: string, id: string): Promise<Task> {
-  const doc = await TaskModel.findOne({ _id: id, userId }).lean();
+  const doc = await TaskModel.findOne({ _id: id, userId, isDeleted: { $ne: true } }).lean();
   if (!doc) throw new NotFoundError('Task not found');
 
   return toTask(doc);
@@ -43,6 +43,7 @@ export async function createTask(userId: string, dto: CreateTaskBodyDto): Promis
     userId,
     title: dto.title,
     isCompleted: dto.isCompleted ?? false,
+    completedAt: dto.isCompleted ? new Date() : null,
   });
   const task = toTask(doc.toObject());
   logger.info(`Task created: id=${task.id}, title="${task.title}"`);
@@ -55,9 +56,20 @@ export async function updateTask(
   id: string,
   dto: UpdateTaskBodyDto,
 ): Promise<Task> {
-  const doc = await TaskModel.findOneAndUpdate({ _id: id, userId }, dto, {
-    returnDocument: 'after',
-  }).lean();
+  const current = await TaskModel.findOne({ _id: id, userId, isDeleted: { $ne: true } }).lean();
+  if (!current) throw new NotFoundError('Task not found');
+
+  const update: Record<string, unknown> = { ...dto };
+  if (dto.isCompleted === true && !current.isCompleted) update['completedAt'] = new Date();
+  else if (dto.isCompleted === false && current.isCompleted) update['completedAt'] = null;
+
+  const doc = await TaskModel.findOneAndUpdate(
+    { _id: id, userId, isDeleted: { $ne: true } },
+    update,
+    {
+      returnDocument: 'after',
+    },
+  ).lean();
   if (!doc) throw new NotFoundError('Task not found');
 
   logger.info(`Task updated: id=${id}`);
@@ -66,9 +78,12 @@ export async function updateTask(
 }
 
 export async function deleteTask(userId: string, id: string): Promise<void> {
-  const doc = await TaskModel.findOneAndDelete({ _id: id, userId }).lean();
+  const doc = await TaskModel.findOneAndUpdate(
+    { _id: id, userId, isDeleted: { $ne: true } },
+    { isDeleted: true, deletedAt: new Date() },
+  ).lean();
   if (!doc) throw new NotFoundError('Task not found');
 
-  logger.info(`Task deleted: id=${id}`);
+  logger.info(`Task soft-deleted: id=${id}`);
   await taskCache.invalidate(userId);
 }
