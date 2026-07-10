@@ -3,9 +3,9 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 vi.mock('./task.schema.ts', () => ({
   TaskModel: {
     find: vi.fn(),
+    findOne: vi.fn(),
     create: vi.fn(),
     findOneAndUpdate: vi.fn(),
-    findOneAndDelete: vi.fn(),
   },
 }));
 
@@ -16,6 +16,7 @@ vi.mock('./task.cache.ts', () => ({
 }));
 
 import { TaskModel } from './task.schema.ts';
+import { NotFoundError } from '../../shared/errors/AppError.ts';
 import * as taskCache from './task.cache.ts';
 import {
   getAllTasks,
@@ -55,7 +56,7 @@ describe('getAllTasks cache-aside', () => {
     } as never);
     const result = await getAllTasks(userId);
     expect(result).toEqual([entityA]);
-    expect(TaskModel.find).toHaveBeenCalledWith({ userId });
+    expect(TaskModel.find).toHaveBeenCalledWith({ userId, isDeleted: { $ne: true } });
     expect(taskCache.write).toHaveBeenCalledWith(userId, [entityA]);
   });
 
@@ -95,12 +96,29 @@ describe('writes invalidate the user cache', () => {
     await updateTask(userId, 't1', { title: 'B' } as never);
     expect(taskCache.invalidate).toHaveBeenCalledWith(userId);
   });
+});
 
-  it('deleteTask invalidates after a successful delete', async () => {
-    vi.mocked(TaskModel.findOneAndDelete).mockReturnValue({
+describe('deleteTask soft-deletes', () => {
+  it('flips isDeleted/deletedAt instead of removing the doc, then invalidates', async () => {
+    vi.mocked(TaskModel.findOneAndUpdate).mockReturnValue({
       lean: () => Promise.resolve(docA),
     } as never);
+
     await deleteTask(userId, 't1');
+
+    expect(TaskModel.findOneAndUpdate).toHaveBeenCalledWith(
+      { _id: 't1', userId, isDeleted: { $ne: true } },
+      { isDeleted: true, deletedAt: expect.any(Date) },
+    );
     expect(taskCache.invalidate).toHaveBeenCalledWith(userId);
+  });
+
+  it('404s when the task is missing or already soft-deleted', async () => {
+    vi.mocked(TaskModel.findOneAndUpdate).mockReturnValue({
+      lean: () => Promise.resolve(null),
+    } as never);
+
+    await expect(deleteTask(userId, 't1')).rejects.toThrow(NotFoundError);
+    expect(taskCache.invalidate).not.toHaveBeenCalled();
   });
 });

@@ -20,7 +20,7 @@ export async function getAllTasks(userId: string): Promise<Task[]> {
   const cached = await taskCache.read(userId);
   if (cached !== null) return cached;
 
-  const docs = await TaskModel.find({ userId }).lean();
+  const docs = await TaskModel.find({ userId, isDeleted: { $ne: true } }).lean();
   const tasks = docs.map(toTask);
   await taskCache.write(userId, tasks);
   return tasks;
@@ -32,7 +32,7 @@ export async function getTasksByStatus(userId: string, isCompleted: boolean): Pr
 }
 
 export async function getTaskById(userId: string, id: string): Promise<Task> {
-  const doc = await TaskModel.findOne({ _id: id, userId }).lean();
+  const doc = await TaskModel.findOne({ _id: id, userId, isDeleted: { $ne: true } }).lean();
   if (!doc) throw new NotFoundError('Task not found');
 
   return toTask(doc);
@@ -66,9 +66,14 @@ export async function updateTask(
 }
 
 export async function deleteTask(userId: string, id: string): Promise<void> {
-  const doc = await TaskModel.findOneAndDelete({ _id: id, userId }).lean();
+  // Soft delete: deletion is a state, not an event — restorable, auditable,
+  // and the same isDeleted filter hides it from every read.
+  const doc = await TaskModel.findOneAndUpdate(
+    { _id: id, userId, isDeleted: { $ne: true } },
+    { isDeleted: true, deletedAt: new Date() },
+  ).lean();
   if (!doc) throw new NotFoundError('Task not found');
 
-  logger.info(`Task deleted: id=${id}`);
+  logger.info(`Task soft-deleted: id=${id}`);
   await taskCache.invalidate(userId);
 }
