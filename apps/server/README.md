@@ -164,7 +164,7 @@ erDiagram
 
 When a `Post` is soft-deleted, `postService.deletePost` also runs `commentModel.softRemoveByPostId` — `updateMany` on all live comments under that post, in one batched operation. Both layers hide together, no orphans.
 
-`User`, `Task`, and `RefreshToken` use **hard-delete** (no soft-delete fields).
+`Task` uses the same two fields (see [Task cleanup (cron)](#task-cleanup-cron) below). `User` and `RefreshToken` use **hard-delete** (no soft-delete fields).
 
 ## Welcome mail (queue)
 
@@ -188,3 +188,42 @@ Mailpit is a local SMTP sink — mails land in its web inbox at <http://localhos
 ### Why effectively-once
 
 RabbitMQ only guarantees **at-least-once** delivery — a redelivery after a crash or requeue is always possible. Exactly-once therefore lives in the consumer: each message upserts a dedup document keyed on `userId` (unique index in Mongo), and a doc already in `status: 'sent'` makes the redelivery a no-op skip. At-least-once transport + idempotent consumer = effectively exactly one mail per user.
+
+## Task cleanup (cron)
+
+Completed todos don't pile up forever: a nightly job soft-deletes any task that has been completed for **7 days**.
+
+### Retention rule
+
+- Cleanup sets `isDeleted: true` + `deletedAt` — the same two-field soft-delete pattern as `Post`/`Comment`. All task reads filter soft-deleted docs out.
+- A user's `DELETE /api/tasks/:id` is **also** a soft delete, so there is exactly one deletion semantic in the system. Restoring anything (user-deleted or expired) is just flipping `isDeleted` back.
+
+### Schedule
+
+`node-cron` runs the job at `0 3 * * *` — 03:00 in the **server's timezone** (UTC in the Docker image). The cron is registered in `index.ts` only, never in `app.ts`, so tests (which import `app.ts`) never start a scheduler.
+
+### Best-effort Redis lock
+
+Every instance fires its own 3am cron, so the job takes a distributed lock first: `SET cron:task-cleanup <pid> NX PX 600000` (~10 min TTL). Only the winner runs. Two deliberate choices:
+
+- **The lock is never released.** If the winner finished in 2 seconds and deleted the key, a sibling whose clock fires at 3:00:05 would acquire it and run again. Letting the TTL expire _is_ the design, not a leak.
+- **Redis down ⇒ run anyway.** The job is idempotent (a second run's criteria match nothing), so a duplicate run is wasted work, not corruption. A non-idempotent job (billing, email) should skip instead.
+
+### Transition-only `completedAt`
+
+The 7-day clock reads `completedAt`, which the task service stamps **only on the false→true transition** and clears on true→false. Title-only edits or redundant `isCompleted: true` updates don't touch it — so editing a completed todo's title never resets its retention clock.
+
+### Backfill
+
+Tasks completed before this feature shipped have no `completedAt`. A one-off script stamps them (`completedAt = updatedAt` as the best available approximation), run **from `apps/server`**:
+
+```bash
+pnpm exec tsx --env-file=.env/.env.dev src/scripts/backfill-completed-at.ts
+```
+
+Idempotent — a second run reports 0 modified. It relies on Mongoose's `updatePipeline: true` option (already set in the script) because copying one field into another needs an aggregation-pipeline update.
+
+### Deliberate gaps
+
+- **No user-facing warning** before a todo disappears — `completedAt` isn't in the shared contract yet, so the web app can't show "expires in N days".
+- **No second hard-delete tier.** Soft-deleted docs live forever for now; `deletedAt` is exactly the field a future hard-delete sweep would query on.
