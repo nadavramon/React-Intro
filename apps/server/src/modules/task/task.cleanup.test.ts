@@ -19,7 +19,6 @@ beforeEach(() => {
   vi.clearAllMocks();
   vi.useFakeTimers();
   vi.setSystemTime(NOW);
-  // happy-path defaults; individual tests override
   vi.mocked(redis.set).mockResolvedValue('OK');
   vi.mocked(TaskModel.distinct).mockResolvedValue([]);
   vi.mocked(TaskModel.updateMany).mockResolvedValue({ modifiedCount: 0 } as never);
@@ -32,7 +31,7 @@ describe('cleanupOldTasks', () => {
 
     const count = await cleanupOldTasks();
 
-    const cutoff = new Date('2026-07-03T03:00:00Z'); // NOW minus 7 days
+    const cutoff = new Date('2026-07-03T03:00:00Z');
     const expectedCriteria = {
       isCompleted: true,
       isDeleted: { $ne: true },
@@ -58,7 +57,7 @@ describe('cleanupOldTasks', () => {
   });
 
   it('acquires the lock with SET NX PX and skips when another instance holds it', async () => {
-    vi.mocked(redis.set).mockResolvedValue(null); // NX failed: key exists
+    vi.mocked(redis.set).mockResolvedValue(null);
 
     const count = await cleanupOldTasks();
 

@@ -56,10 +56,6 @@ export async function updateTask(
   id: string,
   dto: UpdateTaskBodyDto,
 ): Promise<Task> {
-  // Read-then-update so completedAt only moves on a real transition: a title
-  // edit or a redundant isCompleted:true must not restart the 7-day cleanup
-  // clock. ponytail: tiny race window between the two queries; an atomic
-  // aggregation-pipeline update is the upgrade if it ever matters.
   const current = await TaskModel.findOne({ _id: id, userId, isDeleted: { $ne: true } }).lean();
   if (!current) throw new NotFoundError('Task not found');
 
@@ -78,8 +74,6 @@ export async function updateTask(
 }
 
 export async function deleteTask(userId: string, id: string): Promise<void> {
-  // Soft delete: deletion is a state, not an event — restorable, auditable,
-  // and the same isDeleted filter hides it from every read.
   const doc = await TaskModel.findOneAndUpdate(
     { _id: id, userId, isDeleted: { $ne: true } },
     { isDeleted: true, deletedAt: new Date() },
