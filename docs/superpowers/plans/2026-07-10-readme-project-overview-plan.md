@@ -19,7 +19,7 @@
 **Files:**
 - Create: `docs/assignments/monorepo-migration.md`
 
-- [ ] **Step 1: Create the file**
+- [x] **Step 1: Create the file**
 
 Start with this header:
 
@@ -31,7 +31,7 @@ Q&A answers for the monorepo-migration assignment (see the matching spec/plan in
 
 Then append, **verbatim**, the body of README section "Design notes (the assignment's questions)" — `README.md` lines 44–64 (the four `###` Q&A blocks, from "### What lives in `packages/shared`…" through the `import type { Task } from '@repo/shared'` paragraph). Do not include the `## Design notes …` line itself or the `---` separators.
 
-- [ ] **Step 2: Commit**
+- [x] **Step 2: Commit**
 
 ```bash
 git add docs/assignments/monorepo-migration.md
@@ -43,7 +43,7 @@ git commit -m "docs: move monorepo assignment Q&A out of README"
 **Files:**
 - Create: `docs/assignments/google-oauth-better-auth.md`
 
-- [ ] **Step 1: Create the file**
+- [x] **Step 1: Create the file**
 
 Header:
 
@@ -55,7 +55,7 @@ Q&A answers for the Google OAuth / better-auth assignment (see the matching spec
 
 Then append, **verbatim**, the body of README section "Design notes (the Google OAuth / better-auth assignment's questions)" — `README.md` lines 70–84 (the four `###` Q&A blocks, from "### Walk through the OAuth flow…" through the "Identity vs authorization" paragraph). Do not include the `## Design notes …` line itself.
 
-- [ ] **Step 2: Commit**
+- [x] **Step 2: Commit**
 
 ```bash
 git add docs/assignments/google-oauth-better-auth.md
@@ -67,7 +67,7 @@ git commit -m "docs: move OAuth assignment Q&A out of README"
 **Files:**
 - Modify: `README.md` (full-file replacement)
 
-- [ ] **Step 1: Replace README.md with exactly this content**
+- [x] **Step 1: Replace README.md with exactly this content**
 
 ````markdown
 # React Intro — pnpm + Turborepo monorepo
@@ -134,7 +134,7 @@ Non-trivial features flow through a spec-driven pipeline (`/specify → /plan �
 Q&A design notes for individual course assignments live in [`docs/assignments/`](docs/assignments/).
 ````
 
-- [ ] **Step 2: Commit**
+- [x] **Step 2: Commit**
 
 ```bash
 git add README.md
@@ -145,12 +145,12 @@ git commit -m "docs: README describes the whole project; assignment Q&A linked f
 
 **Files:** none (checks only)
 
-- [ ] **Step 1: Prettier check on touched files**
+- [x] **Step 1: Prettier check on touched files**
 
 Run from the repo root: `pnpm format:check`
 Expected: PASS (exit 0). If Prettier complains about the new files, run `pnpm format`, re-check, and amend the last commit.
 
-- [ ] **Step 2: Verify every relative link resolves**
+- [x] **Step 2: Verify every relative link resolves**
 
 ```bash
 cd /Users/nadavramon/fullstack_projects/React_Intro
@@ -163,12 +163,12 @@ done
 
 Expected: no `BROKEN:` lines.
 
-- [ ] **Step 3: Confirm the move left nothing behind**
+- [x] **Step 3: Confirm the move left nothing behind**
 
 Run: `grep -c "Design notes" README.md || true`
 Expected: `0`. Also confirm both Q&A files exist: `ls docs/assignments/`.
 
-- [ ] **Step 4: Final commit if verification touched anything**
+- [x] **Step 4: Final commit if verification touched anything**
 
 ```bash
 git status --short   # expect clean; if format fixed files, commit them:
