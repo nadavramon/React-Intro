@@ -132,7 +132,7 @@ describe('completedAt tracks the completion transition', () => {
     mockCurrent(currentIncomplete);
     await updateTask(userId, 't1', { isCompleted: true } as never);
     expect(TaskModel.findOneAndUpdate).toHaveBeenCalledWith(
-      { _id: 't1', userId },
+      { _id: 't1', userId, isDeleted: { $ne: true } },
       expect.objectContaining({ completedAt: expect.any(Date) }),
       expect.anything(),
     );
@@ -142,7 +142,7 @@ describe('completedAt tracks the completion transition', () => {
     mockCurrent(currentComplete);
     await updateTask(userId, 't1', { isCompleted: false } as never);
     expect(TaskModel.findOneAndUpdate).toHaveBeenCalledWith(
-      { _id: 't1', userId },
+      { _id: 't1', userId, isDeleted: { $ne: true } },
       expect.objectContaining({ completedAt: null }),
       expect.anything(),
     );

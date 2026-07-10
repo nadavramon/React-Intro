@@ -63,9 +63,13 @@ export async function updateTask(
   if (dto.isCompleted === true && !current.isCompleted) update['completedAt'] = new Date();
   else if (dto.isCompleted === false && current.isCompleted) update['completedAt'] = null;
 
-  const doc = await TaskModel.findOneAndUpdate({ _id: id, userId }, update, {
-    returnDocument: 'after',
-  }).lean();
+  const doc = await TaskModel.findOneAndUpdate(
+    { _id: id, userId, isDeleted: { $ne: true } },
+    update,
+    {
+      returnDocument: 'after',
+    },
+  ).lean();
   if (!doc) throw new NotFoundError('Task not found');
 
   logger.info(`Task updated: id=${id}`);
