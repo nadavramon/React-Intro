@@ -39,7 +39,7 @@ Note: `toTask()` needs no change — it projects through `taskSchema.parse` with
 - Modify: `apps/server/package.json` (via pnpm)
 - Modify: `apps/server/src/modules/task/task.schema.ts`
 
-- [ ] **Step 1: Install node-cron**
+- [x] **Step 1: Install node-cron**
 
 Run from the repo root:
 ```bash
@@ -47,7 +47,7 @@ pnpm --filter @repo/server add node-cron
 ```
 Expected: `node-cron ^4.6.0` in `apps/server/package.json` dependencies; root `pnpm-lock.yaml` updated (one lockfile — never create a per-package one). v4 bundles its own types; do NOT add `@types/node-cron`.
 
-- [ ] **Step 2: Add the three fields + compound index**
+- [x] **Step 2: Add the three fields + compound index**
 
 In `task.schema.ts`, replace the schema definition:
 
@@ -70,14 +70,14 @@ const taskSchema = new Schema(
 taskSchema.index({ isDeleted: 1, isCompleted: 1, completedAt: 1 });
 ```
 
-- [ ] **Step 3: Typecheck + existing tests still green**
+- [x] **Step 3: Typecheck + existing tests still green**
 
 ```bash
 pnpm --filter @repo/server typecheck && pnpm --filter @repo/server test
 ```
 Expected: clean; new fields have defaults so nothing existing breaks.
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add apps/server/package.json pnpm-workspace.yaml pnpm-lock.yaml apps/server/src/modules/task/task.schema.ts
@@ -93,7 +93,7 @@ git commit -m "feat(server): task lifecycle fields (completedAt/isDeleted/delete
 - Modify: `apps/server/src/modules/task/task.service.ts`
 - Test: `apps/server/src/modules/task/task.service.test.ts`
 
-- [ ] **Step 1: Write the failing tests**
+- [x] **Step 1: Write the failing tests**
 
 In `task.service.test.ts`, update the `TaskModel` mock factory (deleteTask stops using `findOneAndDelete`; `findOne` is needed here and by Task 3). Factories stay self-contained — inline `vi.fn()` only, no outer consts (else vi.mock hoisting throws a TDZ ReferenceError; see the vi.hoisted memory):
 
@@ -149,14 +149,14 @@ describe('deleteTask soft-deletes', () => {
 
 Also update the old "deleteTask invalidates after a successful delete" spec to mock `findOneAndUpdate` instead of `findOneAndDelete` (or fold it into the block above and delete the old one — preferred).
 
-- [ ] **Step 2: Run to verify failure**
+- [x] **Step 2: Run to verify failure**
 
 ```bash
 pnpm --filter @repo/server test -- task.service
 ```
 Expected: FAIL — `find` called without the `isDeleted` filter; `deleteTask` still calls the (now unmocked) `findOneAndDelete`.
 
-- [ ] **Step 3: Implement in `task.service.ts`**
+- [x] **Step 3: Implement in `task.service.ts`**
 
 `getAllTasks` — the Mongo query becomes:
 ```ts
@@ -186,14 +186,14 @@ export async function deleteTask(userId: string, id: string): Promise<void> {
 
 (`getTasksByStatus` derives from `getAllTasks`, so it's covered for free. `updateTask`'s filter changes in Task 3 together with the transition logic.)
 
-- [ ] **Step 4: Run tests — pass**
+- [x] **Step 4: Run tests — pass**
 
 ```bash
 pnpm --filter @repo/server test -- task.service
 ```
 Expected: PASS.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add apps/server/src/modules/task/task.service.ts apps/server/src/modules/task/task.service.test.ts
@@ -208,7 +208,7 @@ git commit -m "feat(server): soft delete tasks; reads exclude deleted"
 - Modify: `apps/server/src/modules/task/task.service.ts`
 - Test: `apps/server/src/modules/task/task.service.test.ts`
 
-- [ ] **Step 1: Write the failing tests**
+- [x] **Step 1: Write the failing tests**
 
 Add to `task.service.test.ts`:
 
@@ -286,14 +286,14 @@ describe('completedAt tracks the completion transition', () => {
 });
 ```
 
-- [ ] **Step 2: Run to verify failure**
+- [x] **Step 2: Run to verify failure**
 
 ```bash
 pnpm --filter @repo/server test -- task.service
 ```
 Expected: FAIL — `createTask` never passes `completedAt`; `updateTask` doesn't call `findOne`.
 
-- [ ] **Step 3: Implement in `task.service.ts`**
+- [x] **Step 3: Implement in `task.service.ts`**
 
 `createTask` — the create call becomes:
 ```ts
@@ -334,14 +334,14 @@ export async function updateTask(
 }
 ```
 
-- [ ] **Step 4: Run the full server suite — pass**
+- [x] **Step 4: Run the full server suite — pass**
 
 ```bash
 pnpm --filter @repo/server test
 ```
 Expected: PASS (including the untouched cache/controller suites).
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add apps/server/src/modules/task/task.service.ts apps/server/src/modules/task/task.service.test.ts
@@ -356,7 +356,7 @@ git commit -m "feat(server): completedAt stamps the false->true completion trans
 - Create: `apps/server/src/modules/task/task.cleanup.ts`
 - Test: `apps/server/src/modules/task/task.cleanup.test.ts`
 
-- [ ] **Step 1: Write the failing tests**
+- [x] **Step 1: Write the failing tests**
 
 Create `task.cleanup.test.ts`. Mock factories are self-contained (inline `vi.fn()` — no outer consts, no `vi.hoisted` needed; referencing an outer const from a factory throws a TDZ error):
 
@@ -457,14 +457,14 @@ describe('cron wiring', () => {
 });
 ```
 
-- [ ] **Step 2: Run to verify failure**
+- [x] **Step 2: Run to verify failure**
 
 ```bash
 pnpm --filter @repo/server test -- task.cleanup
 ```
 Expected: FAIL — module `./task.cleanup.ts` does not exist.
 
-- [ ] **Step 3: Create `task.cleanup.ts`**
+- [x] **Step 3: Create `task.cleanup.ts`**
 
 ```ts
 import { schedule, type ScheduledTask } from 'node-cron';
@@ -544,14 +544,14 @@ export function stopTaskCleanup(): void {
 
 Note the **named** imports from `node-cron` — under `module: nodenext`, a default import of a CJS lib resolves to a non-constructable/non-callable namespace (TS2351/TS2339); named imports are the project rule.
 
-- [ ] **Step 4: Run tests — pass**
+- [x] **Step 4: Run tests — pass**
 
 ```bash
 pnpm --filter @repo/server test -- task.cleanup
 ```
 Expected: PASS (6 tests).
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add apps/server/src/modules/task/task.cleanup.ts apps/server/src/modules/task/task.cleanup.test.ts
