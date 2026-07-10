@@ -567,7 +567,7 @@ git commit -m "feat(server): nightly cleanup job soft-deletes week-old completed
 
 Cron registration lives in `index.ts` ONLY — `app.ts` must stay side-effect-free (Vitest imports it; same seam Redis/RabbitMQ use). No unit test for this glue; Task 7 verifies it live.
 
-- [ ] **Step 1: Wire start/stop**
+- [x] **Step 1: Wire start/stop**
 
 ```ts
 import { startTaskCleanup, stopTaskCleanup } from './modules/task/task.cleanup.ts';
@@ -583,7 +583,7 @@ In the signal handler, before the `Promise.all` line:
 stopTaskCleanup();
 ```
 
-- [ ] **Step 2: Typecheck + boot smoke**
+- [x] **Step 2: Typecheck + boot smoke**
 
 ```bash
 pnpm --filter @repo/server typecheck
@@ -594,7 +594,7 @@ pnpm --filter @repo/server dev
 ```
 Expected in the log: `[cleanup] daily task-cleanup cron scheduled (03:00 server time)`. Ctrl-C: shuts down cleanly. (If :3000 is busy from an old tsx watcher, kill the *child* process too — see the welcome-mail journal.)
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add apps/server/src/index.ts
@@ -608,7 +608,7 @@ git commit -m "feat(server): schedule task-cleanup cron on boot, stop on shutdow
 **Files:**
 - Create: `apps/server/src/scripts/backfill-completed-at.ts`
 
-- [ ] **Step 1: Write the script**
+- [x] **Step 1: Write the script**
 
 ```ts
 // One-off backfill: tasks completed before completedAt existed get
@@ -635,18 +635,18 @@ console.log(`backfilled completedAt on ${modifiedCount} task(s)`);
 await mongoose.disconnect();
 ```
 
-- [ ] **Step 2: Run it against the dev DB (Mongo must be up: `docker compose up -d`)**
+- [x] **Step 2: Run it against the dev DB (Mongo must be up: `docker compose up -d`)**
 
 ```bash
 pnpm --filter @repo/server exec tsx --env-file=.env/.env.dev src/scripts/backfill-completed-at.ts
 ```
 Expected: `backfilled completedAt on N task(s)` (N = however many completed tasks exist in dev).
 
-- [ ] **Step 3: Prove idempotence — run it again**
+- [x] **Step 3: Prove idempotence — run it again**
 
 Same command. Expected: `backfilled completedAt on 0 task(s)`.
 
-- [ ] **Step 4: Typecheck + commit**
+- [x] **Step 4: Typecheck + commit**
 
 ```bash
 pnpm --filter @repo/server typecheck
@@ -663,7 +663,7 @@ git commit -m "feat(server): one-off backfill of completedAt from updatedAt"
 
 Unit tests proved the logic against mocks; this proves it against real Mongo + Redis. Uses a scratch script instead of the HTTP API to skip the auth-cookie dance — the read filter it asserts on is the exact query `getAllTasks` runs.
 
-- [ ] **Step 1: Scratch verification script**
+- [x] **Step 1: Scratch verification script**
 
 ```ts
 import mongoose from 'mongoose';
@@ -697,7 +697,7 @@ await mongoose.disconnect();
 process.exit(0); // ioredis auto-reconnect keeps the loop alive otherwise
 ```
 
-- [ ] **Step 2: Run it (Mongo + Redis up via `docker compose up -d`)**
+- [x] **Step 2: Run it (Mongo + Redis up via `docker compose up -d`)**
 
 ```bash
 pnpm --filter @repo/server exec tsx --env-file=.env/.env.dev src/scripts/verify-cleanup.ts
@@ -709,14 +709,14 @@ Expected output:
 
 Also expected in the process log: `[cleanup] soft-deleted N task(s) completed before <cutoff>`.
 
-- [ ] **Step 3: Lock check (live Redis)**
+- [x] **Step 3: Lock check (live Redis)**
 
 Run the same script twice within 10 minutes. Second run expected: `[cleanup] lock held by another instance, skipping run` + `swept=0` — the NX lock from run 1 is still alive (not released by design). Then clear it so it doesn't surprise later testing:
 ```bash
 docker compose exec redis redis-cli DEL cron:task-cleanup
 ```
 
-- [ ] **Step 4: Delete the scratch script**
+- [x] **Step 4: Delete the scratch script**
 
 ```bash
 rm apps/server/src/scripts/verify-cleanup.ts
@@ -730,18 +730,18 @@ Nothing to commit — record the observed output in the journal instead.
 **Files:**
 - Modify: `apps/server/README.md`
 
-- [ ] **Step 1: README section**
+- [x] **Step 1: README section**
 
 Add a "Task cleanup (cron)" section to `apps/server/README.md` (pattern: the existing "Welcome mail (queue)" section) covering: the retention rule (completed + 7 days → soft delete), the daily `0 3 * * *` schedule (server TZ = UTC in Docker), the best-effort Redis lock (`cron:task-cleanup`, NX/PX, never released — TTL expiry is the design; Redis down ⇒ run anyway because the job is idempotent), the transition-only `completedAt` rule, the backfill script command, and the two deliberate gaps (no user-facing warning before disappearance; no second hard-delete retention tier — `deletedAt` is what that tier would query on).
 
-- [ ] **Step 2: Full gauntlet (mirrors CI — not a hand-picked subset)**
+- [x] **Step 2: Full gauntlet (mirrors CI — not a hand-picked subset)**
 
 ```bash
 pnpm format:check && pnpm turbo run lint typecheck test
 ```
 Expected: all green across web/server/shared. Fix anything red before committing (`pnpm format` for formatting).
 
-- [ ] **Step 3: Spot-check `git status` is clean of surprises, then commit**
+- [x] **Step 3: Spot-check `git status` is clean of surprises, then commit**
 
 ```bash
 git add apps/server/README.md

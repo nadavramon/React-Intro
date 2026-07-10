@@ -7,7 +7,7 @@ See `CLAUDE.md → "Spec-driven workflow"` for how the pipeline works.
 
 | Feature | Date | Spec | Plan | Status |
 | --- | --- | --- | --- | --- |
-| Task cleanup cron (soft delete) | 2026-07-10 | [spec](specs/2026-07-10-task-cleanup-cron-design.md) | [plan](plans/2026-07-10-task-cleanup-cron-plan.md) | In progress |
+| Task cleanup cron (soft delete) | 2026-07-10 | [spec](specs/2026-07-10-task-cleanup-cron-design.md) | [plan](plans/2026-07-10-task-cleanup-cron-plan.md) | Done |
 | Welcome mail via queue (RabbitMQ) | 2026-07-06 | [spec](specs/2026-07-06-welcome-mail-rabbitmq-queue-design.md) | [plan](plans/2026-07-06-welcome-mail-rabbitmq-queue-plan.md) | Done |
 | Shared contract hardening (DTO-out) | 2026-07-05 | [spec](specs/2026-07-05-shared-contract-hardening-design.md) | [plan](plans/2026-07-05-shared-contract-hardening-plan.md) | Done |
 | Google OAuth via better-auth | 2026-07-03 | [spec](specs/2026-07-03-google-oauth-better-auth-design.md) | [plan](plans/2026-07-03-google-oauth-better-auth-plan.md) | Done |
