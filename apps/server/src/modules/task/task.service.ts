@@ -43,6 +43,7 @@ export async function createTask(userId: string, dto: CreateTaskBodyDto): Promis
     userId,
     title: dto.title,
     isCompleted: dto.isCompleted ?? false,
+    completedAt: dto.isCompleted ? new Date() : null,
   });
   const task = toTask(doc.toObject());
   logger.info(`Task created: id=${task.id}, title="${task.title}"`);
@@ -55,7 +56,18 @@ export async function updateTask(
   id: string,
   dto: UpdateTaskBodyDto,
 ): Promise<Task> {
-  const doc = await TaskModel.findOneAndUpdate({ _id: id, userId }, dto, {
+  // Read-then-update so completedAt only moves on a real transition: a title
+  // edit or a redundant isCompleted:true must not restart the 7-day cleanup
+  // clock. ponytail: tiny race window between the two queries; an atomic
+  // aggregation-pipeline update is the upgrade if it ever matters.
+  const current = await TaskModel.findOne({ _id: id, userId, isDeleted: { $ne: true } }).lean();
+  if (!current) throw new NotFoundError('Task not found');
+
+  const update: Record<string, unknown> = { ...dto };
+  if (dto.isCompleted === true && !current.isCompleted) update['completedAt'] = new Date();
+  else if (dto.isCompleted === false && current.isCompleted) update['completedAt'] = null;
+
+  const doc = await TaskModel.findOneAndUpdate({ _id: id, userId }, update, {
     returnDocument: 'after',
   }).lean();
   if (!doc) throw new NotFoundError('Task not found');

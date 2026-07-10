@@ -90,11 +90,82 @@ describe('writes invalidate the user cache', () => {
   });
 
   it('updateTask invalidates after a successful update', async () => {
+    vi.mocked(TaskModel.findOne).mockReturnValue({
+      lean: () => Promise.resolve(docA),
+    } as never);
     vi.mocked(TaskModel.findOneAndUpdate).mockReturnValue({
       lean: () => Promise.resolve(docA),
     } as never);
     await updateTask(userId, 't1', { title: 'B' } as never);
     expect(taskCache.invalidate).toHaveBeenCalledWith(userId);
+  });
+});
+
+describe('completedAt tracks the completion transition', () => {
+  const currentIncomplete = { ...docA, isCompleted: false };
+  const currentComplete = { ...docA, isCompleted: true };
+
+  function mockCurrent(doc: unknown) {
+    vi.mocked(TaskModel.findOne).mockReturnValue({
+      lean: () => Promise.resolve(doc),
+    } as never);
+    vi.mocked(TaskModel.findOneAndUpdate).mockReturnValue({
+      lean: () => Promise.resolve(docA),
+    } as never);
+  }
+
+  it('createTask with isCompleted:true stamps completedAt', async () => {
+    vi.mocked(TaskModel.create).mockResolvedValue({ toObject: () => docA } as never);
+    await createTask(userId, { title: 'A', isCompleted: true } as never);
+    expect(TaskModel.create).toHaveBeenCalledWith(
+      expect.objectContaining({ isCompleted: true, completedAt: expect.any(Date) }),
+    );
+  });
+
+  it('createTask default leaves completedAt null', async () => {
+    vi.mocked(TaskModel.create).mockResolvedValue({ toObject: () => docA } as never);
+    await createTask(userId, { title: 'A' } as never);
+    expect(TaskModel.create).toHaveBeenCalledWith(expect.objectContaining({ completedAt: null }));
+  });
+
+  it('update false→true stamps completedAt', async () => {
+    mockCurrent(currentIncomplete);
+    await updateTask(userId, 't1', { isCompleted: true } as never);
+    expect(TaskModel.findOneAndUpdate).toHaveBeenCalledWith(
+      { _id: 't1', userId },
+      expect.objectContaining({ completedAt: expect.any(Date) }),
+      expect.anything(),
+    );
+  });
+
+  it('update true→false clears completedAt (clock restarts on re-complete)', async () => {
+    mockCurrent(currentComplete);
+    await updateTask(userId, 't1', { isCompleted: false } as never);
+    expect(TaskModel.findOneAndUpdate).toHaveBeenCalledWith(
+      { _id: 't1', userId },
+      expect.objectContaining({ completedAt: null }),
+      expect.anything(),
+    );
+  });
+
+  it('redundant isCompleted:true does NOT reset the clock', async () => {
+    mockCurrent(currentComplete);
+    await updateTask(userId, 't1', { isCompleted: true } as never);
+    const update = vi.mocked(TaskModel.findOneAndUpdate).mock.calls[0]![1];
+    expect(update).not.toHaveProperty('completedAt');
+  });
+
+  it('title-only update does NOT touch completedAt', async () => {
+    mockCurrent(currentComplete);
+    await updateTask(userId, 't1', { title: 'B' } as never);
+    const update = vi.mocked(TaskModel.findOneAndUpdate).mock.calls[0]![1];
+    expect(update).not.toHaveProperty('completedAt');
+  });
+
+  it('update 404s when the task is soft-deleted (findOne filter)', async () => {
+    mockCurrent(null);
+    await expect(updateTask(userId, 't1', { title: 'B' } as never)).rejects.toThrow(NotFoundError);
+    expect(TaskModel.findOneAndUpdate).not.toHaveBeenCalled();
   });
 });
 
