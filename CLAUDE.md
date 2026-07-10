@@ -64,6 +64,7 @@ Non-trivial features flow through four rerunnable commands. Each reads the prior
 | 3    | `/implement [N-M]` | plan checkboxes → code, ticks boxes, journals                        | fan-out subagents, foreground           |
 | 4    | `/retro [feature]` | journal + plan + diff → `LESSONS.md` + routed tooling/memory changes | review, live in main                    |
 
+- **Optional: `/grill [slug]`** — adversarial stress-test of a spec or plan before `/implement` (or between 1→2). Interviews the user one question at a time (facts looked up in code, only _decisions_ asked; riskiest first; recommended answer per question), then appends the resolved decisions to the grilled artifact + journals. Refines, never advances phase.
 - **This file (`CLAUDE.md`) is the constitution** — the standing rules every phase inherits. No separate command; it's loaded every session.
 - **`docs/superpowers/INDEX.md`** — manifest of every feature and its spec/plan/status. The discoverability anchor.
 - **`docs/superpowers/JOURNAL.md`** — append-only debug trail; every command logs what it did. Phase boundaries are debug seams: one file in, one file out, so a wrong output tells you exactly which phase to rerun.
