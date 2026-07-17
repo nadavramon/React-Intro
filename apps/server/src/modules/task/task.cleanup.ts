@@ -49,13 +49,15 @@ export async function cleanupOldTasks(): Promise<number> {
 let job: ScheduledTask | null = null;
 
 export function startTaskCleanup(): void {
-  job = schedule(CRON_EXPRESSION, () => {
-    cleanupOldTasks().catch((err) => logger.error(`[cleanup] run failed: ${err}`));
-  });
+  job = schedule(
+    CRON_EXPRESSION,
+    () => cleanupOldTasks().catch((err) => logger.error(`[cleanup] run failed: ${err}`)),
+    { noOverlap: true },
+  );
   logger.info('[cleanup] daily task-cleanup cron scheduled (03:00 server time)');
 }
 
-export function stopTaskCleanup(): void {
-  job?.stop();
+export async function stopTaskCleanup(): Promise<void> {
+  await job?.stop();
   job = null;
 }

@@ -10,13 +10,13 @@ import { app } from './app.ts';
 async function start() {
   await connectDB();
   connectRedis();
-  startWelcomeConsumer(); // registers the re-subscribe callback (runs on connect)
-  await connectRabbitMQ(); // resolves even if the broker is down (self-retries)
+  startWelcomeConsumer();
+  await connectRabbitMQ();
   startTaskCleanup();
   for (const sig of ['SIGINT', 'SIGTERM'] as const) {
     process.on(sig, async () => {
       logger.info(`${sig} received, shutting down`);
-      stopTaskCleanup();
+      await stopTaskCleanup();
       await Promise.all([disconnectDB(), disconnectRedis(), disconnectRabbitMQ()]);
       process.exit(0);
     });
