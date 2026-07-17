@@ -82,12 +82,12 @@ describe('cleanupOldTasks', () => {
 });
 
 describe('cron wiring', () => {
-  it('schedules the daily job at 03:00 and stop() stops it', () => {
+  it('schedules the daily job at 03:00 with no-overlap and stop() stops it', async () => {
     startTaskCleanup();
-    expect(schedule).toHaveBeenCalledWith('0 3 * * *', expect.any(Function));
+    expect(schedule).toHaveBeenCalledWith('0 3 * * *', expect.any(Function), { noOverlap: true });
 
     const task = vi.mocked(schedule).mock.results[0]!.value;
-    stopTaskCleanup();
+    await stopTaskCleanup();
     expect(task.stop).toHaveBeenCalled();
   });
 });
