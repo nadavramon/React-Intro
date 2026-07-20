@@ -149,11 +149,13 @@ erDiagram
 
 ### Indexes
 
-| Collection     | Index                                             | Purpose                                                |
-| -------------- | ------------------------------------------------- | ------------------------------------------------------ |
-| `Comment`      | `{ postId: 1, createdAt: -1 }` (compound)         | Serves "newest comments per post" via index scan       |
-| `RefreshToken` | `{ token: 1 }` (unique)                           | Prevents duplicate tokens, fast lookup by token        |
-| `RefreshToken` | `{ expiresAt: 1 }` (TTL, `expireAfterSeconds: 0`) | Mongo's background sweeper auto-deletes expired tokens |
+| Collection     | Index                                              | Purpose                                                |
+| -------------- | -------------------------------------------------- | ------------------------------------------------------ |
+| `Comment`      | `{ postId: 1, createdAt: -1 }` (compound)          | Serves "newest comments per post" via index scan       |
+| `RefreshToken` | `{ token: 1 }` (unique)                            | Prevents duplicate tokens, fast lookup by token        |
+| `RefreshToken` | `{ expiresAt: 1 }` (TTL, `expireAfterSeconds: 0`)  | Mongo's background sweeper auto-deletes expired tokens |
+| `Task`         | `{ isDeleted: 1, isCompleted: 1, completedAt: 1 }` | Serves the nightly cleanup sweep's criteria            |
+| `Task`         | `{ userId: 1, isDeleted: 1 }`                      | Serves every user's task-list read (`getAllTasks`)     |
 
 ### Soft-delete model
 
@@ -200,7 +202,7 @@ Completed todos don't pile up forever: a nightly job soft-deletes any task that 
 
 ### Schedule
 
-`node-cron` runs the job at `0 3 * * *` — 03:00 in the **server's timezone** (UTC in the Docker image). The cron is registered in `index.ts` only, never in `app.ts`, so tests (which import `app.ts`) never start a scheduler.
+`node-cron` runs the job at `0 3 * * *` — 03:00 in the **server's timezone** (UTC in the Docker image). The cron is registered in `index.ts` only, never in `app.ts`, so tests (which import `app.ts`) never start a scheduler. The task is scheduled with `noOverlap: true`, so if a run is somehow still executing when the next tick fires, node-cron skips that tick — an in-process guard complementing the cross-instance Redis lock below.
 
 ### Best-effort Redis lock
 
