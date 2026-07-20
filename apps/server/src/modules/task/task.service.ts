@@ -59,9 +59,13 @@ export async function updateTask(
   const current = await TaskModel.findOne({ _id: id, userId, isDeleted: { $ne: true } }).lean();
   if (!current) throw new NotFoundError('Task not found');
 
-  const update: Record<string, unknown> = { ...dto };
-  if (dto.isCompleted === true && !current.isCompleted) update['completedAt'] = new Date();
-  else if (dto.isCompleted === false && current.isCompleted) update['completedAt'] = null;
+  const completes = dto.isCompleted === true && !current.isCompleted;
+  const uncompletes = dto.isCompleted === false && current.isCompleted;
+  const update = {
+    ...dto,
+    ...(completes && { completedAt: new Date() }),
+    ...(uncompletes && { completedAt: null }),
+  };
 
   const doc = await TaskModel.findOneAndUpdate(
     { _id: id, userId, isDeleted: { $ne: true } },
@@ -81,6 +85,7 @@ export async function deleteTask(userId: string, id: string): Promise<void> {
   const doc = await TaskModel.findOneAndUpdate(
     { _id: id, userId, isDeleted: { $ne: true } },
     { isDeleted: true, deletedAt: new Date() },
+    { timestamps: false },
   ).lean();
   if (!doc) throw new NotFoundError('Task not found');
 

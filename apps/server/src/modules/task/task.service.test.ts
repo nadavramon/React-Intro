@@ -180,6 +180,7 @@ describe('deleteTask soft-deletes', () => {
     expect(TaskModel.findOneAndUpdate).toHaveBeenCalledWith(
       { _id: 't1', userId, isDeleted: { $ne: true } },
       { isDeleted: true, deletedAt: expect.any(Date) },
+      { timestamps: false },
     );
     expect(taskCache.invalidate).toHaveBeenCalledWith(userId);
   });

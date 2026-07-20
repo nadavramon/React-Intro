@@ -30,15 +30,16 @@ export async function cleanupOldTasks(): Promise<number> {
   const criteria = {
     isCompleted: true,
     isDeleted: { $ne: true },
-    completedAt: { $ne: null, $lt: cutoff },
+    completedAt: { $lt: cutoff },
   };
 
   const userIds = await TaskModel.distinct('userId', criteria);
-  const { modifiedCount } = await TaskModel.updateMany(criteria, {
-    isDeleted: true,
-    deletedAt: new Date(),
-  });
-  for (const uid of userIds) await taskCache.invalidate(uid.toString());
+  const { modifiedCount } = await TaskModel.updateMany(
+    criteria,
+    { isDeleted: true, deletedAt: new Date() },
+    { timestamps: false },
+  );
+  await Promise.all(userIds.map((uid) => taskCache.invalidate(uid.toString())));
 
   logger.info(
     `[cleanup] soft-deleted ${modifiedCount} task(s) completed before ${cutoff.toISOString()}`,
