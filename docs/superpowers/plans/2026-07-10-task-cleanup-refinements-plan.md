@@ -37,7 +37,7 @@
 - Modify: `apps/server/src/modules/task/task.schema.ts`
 - Create (scratch, NOT committed): `apps/server/src/scripts/sync-task-indexes.ts`
 
-- [ ] **Step 1: Add the index declaration**
+- [x] **Step 1: Add the index declaration**
 
 In `task.schema.ts`, directly below the existing index line, so the file reads:
 
@@ -46,7 +46,7 @@ taskSchema.index({ isDeleted: 1, isCompleted: 1, completedAt: 1 });
 taskSchema.index({ userId: 1, isDeleted: 1 });
 ```
 
-- [ ] **Step 2: Scratch sync-and-prove script**
+- [x] **Step 2: Scratch sync-and-prove script**
 
 Create `apps/server/src/scripts/sync-task-indexes.ts`:
 
@@ -74,7 +74,7 @@ try {
 
 `syncIndexes()` does both jobs in one call: builds every schema-declared index and **drops any index not declared in the schema** — which removes the stray `userId_1_isCompleted_1`. It is scoped to the Task collection only and is idempotent (safe to rerun).
 
-- [ ] **Step 3: Run it (Mongo up first)**
+- [x] **Step 3: Run it (Mongo up first)**
 
 ```bash
 cd apps/server && docker compose up -d && pnpm exec tsx --env-file=.env/.env.dev src/scripts/sync-task-indexes.ts
@@ -85,7 +85,7 @@ Expected output:
 - `after:` exactly `[ '_id_', 'isDeleted_1_isCompleted_1_completedAt_1', 'userId_1_isDeleted_1' ]`
 - plan match includes `"indexName":"userId_1_isDeleted_1"` and an `IXSCAN` stage, `keys=0 docs=0` (random ObjectId matches nothing — the point is the chosen index, not the counts)
 
-- [ ] **Step 4: Delete the scratch script, typecheck, commit**
+- [x] **Step 4: Delete the scratch script, typecheck, commit**
 
 ```bash
 rm apps/server/src/scripts/sync-task-indexes.ts
@@ -109,7 +109,7 @@ Co-Authored-By: Claude Fable 5 <noreply@anthropic.com>"
 - Modify: `apps/server/src/modules/task/task.service.ts`
 - Test: `apps/server/src/modules/task/task.cleanup.test.ts`, `apps/server/src/modules/task/task.service.test.ts`
 
-- [ ] **Step 1: Tighten the pinned assertions (failing first)**
+- [x] **Step 1: Tighten the pinned assertions (failing first)**
 
 `task.cleanup.test.ts` — in the "soft-deletes tasks completed before the 7-day cutoff" spec, the `updateMany` assertion gains the options arg:
 
@@ -131,14 +131,14 @@ expect(TaskModel.findOneAndUpdate).toHaveBeenCalledWith(
 );
 ```
 
-- [ ] **Step 2: Verify both fail**
+- [x] **Step 2: Verify both fail**
 
 ```bash
 pnpm --filter @repo/server test -- task.cleanup && pnpm --filter @repo/server test -- task.service
 ```
 Expected: 1 failure in each file — called without the third argument.
 
-- [ ] **Step 3: Implement**
+- [x] **Step 3: Implement**
 
 `task.cleanup.ts` — the `updateMany` call becomes:
 
@@ -162,14 +162,14 @@ const doc = await TaskModel.findOneAndUpdate(
 
 (`updatedAt` returns to meaning "the user's last action"; the backfill script already used this option.)
 
-- [ ] **Step 4: Full server suite green**
+- [x] **Step 4: Full server suite green**
 
 ```bash
 pnpm --filter @repo/server test
 ```
 Expected: all pass (60 tests).
 
-- [ ] **Step 5: Format touched files, commit**
+- [x] **Step 5: Format touched files, commit**
 
 ```bash
 pnpm --filter @repo/server exec prettier --write src/modules/task/task.cleanup.ts src/modules/task/task.cleanup.test.ts src/modules/task/task.service.ts src/modules/task/task.service.test.ts
@@ -187,7 +187,7 @@ Co-Authored-By: Claude Fable 5 <noreply@anthropic.com>"
 - Modify: `apps/server/src/modules/task/task.cleanup.ts`
 - Test: `apps/server/src/modules/task/task.cleanup.test.ts`
 
-- [ ] **Step 1: Update the pinned criteria (failing first)**
+- [x] **Step 1: Update the pinned criteria (failing first)**
 
 In `task.cleanup.test.ts`, `expectedCriteria` becomes:
 
@@ -199,14 +199,14 @@ const expectedCriteria = {
 };
 ```
 
-- [ ] **Step 2: Verify it fails**
+- [x] **Step 2: Verify it fails**
 
 ```bash
 pnpm --filter @repo/server test -- task.cleanup
 ```
 Expected: FAIL — implementation still sends `$ne: null`.
 
-- [ ] **Step 3: Implement**
+- [x] **Step 3: Implement**
 
 In `task.cleanup.ts`, `criteria` becomes:
 
@@ -220,7 +220,7 @@ const criteria = {
 
 (`$lt: <Date>` never matches null/missing — BSON type bracketing; proven empirically in the spec.)
 
-- [ ] **Step 4: Suite green, format, commit**
+- [x] **Step 4: Suite green, format, commit**
 
 ```bash
 pnpm --filter @repo/server test -- task.cleanup
@@ -241,7 +241,7 @@ Co-Authored-By: Claude Fable 5 <noreply@anthropic.com>"
 
 No assertion changes — the existing suite is the safety net and must pass untouched.
 
-- [ ] **Step 1: Parallel cache invalidation**
+- [x] **Step 1: Parallel cache invalidation**
 
 In `task.cleanup.ts`, replace:
 
@@ -255,7 +255,7 @@ with:
 await Promise.all(userIds.map((uid) => taskCache.invalidate(uid.toString())));
 ```
 
-- [ ] **Step 2: Conditional-spread update object**
+- [x] **Step 2: Conditional-spread update object**
 
 In `task.service.ts` `updateTask`, replace:
 
@@ -279,14 +279,14 @@ const update = {
 
 (Spreading `false` is a no-op, so only the matching transition contributes a `completedAt` key — same semantics as before, declared in one expression.)
 
-- [ ] **Step 3: Full server suite green untouched**
+- [x] **Step 3: Full server suite green untouched**
 
 ```bash
 pnpm --filter @repo/server test && pnpm --filter @repo/server typecheck
 ```
 Expected: all pass with zero test edits — that is the proof the pass was behavior-preserving.
 
-- [ ] **Step 4: Format, commit**
+- [x] **Step 4: Format, commit**
 
 ```bash
 pnpm --filter @repo/server exec prettier --write src/modules/task/task.cleanup.ts src/modules/task/task.service.ts
@@ -303,13 +303,13 @@ Co-Authored-By: Claude Fable 5 <noreply@anthropic.com>"
 **Files:**
 - Modify: `apps/server/README.md`
 
-- [ ] **Step 1: `noOverlap` sentence**
+- [x] **Step 1: `noOverlap` sentence**
 
 In the "Schedule" section (the paragraph beginning `` `node-cron` runs the job at `0 3 * * *` ``), append this sentence to the paragraph:
 
 > The task is scheduled with `noOverlap: true`, so if a run is somehow still executing when the next tick fires, node-cron skips that tick — an in-process guard complementing the cross-instance Redis lock below.
 
-- [ ] **Step 2: Index-table rows**
+- [x] **Step 2: Index-table rows**
 
 In the "Indexes" table (under `### Indexes`), add two rows:
 
@@ -320,14 +320,14 @@ In the "Indexes" table (under `### Indexes`), add two rows:
 
 Do NOT touch the stale `RefreshToken` rows — that's a separate chore.
 
-- [ ] **Step 3: Full gauntlet (mirrors CI)**
+- [x] **Step 3: Full gauntlet (mirrors CI)**
 
 ```bash
 pnpm format:check && pnpm turbo run lint typecheck test
 ```
 Expected: all green. If `format:check` flags files Nadav's own edits touched, report it — do not "fix" his files.
 
-- [ ] **Step 4: Commit (README only)**
+- [x] **Step 4: Commit (README only)**
 
 ```bash
 git add apps/server/README.md

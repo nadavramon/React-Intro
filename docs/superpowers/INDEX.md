@@ -7,7 +7,7 @@ See `CLAUDE.md → "Spec-driven workflow"` for how the pipeline works.
 
 | Feature | Date | Spec | Plan | Status |
 | --- | --- | --- | --- | --- |
-| Task-cleanup refinements (round 2) | 2026-07-10 | [spec](specs/2026-07-10-task-cleanup-refinements-design.md) | [plan](plans/2026-07-10-task-cleanup-refinements-plan.md) | Planned |
+| Task-cleanup refinements (round 2) | 2026-07-10 | [spec](specs/2026-07-10-task-cleanup-refinements-design.md) | [plan](plans/2026-07-10-task-cleanup-refinements-plan.md) | Done |
 | README project overview | 2026-07-10 | [spec](specs/2026-07-10-readme-project-overview-design.md) | [plan](plans/2026-07-10-readme-project-overview-plan.md) | Done |
 | Task cleanup cron (soft delete) | 2026-07-10 | [spec](specs/2026-07-10-task-cleanup-cron-design.md) | [plan](plans/2026-07-10-task-cleanup-cron-plan.md) | Done |
 | Welcome mail via queue (RabbitMQ) | 2026-07-06 | [spec](specs/2026-07-06-welcome-mail-rabbitmq-queue-design.md) | [plan](plans/2026-07-06-welcome-mail-rabbitmq-queue-plan.md) | Done |
