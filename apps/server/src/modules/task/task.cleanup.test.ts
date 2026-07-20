@@ -37,10 +37,11 @@ describe('cleanupOldTasks', () => {
       isDeleted: { $ne: true },
       completedAt: { $ne: null, $lt: cutoff },
     };
-    expect(TaskModel.updateMany).toHaveBeenCalledWith(expectedCriteria, {
-      isDeleted: true,
-      deletedAt: expect.any(Date),
-    });
+    expect(TaskModel.updateMany).toHaveBeenCalledWith(
+      expectedCriteria,
+      { isDeleted: true, deletedAt: expect.any(Date) },
+      { timestamps: false },
+    );
     expect(count).toBe(2);
   });
 

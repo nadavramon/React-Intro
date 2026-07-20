@@ -34,10 +34,11 @@ export async function cleanupOldTasks(): Promise<number> {
   };
 
   const userIds = await TaskModel.distinct('userId', criteria);
-  const { modifiedCount } = await TaskModel.updateMany(criteria, {
-    isDeleted: true,
-    deletedAt: new Date(),
-  });
+  const { modifiedCount } = await TaskModel.updateMany(
+    criteria,
+    { isDeleted: true, deletedAt: new Date() },
+    { timestamps: false },
+  );
   for (const uid of userIds) await taskCache.invalidate(uid.toString());
 
   logger.info(

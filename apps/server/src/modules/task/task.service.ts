@@ -81,6 +81,7 @@ export async function deleteTask(userId: string, id: string): Promise<void> {
   const doc = await TaskModel.findOneAndUpdate(
     { _id: id, userId, isDeleted: { $ne: true } },
     { isDeleted: true, deletedAt: new Date() },
+    { timestamps: false },
   ).lean();
   if (!doc) throw new NotFoundError('Task not found');
 
