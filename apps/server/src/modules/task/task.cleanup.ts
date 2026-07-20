@@ -30,7 +30,7 @@ export async function cleanupOldTasks(): Promise<number> {
   const criteria = {
     isCompleted: true,
     isDeleted: { $ne: true },
-    completedAt: { $ne: null, $lt: cutoff },
+    completedAt: { $lt: cutoff },
   };
 
   const userIds = await TaskModel.distinct('userId', criteria);

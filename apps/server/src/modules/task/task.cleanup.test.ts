@@ -35,7 +35,7 @@ describe('cleanupOldTasks', () => {
     const expectedCriteria = {
       isCompleted: true,
       isDeleted: { $ne: true },
-      completedAt: { $ne: null, $lt: cutoff },
+      completedAt: { $lt: cutoff },
     };
     expect(TaskModel.updateMany).toHaveBeenCalledWith(
       expectedCriteria,
