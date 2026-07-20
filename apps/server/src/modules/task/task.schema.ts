@@ -13,6 +13,7 @@ const taskSchema = new Schema(
 );
 
 taskSchema.index({ isDeleted: 1, isCompleted: 1, completedAt: 1 });
+taskSchema.index({ userId: 1, isDeleted: 1 });
 
 export type TaskDoc = InferSchemaType<typeof taskSchema> & {
   _id: Types.ObjectId;
