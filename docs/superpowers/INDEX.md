@@ -7,7 +7,7 @@ See `CLAUDE.md → "Spec-driven workflow"` for how the pipeline works.
 
 | Feature | Date | Spec | Plan | Status |
 | --- | --- | --- | --- | --- |
-| Auth refinement (comment-free consolidation) | 2026-07-23 | [spec](specs/2026-07-23-auth-refinement-design.md) | — | Spec'd |
+| Auth refinement (comment-free consolidation) | 2026-07-23 | [spec](specs/2026-07-23-auth-refinement-design.md) | [plan](plans/2026-07-23-auth-refinement-plan.md) | Planned |
 | Task-cleanup refinements (round 2) | 2026-07-10 | [spec](specs/2026-07-10-task-cleanup-refinements-design.md) | [plan](plans/2026-07-10-task-cleanup-refinements-plan.md) | Done |
 | README project overview | 2026-07-10 | [spec](specs/2026-07-10-readme-project-overview-design.md) | [plan](plans/2026-07-10-readme-project-overview-plan.md) | Done |
 | Task cleanup cron (soft delete) | 2026-07-10 | [spec](specs/2026-07-10-task-cleanup-cron-design.md) | [plan](plans/2026-07-10-task-cleanup-cron-plan.md) | Done |
