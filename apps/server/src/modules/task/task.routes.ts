@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { getTasks, getTaskById, createTask, updateTask, deleteTask } from './task.controller.ts';
-import { authenticate } from '../../shared/middlewares/authenticate.ts';
+import { authenticate } from '../auth/authenticate.ts';
 
 const router = Router();
 

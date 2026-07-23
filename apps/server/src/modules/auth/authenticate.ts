@@ -1,8 +1,8 @@
 import { Request, Response, NextFunction } from 'express';
 import { fromNodeHeaders } from 'better-auth/node';
 import type { UserRole } from '@repo/shared';
-import { auth } from '../config/auth.ts';
-import { UnauthorizedError } from '../errors/AppError.ts';
+import { auth } from './auth.ts';
+import { UnauthorizedError } from '../../shared/errors/AppError.ts';
 
 export interface AuthUser {
   userId: string;
@@ -19,7 +19,6 @@ export async function authenticate(
   try {
     session = await auth.api.getSession({ headers: fromNodeHeaders(req.headers) });
   } catch (err) {
-    // Infra failure (Mongo down, adapter error) — let errorHandler 500 it, don't fake a 401
     next(err);
     return;
   }

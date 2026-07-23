@@ -1,10 +1,10 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
-vi.mock('../config/auth.ts', () => ({ auth: { api: { getSession: vi.fn() } } }));
+vi.mock('./auth.ts', () => ({ auth: { api: { getSession: vi.fn() } } }));
 
-import { auth } from '../config/auth.ts';
+import { auth } from './auth.ts';
 import { authenticate } from './authenticate.ts';
-import { UnauthorizedError } from '../errors/AppError.ts';
+import { UnauthorizedError } from '../../shared/errors/AppError.ts';
 import type { Request, Response, NextFunction } from 'express';
 
 const getSession = vi.mocked(auth.api.getSession);
