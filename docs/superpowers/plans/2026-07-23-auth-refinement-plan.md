@@ -149,23 +149,23 @@ Co-Authored-By: Claude Fable 5 <noreply@anthropic.com>"
 
 **Files:** create `features/auth/components/{LoginPage,AuthForm,GoogleIcon}.tsx` + `LoginPage.test.tsx`; modify `features/auth/index.ts`, `routes/login.tsx`; delete `pages/LoginPage.tsx` + test.
 
-- [ ] **Step 1: Move the test first**
+- [x] **Step 1: Move the test first**
 
 `git mv apps/web/src/pages/LoginPage.test.tsx apps/web/src/features/auth/components/LoginPage.test.tsx`; import becomes `./LoginPage` (named import). **Assertions stay untouched** — they pin the Google `callbackURL`, error surfacing, and both email flows, and must pass against the decomposed version as-is.
 
-- [ ] **Step 2: Decompose (visuals byte-identical)**
+- [x] **Step 2: Decompose (visuals byte-identical)**
 
 - `GoogleIcon.tsx` — the svg component, verbatim minus comments.
 - `AuthForm.tsx` — props `{ mode: Mode; error: string | null; onError: (message: string) => void }`. Owns `pending` state, `handleSubmit` (email sign-in/sign-up branch, `window.location.assign('/tasks')` on success), the name/email/password fields, the error `<p role="alert">`, and the submit button. `inputClasses`/`labelClasses` live here. Export the `Mode` type.
 - `LoginPage.tsx` — named export. Owns `mode` + `error` state and `showError` (setError + toast); renders the card layout, scanline div, header copy, Google button + `handleGoogle`, divider, `<AuthForm />`, and the mode toggle.
 
-- [ ] **Step 3: Rewire and delete**
+- [x] **Step 3: Rewire and delete**
 
 - `features/auth/index.ts`: add `export { LoginPage } from './components/LoginPage'`.
 - `routes/login.tsx`: `import { LoginPage } from '@/features/auth'`.
 - `git rm apps/web/src/pages/LoginPage.tsx` (test already moved).
 
-- [ ] **Step 4: Green, format, commit**
+- [x] **Step 4: Green, format, commit**
 
 ```bash
 pnpm --filter @repo/web test && pnpm --filter @repo/web typecheck && pnpm --filter @repo/web lint
@@ -182,9 +182,9 @@ Co-Authored-By: Claude Fable 5 <noreply@anthropic.com>"
 
 **Files:** `apps/web/src/lib/api.ts`, `CLAUDE.md`.
 
-- [ ] **Step 1: Strip the `api.ts` comment** (`withCredentials` line). Then sweep every file this plan touched for stragglers: `grep -n "//\|/\*" <touched files>` must return nothing (JSX `{/* */}` included).
+- [x] **Step 1: Strip the `api.ts` comment** (`withCredentials` line). Then sweep every file this plan touched for stragglers: `grep -n "//\|/\*" <touched files>` must return nothing (JSX `{/* */}` included).
 
-- [ ] **Step 2: CLAUDE.md — Auth notes**
+- [x] **Step 2: CLAUDE.md — Auth notes**
 
 In the **Backend API contract** section, replace the existing better-auth mount bullet with a compact **Auth notes** list:
 
@@ -195,7 +195,7 @@ In the **Backend API contract** section, replace the existing better-auth mount 
 5. `authClient` resolves `VITE_API_BASE_URL + '/auth'` against the page origin — absolute in dev, same-origin in prod.
 6. Express 5 note (path-to-regexp RegExp fallback for the SPA catch-all) — keep the existing CLAUDE.md stack bullet as the home for this; just confirm it still covers what app.ts's deleted comment said.
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add apps/web/src/lib/api.ts CLAUDE.md
@@ -208,13 +208,13 @@ Co-Authored-By: Claude Fable 5 <noreply@anthropic.com>"
 
 ### Task 5: Full gauntlet + e2e + PR
 
-- [ ] **Step 1: Full gauntlet (mirrors CI)**
+- [x] **Step 1: Full gauntlet (mirrors CI)**
 
 ```bash
 pnpm format:check && pnpm turbo run lint typecheck test
 ```
 
-- [ ] **Step 2: E2E (network-mocked, no servers needed)**
+- [x] **Step 2: E2E (network-mocked, no servers needed)**
 
 ```bash
 pnpm --filter @repo/web test:e2e
@@ -222,7 +222,7 @@ pnpm --filter @repo/web test:e2e
 
 `auth.spec.ts` must pass unchanged — the guard wall-off and header account render are the end-to-end behavior proof.
 
-- [ ] **Step 3: Push + PR**
+- [x] **Step 3: Push + PR**
 
 ```bash
 git push -u origin feat/auth-refinement
