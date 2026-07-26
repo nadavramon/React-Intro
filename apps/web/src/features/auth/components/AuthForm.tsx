@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from 'react'
+import { useState, type SubmitEvent } from 'react'
 import { authClient } from '@/features/auth/authClient'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
@@ -25,7 +25,7 @@ export function AuthForm({
     const [pending, setPending] = useState(false)
     const isSignUp = mode === 'sign-up'
 
-    async function handleSubmit(e: FormEvent<HTMLFormElement>) {
+    async function handleSubmit(e: SubmitEvent<HTMLFormElement>) {
         e.preventDefault()
         onErrorChange(null)
         setPending(true)
