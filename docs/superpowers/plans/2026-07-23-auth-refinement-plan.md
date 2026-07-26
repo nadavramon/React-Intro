@@ -43,13 +43,13 @@
 
 **Files:** all server rows of the file map.
 
-- [ ] **Step 1: Branch**
+- [x] **Step 1: Branch**
 
 ```bash
 git checkout -b feat/auth-refinement
 ```
 
-- [ ] **Step 2: Move the three files (history-preserving)**
+- [x] **Step 2: Move the three files (history-preserving)**
 
 ```bash
 git mv apps/server/src/shared/config/auth.ts apps/server/src/modules/auth/auth.ts
@@ -57,7 +57,7 @@ git mv apps/server/src/shared/middlewares/authenticate.ts apps/server/src/module
 git mv apps/server/src/shared/middlewares/authenticate.test.ts apps/server/src/modules/auth/authenticate.test.ts
 ```
 
-- [ ] **Step 3: Fix `modules/auth/auth.ts`** — imports become `../../shared/config/env.ts` and `../mail/welcomeMail.publisher.ts`; strip every comment; the welcome hook collapses to a single expression (`publishWelcomeEmail` never throws by contract):
+- [x] **Step 3: Fix `modules/auth/auth.ts`** — imports become `../../shared/config/env.ts` and `../mail/welcomeMail.publisher.ts`; strip every comment; the welcome hook collapses to a single expression (`publishWelcomeEmail` never throws by contract):
 
 ```ts
 databaseHooks: {
@@ -71,15 +71,15 @@ databaseHooks: {
 
 Config values (`transaction: false`, `cookieCache`, `trustedOrigins`, providers, `role` field) stay byte-identical.
 
-- [ ] **Step 4: Fix `modules/auth/authenticate.ts`** — imports become `./auth.ts` and `../../shared/errors/AppError.ts`; strip comments; logic unchanged. In `authenticate.test.ts` the mock and import become `./auth.ts`.
+- [x] **Step 4: Fix `modules/auth/authenticate.ts`** — imports become `./auth.ts` and `../../shared/errors/AppError.ts`; strip comments; logic unchanged. In `authenticate.test.ts` the mock and import become `./auth.ts`.
 
-- [ ] **Step 5: Update the four importers**
+- [x] **Step 5: Update the four importers**
 
 - `app.ts`: `import { auth } from './modules/auth/auth.ts'` — and strip all comments from the file (mount ordering, rate-limiter, path-to-regexp, SPA-fallback notes all move to Task 5's CLAUDE.md list).
 - `task.routes.ts` / `post.routes.ts`: `import { authenticate } from '../auth/authenticate.ts'`.
 - `express.d.ts`: `import { AuthUser } from '../../modules/auth/authenticate.ts'`.
 
-- [ ] **Step 6: Green, format, commit**
+- [x] **Step 6: Green, format, commit**
 
 ```bash
 pnpm --filter @repo/server typecheck && pnpm --filter @repo/server test
@@ -96,7 +96,7 @@ Co-Authored-By: Claude Fable 5 <noreply@anthropic.com>"
 
 **Files:** `features/auth/authClient.ts`, `features/auth/guards.ts` (+ test), `features/auth/index.ts`; modify `routes/_authed.tsx`, `routes/login.tsx`, `layout/Header/Header.tsx`, `pages/LoginPage.tsx` (+ test, import path only — decomposition is Task 3); delete `lib/authClient.ts`.
 
-- [ ] **Step 1: Guard tests first (failing — module doesn't exist yet)**
+- [x] **Step 1: Guard tests first (failing — module doesn't exist yet)**
 
 Create `apps/web/src/features/auth/guards.test.ts`. Mock `./authClient` (`getSession: vi.fn()`); use `isRedirect` from `@tanstack/react-router`:
 
@@ -105,7 +105,7 @@ Create `apps/web/src/features/auth/guards.test.ts`. Mock `./authClient` (`getSes
 - `requireSession` resolves silently when `getSession` rejects (server down — graceful degradation)
 - `redirectIfSignedIn` throws a redirect to `/tasks` when a session exists; resolves when `null`
 
-- [ ] **Step 2: Implement `features/auth/authClient.ts`**
+- [x] **Step 2: Implement `features/auth/authClient.ts`**
 
 ```ts
 import { createAuthClient } from 'better-auth/react'
@@ -119,20 +119,20 @@ export const authClient = createAuthClient({
 })
 ```
 
-- [ ] **Step 3: Implement `features/auth/guards.ts`**
+- [x] **Step 3: Implement `features/auth/guards.ts`**
 
 `requireSession`: today's `_authed` beforeLoad body verbatim (try/catch → return on error; `throw redirect({ to: '/login' })` on no session), comment-free. `redirectIfSignedIn`: today's `/login` beforeLoad body (`throw redirect({ to: '/tasks' })` on session).
 
-- [ ] **Step 4: `features/auth/index.ts`** — `export { authClient }`, `export { requireSession, redirectIfSignedIn }` (LoginPage export joins in Task 3).
+- [x] **Step 4: `features/auth/index.ts`** — `export { authClient }`, `export { requireSession, redirectIfSignedIn }` (LoginPage export joins in Task 3).
 
-- [ ] **Step 5: Rewire importers, delete `lib/authClient.ts`**
+- [x] **Step 5: Rewire importers, delete `lib/authClient.ts`**
 
 - `routes/_authed.tsx`: `beforeLoad: requireSession` (imported from `@/features/auth`); drop the inline body + its comment.
 - `routes/login.tsx`: `beforeLoad: redirectIfSignedIn`.
 - `Header.tsx`, `pages/LoginPage.tsx`: import `authClient` from `@/features/auth`; in `pages/LoginPage.test.tsx` the mock path becomes `@/features/auth/authClient`.
 - `git rm apps/web/src/lib/authClient.ts`.
 
-- [ ] **Step 6: Green, format, commit**
+- [x] **Step 6: Green, format, commit**
 
 ```bash
 pnpm --filter @repo/web test && pnpm --filter @repo/web typecheck && pnpm --filter @repo/web lint
