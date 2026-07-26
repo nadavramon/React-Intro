@@ -10,7 +10,7 @@ vi.mock('@/features/auth/authClient', () => ({
 }))
 
 import { authClient } from '@/features/auth/authClient'
-import LoginPage from './LoginPage'
+import { LoginPage } from './LoginPage'
 
 beforeEach(() => vi.clearAllMocks())
 
