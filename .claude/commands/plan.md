@@ -12,6 +12,7 @@ You are running **/plan**, step 2 of the spec-driven pipeline (see `CLAUDE.md �
 2. **Enter plan mode** (EnterPlanMode), read the spec, and develop the implementation plan interactively — the user steers it. Read-only safety comes for free.
    - _Fallback:_ if entering plan mode from a command misbehaves, instead do read-only research, present the plan inline for approval, then continue. The artifact is identical either way.
 3. Use the **writing-plans** skill for structure and quality: required header, file map, bite-sized `- [ ]` TDD steps, exact paths, frequent commits.
+   - **Decomposition/move tasks:** when a task splits or relocates existing code, the task text must state that **source behavior wins over any interface the plan prescribes** — if a prescribed prop/signature can't express an existing behavior, the executor reshapes the interface and reports it; a dropped behavior is a blocker, not a deviation. (A plan once prescribed component props with no clear-error path and the subagent faithfully dropped the behavior.)
 4. **Override writing-plans' execution handoff:** do **not** offer subagent-driven / inline execution at the end — `/implement` owns execution.
 5. On approval, persist to `docs/superpowers/plans/YYYY-MM-DD-<topic>-plan.md` (reuse the spec's date + slug).
 6. Update `docs/superpowers/INDEX.md` (Plan linked, Status `Planned`) and append `## <timestamp> — plan: <topic>` to `docs/superpowers/JOURNAL.md`.
