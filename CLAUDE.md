@@ -25,7 +25,7 @@ pnpm is pinned via corepack (`packageManager` in the root `package.json`); Node 
 ## Stack
 
 - **Web:** React 19 + TypeScript (strict), Vite, TanStack Router (file-based; `src/routes/` → generated `routeTree.gen.ts`), Tailwind CSS v4 + shadcn/radix-ui (some older features still use CSS Modules), `clsx`/`tailwind-merge` (`cn()` in `src/lib/utils.ts`), axios (`src/lib/api.ts`), zustand.
-- **Server:** Express 5 (note: bare `'*'` routes throw under path-to-regexp v8 — use a RegExp), Mongoose, better-auth (Google + email/password, cookie sessions), zod validation, ioredis cache (optional — degrades to no-cache), RabbitMQ via amqplib + Mailpit SMTP sink for the welcome-mail queue (`modules/mail/`; dev services via `docker compose up -d`), winston. `module: nodenext`; `declaration: false` (it's an app, not a library — also avoids TS2883 under pnpm).
+- **Server:** Express 5 (note: bare `'*'` routes throw under path-to-regexp v8 — use a RegExp; the prod SPA fallback is one such RegExp route, serving `index.html` for non-`/api` GETs), Mongoose, better-auth (Google + email/password, cookie sessions), zod validation, ioredis cache (optional — degrades to no-cache), RabbitMQ via amqplib + Mailpit SMTP sink for the welcome-mail queue (`modules/mail/`; dev services via `docker compose up -d`), winston. `module: nodenext`; `declaration: false` (it's an app, not a library — also avoids TS2883 under pnpm).
 - **Tests:** Vitest (+ RTL/jsdom in web); Playwright for e2e.
 
 ## Web app architecture (`apps/web/src/`)
@@ -77,7 +77,12 @@ Non-trivial features flow through four rerunnable commands. Each reads the prior
 The todo feature talks to `apps/server` (same repo). Client in `apps/web/src/features/todo/api/tasksApi.ts`, axios instance in `apps/web/src/lib/api.ts`. **The contract types/schemas live in `@repo/shared` — change them there, both sides feel it at compile time.**
 
 - **The API is mounted under `/api`** (`/health` stays at root). Base URL from `VITE_API_BASE_URL`: dev `http://localhost:3000/api` (`.env.local`), prod `/api` (same-origin; `.env.production`). `VITE_*` values are baked at build time.
-- **Auth is better-auth** at `/api/auth/*` via `toNodeHandler`, mounted **before** `express.json()` — a hard constraint: better-auth reads the raw body, so anyone editing `app.ts` must keep that ordering.
+- **Auth is better-auth** at `/api/auth/*` via `toNodeHandler` (`apps/server/src/modules/auth/`; web client + guards in `apps/web/src/features/auth/`). Auth notes — constraints the code can't express:
+  - better-auth mounts **before** `express.json()` (it reads the raw body); the rate limiter mounts before it so auth endpoints are limited too.
+  - The Mongo adapter runs `transaction: false` (standalone dev Mongo has no replica set; flip if running against Atlas) and opens its own `MongoClient` because it needs a Db handle before mongoose connects.
+  - Sessions use a 5-min signed-cookie cache, skipping the per-request Mongo read.
+  - The welcome-mail hook runs post-commit and must never throw; `publishWelcomeEmail` swallows all errors by contract.
+  - `authClient` resolves `VITE_API_BASE_URL + '/auth'` against the page origin — absolute URL in dev, same-origin in prod.
 - The web holds the session in an **httpOnly cookie** (axios `withCredentials: true`); there is no token in `localStorage` and no dev auto-login — `VITE_DEV_EMAIL` / `VITE_DEV_PASSWORD` are gone. Sign in at `/login` (Google or email/password); the whole app sits behind a root `beforeLoad` guard.
 - **Task shape:** `{ id: string; title: string; isCompleted: boolean }` — `title` (not `text`), `isCompleted` (not `done`).
 - Endpoints: `GET/POST /api/tasks`, `PUT/DELETE /api/tasks/:id`, swagger at `/api/api-docs`. Auth endpoints are better-auth's, under `/api/auth/*` (e.g. `sign-in/email`, `sign-up/email`, `callback/google`, `get-session`).

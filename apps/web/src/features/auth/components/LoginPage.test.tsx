@@ -2,15 +2,15 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 
-vi.mock('@/lib/authClient', () => ({
+vi.mock('../authClient', () => ({
     authClient: {
         signIn: { social: vi.fn(), email: vi.fn().mockResolvedValue({ data: {}, error: null }) },
         signUp: { email: vi.fn().mockResolvedValue({ data: {}, error: null }) },
     },
 }))
 
-import { authClient } from '@/lib/authClient'
-import LoginPage from './LoginPage'
+import { authClient } from '../authClient'
+import { LoginPage } from './LoginPage'
 
 beforeEach(() => vi.clearAllMocks())
 

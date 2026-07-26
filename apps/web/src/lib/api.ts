@@ -2,7 +2,7 @@ import axios from 'axios'
 
 export const api = axios.create({
     baseURL: import.meta.env.VITE_API_BASE_URL,
-    withCredentials: true, // better-auth session cookie rides along
+    withCredentials: true,
 })
 
 api.interceptors.response.use(

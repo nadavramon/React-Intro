@@ -8,7 +8,7 @@ import {
   likePost,
   unlikePost,
 } from './post.controller.ts';
-import { authenticate } from '../../shared/middlewares/authenticate.ts';
+import { authenticate } from '../auth/authenticate.ts';
 import commentRoutes from '../comment/comment.routes.ts';
 
 const router = Router();

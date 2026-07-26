@@ -3,7 +3,7 @@ import { toast } from 'sonner'
 import { Menu, User } from 'lucide-react'
 import { ROUTES } from '@/routes'
 import { cn } from '@/lib/utils'
-import { authClient } from '@/lib/authClient'
+import { authClient } from '@/features/auth'
 
 type HeaderProps = {
     sidebarOpen: boolean
