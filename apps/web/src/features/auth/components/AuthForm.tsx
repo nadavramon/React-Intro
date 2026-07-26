@@ -1,5 +1,5 @@
 import { useState, type SubmitEvent } from 'react'
-import { authClient } from '@/features/auth/authClient'
+import { authClient } from '../authClient'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 

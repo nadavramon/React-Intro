@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { toast } from 'sonner'
-import { authClient } from '@/features/auth/authClient'
+import { authClient } from '../authClient'
 import { Button } from '@/components/ui/button'
 import { AuthForm, type Mode } from './AuthForm'
 import { GoogleIcon } from './GoogleIcon'
@@ -12,7 +12,7 @@ export function LoginPage() {
 
     function showError(message: string | null) {
         setError(message)
-        if (message !== null) toast.error(message)
+        if (message) toast.error(message)
     }
 
     async function handleGoogle() {
