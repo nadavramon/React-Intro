@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from 'react'
 import { toast } from 'sonner'
-import { authClient } from '@/lib/authClient'
+import { authClient } from '@/features/auth'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 
