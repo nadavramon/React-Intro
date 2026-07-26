@@ -10,6 +10,7 @@ import { limiter } from './shared/middlewares/rateLimiter.ts';
 import cors from 'cors';
 import { toNodeHandler } from 'better-auth/node';
 import { auth } from './modules/auth/auth.ts';
+import { env } from './shared/config/env.ts';
 
 export const app = express();
 
@@ -18,7 +19,7 @@ app.get('/health', (_req, res) => {
 });
 
 app.use(httpLogger);
-app.use(cors({ origin: 'http://localhost:5173', credentials: true }));
+app.use(cors({ origin: env.WEB_ORIGIN, credentials: true }));
 app.use(limiter);
 app.all('/api/auth/*splat', toNodeHandler(auth));
 app.use(express.json());

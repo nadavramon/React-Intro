@@ -16,6 +16,7 @@ export const env = {
   BETTER_AUTH_SECRET: requireEnv('BETTER_AUTH_SECRET'),
   BETTER_AUTH_URL: requireEnv('BETTER_AUTH_URL'),
   PORT: process.env.PORT,
+  WEB_ORIGIN: process.env.WEB_ORIGIN ?? 'http://localhost:5173',
   REDIS_URL: process.env.REDIS_URL ?? 'redis://localhost:6379',
   RABBITMQ_URL: process.env.RABBITMQ_URL ?? 'amqp://localhost:5672',
   SMTP_HOST: process.env.SMTP_HOST ?? 'localhost',

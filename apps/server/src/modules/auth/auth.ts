@@ -10,7 +10,7 @@ export const auth = betterAuth({
   database: mongodbAdapter(client.db(), { client, transaction: false }),
   secret: env.BETTER_AUTH_SECRET,
   baseURL: env.BETTER_AUTH_URL,
-  trustedOrigins: ['http://localhost:5173'],
+  trustedOrigins: [env.WEB_ORIGIN],
   emailAndPassword: { enabled: true },
   session: {
     cookieCache: { enabled: true, maxAge: 300 },
