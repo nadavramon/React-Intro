@@ -26,9 +26,8 @@ playwright/.cache/
 !.claude/statusline.sh
 .playwright-mcp/
 
-# SDD docs — specs/plans/INDEX are versioned; the journal & lessons diaries stay local.
-docs/superpowers/JOURNAL.md
-docs/superpowers/LESSONS.md
+# Project docs (SDD specs/plans, assignments) stay local — not part of the shipped repo.
+docs/
 # Personal notes (any language variants)
 docs/*-he.md
 
