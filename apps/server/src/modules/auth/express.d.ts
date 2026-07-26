@@ -1,4 +1,4 @@
-import { AuthUser } from '../../modules/auth/authenticate.ts';
+import { AuthUser } from './authenticate.ts';
 
 declare global {
   namespace Express {

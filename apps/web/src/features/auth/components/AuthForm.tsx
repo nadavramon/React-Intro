@@ -1,9 +1,12 @@
 import { useState, type SubmitEvent } from 'react'
+import { ROUTES } from '@/routes'
 import { authClient } from '../authClient'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 
 export type Mode = 'sign-in' | 'sign-up'
+
+export const NETWORK_ERROR = 'Could not reach the server — check your connection and try again'
 
 const inputClasses = cn(
     'bg-background text-foreground w-full border-2 border-foreground px-3 py-2 text-sm',
@@ -44,9 +47,9 @@ export function AuthForm({
                 onErrorChange(result.error.message ?? 'Something went wrong. Try again.')
                 return
             }
-            window.location.assign('/tasks')
+            window.location.assign(ROUTES.todo)
         } catch {
-            onErrorChange('Could not reach the server — check your connection and try again')
+            onErrorChange(NETWORK_ERROR)
         } finally {
             setPending(false)
         }

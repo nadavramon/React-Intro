@@ -1,4 +1,5 @@
 import { redirect } from '@tanstack/react-router'
+import { ROUTES } from '@/routes'
 import { authClient } from './authClient'
 
 export async function requireSession() {
@@ -8,5 +9,5 @@ export async function requireSession() {
 
 export async function redirectIfSignedIn() {
     const { data: session } = await authClient.getSession()
-    if (session) throw redirect({ to: '/tasks' })
+    if (session) throw redirect({ to: ROUTES.todo })
 }

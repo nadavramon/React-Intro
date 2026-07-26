@@ -1,8 +1,9 @@
 import { useState } from 'react'
 import { toast } from 'sonner'
+import { ROUTES } from '@/routes'
 import { authClient } from '../authClient'
 import { Button } from '@/components/ui/button'
-import { AuthForm, type Mode } from './AuthForm'
+import { AuthForm, NETWORK_ERROR, type Mode } from './AuthForm'
 import { GoogleIcon } from './GoogleIcon'
 
 export function LoginPage() {
@@ -10,7 +11,7 @@ export function LoginPage() {
     const [error, setError] = useState<string | null>(null)
     const isSignUp = mode === 'sign-up'
 
-    function showError(message: string | null) {
+    function handleErrorChange(message: string | null) {
         setError(message)
         if (message) toast.error(message)
     }
@@ -19,11 +20,11 @@ export function LoginPage() {
         try {
             const result = await authClient.signIn.social({
                 provider: 'google',
-                callbackURL: `${window.location.origin}/tasks`,
+                callbackURL: `${window.location.origin}${ROUTES.todo}`,
             })
-            if (result?.error) showError(result.error.message ?? 'Google sign-in failed')
+            if (result?.error) handleErrorChange(result.error.message ?? 'Google sign-in failed')
         } catch {
-            showError('Could not reach the server — check your connection and try again')
+            handleErrorChange(NETWORK_ERROR)
         }
     }
 
@@ -65,7 +66,7 @@ export function LoginPage() {
                     <span aria-hidden="true" className="bg-border h-0.5 flex-1" />
                 </div>
 
-                <AuthForm mode={mode} error={error} onErrorChange={showError} />
+                <AuthForm mode={mode} error={error} onErrorChange={handleErrorChange} />
 
                 <button
                     type="button"
